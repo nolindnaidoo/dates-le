@@ -1,0 +1,17 @@
+task_id,task_name,start_date,end_date,due_date,created_at,updated_at,assigned_to,status
+T-001,Design Homepage,2025-01-05,2025-01-15,2025-01-20,2024-12-01 09:00:00,2025-01-03 14:30:00,Alice Johnson,In Progress
+T-002,Implement Authentication,2025-01-10,2025-01-25,2025-01-30,2024-12-05 10:15:00,2025-01-08 16:45:00,Bob Smith,Not Started
+T-003,Database Migration,2025-01-15,2025-01-20,2025-01-22,2024-12-10 11:30:00,2025-01-12 09:20:00,Carol Williams,Completed
+T-004,API Development,2025-01-20,2025-02-10,2025-02-15,2024-12-15 08:45:00,2025-01-18 13:10:00,David Brown,In Progress
+T-005,Frontend Integration,2025-02-01,2025-02-20,2025-02-25,2024-12-20 14:00:00,2025-01-25 10:30:00,Alice Johnson,Not Started
+T-006,Testing & QA,2025-02-15,2025-03-01,2025-03-05,2025-01-05 09:15:00,2025-02-10 15:20:00,Bob Smith,Not Started
+T-007,Documentation,2025-02-20,2025-03-10,2025-03-15,2025-01-10 10:30:00,2025-02-18 11:45:00,Carol Williams,Not Started
+T-008,Performance Optimization,2025-03-01,2025-03-15,2025-03-20,2025-01-15 13:45:00,2025-02-28 09:30:00,David Brown,Not Started
+T-009,Security Audit,2025-03-10,2025-03-20,2025-03-25,2025-01-20 11:00:00,2025-03-08 14:15:00,Alice Johnson,Not Started
+T-010,Deployment,2025-03-20,2025-03-25,2025-03-30,2025-01-25 15:30:00,2025-03-18 10:00:00,Bob Smith,Not Started
+T-011,Monitor & Support,2025-03-25,2025-04-10,2025-04-15,2025-02-01 09:00:00,2025-03-23 16:30:00,Carol Williams,Not Started
+T-012,Feature Requests Review,2025-04-01,2025-04-15,2025-04-20,2025-02-05 10:15:00,2025-03-30 13:45:00,David Brown,Not Started
+T-013,Bug Fixes Sprint 1,2025-04-05,2025-04-15,2025-04-18,2025-02-10 11:30:00,2025-04-03 09:20:00,Alice Johnson,Not Started
+T-014,User Feedback Analysis,2025-04-10,2025-04-20,2025-04-25,2025-02-15 08:45:00,2025-04-08 14:10:00,Bob Smith,Not Started
+T-015,Version 2.0 Planning,2025-04-15,2025-05-01,2025-05-05,2025-02-20 14:00:00,2025-04-13 10:30:00,Carol Williams,Not Started
+
