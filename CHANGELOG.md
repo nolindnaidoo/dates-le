@@ -5,28 +5,31 @@ All notable changes to Dates-LE will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.2] - 2025-10-14
+## [1.1.0] - 2025-10-14
 
 ### Added
 
-- **Deduplicate command** - Added `dates-le.postProcess.dedupe` command to remove duplicate dates
-- **Sort command** - Added `dates-le.postProcess.sort` command with multiple sort modes:
+- **Command parity achievement** - Full parity with other LE extraction extensions
+- **Deduplicate command** - Added `dates-le.postProcess.dedupe` to remove duplicate dates while preserving order
+- **Sort command** - Added `dates-le.postProcess.sort` with 4 interactive sort modes:
   - Chronological (Oldest First)
   - Reverse Chronological (Newest First)
   - Alphabetical (A → Z)
   - Alphabetical (Z → A)
-- **Interactive sorting** - User can choose sort order via quick pick menu
-- **i18n entries** - Added localized command titles for dedupe and sort
+- **Comprehensive documentation** - Added complete command list to README with examples
+- **Extended COMMANDS.md** - Full documentation for all post-processing commands
+- **i18n support** - Localized command titles for dedupe and sort
 
 ### Changed
 
-- **Command count** - Increased from 6 to 8 commands for full parity with other extraction extensions
-
-## [1.0.1] - 2025-10-14
+- **Infrastructure completion** - Fixed activation events and command registry for all commands
+- **Command count** - Increased from 6 to 8 commands (Extract, Dedupe, Sort, Help, Settings x4)
+- **Documentation updates** - Updated all docs to reflect command parity achievement
 
 ### Fixed
 
-- **VSCode engine version requirement** - Changed from `^1.105.0` to `^1.70.0` for better compatibility with current VSCode versions
+- **Linting issues** - Resolved isNaN usage warnings (replaced with Number.isNaN)
+- **VSCode engine compatibility** - Changed from `^1.105.0` to `^1.70.0` for broader compatibility
 
 ## [1.0.0] - 2025-10-13
 
