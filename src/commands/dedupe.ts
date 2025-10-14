@@ -48,4 +48,3 @@ export function registerDedupeCommand(context: vscode.ExtensionContext): void {
 
 	context.subscriptions.push(command);
 }
-
