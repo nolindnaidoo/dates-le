@@ -5,9 +5,11 @@ import type { StatusBar } from '../ui/statusBar';
 import type { ErrorHandler } from '../utils/errorHandling';
 import type { Localizer } from '../utils/localization';
 import type { PerformanceMonitor } from '../utils/performance';
+import { registerDedupeCommand } from './dedupe';
 import { registerExtractCommand } from './extract';
 import { registerHelpCommand } from './help';
 import { registerSettingsCommands } from './settings';
+import { registerSortCommand } from './sort';
 
 export function registerCommands(
 	context: vscode.ExtensionContext,
@@ -21,6 +23,8 @@ export function registerCommands(
 	}>,
 ): void {
 	registerExtractCommand(context, deps);
+	registerDedupeCommand(context);
+	registerSortCommand(context);
 	registerHelpCommand(context, deps);
 	registerSettingsCommands(context, deps);
 }

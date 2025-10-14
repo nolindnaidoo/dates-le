@@ -2,7 +2,7 @@
 
 ## Overview
 
-Dates-LE provides a focused set of commands for extracting dates from structured data files (JSON, YAML, CSV). All commands are designed with the "Zero Hassle" philosophy, providing clear feedback and graceful error handling.
+Dates-LE provides **8 commands** for extracting, processing, and managing dates from structured data files (JSON, YAML, CSV). All commands are designed with the "Zero Hassle" philosophy, providing clear feedback and graceful error handling.
 
 ## Core Commands
 
@@ -62,9 +62,80 @@ Mon, 25 Dec 2023 10:30:00 GMT
 - Continues processing despite individual date errors
 - Shows helpful messages when no dates are found
 
+## Post-Processing Commands
+
+### 2. Deduplicate Dates (`dates-le.postProcess.dedupe`)
+
+**Purpose**: Remove duplicate dates from the current document while preserving the original order.
+
+**Usage**:
+
+- **Command Palette**: `Dates-LE: Deduplicate Dates`
+
+**Features**:
+
+- Removes duplicate date entries while maintaining first occurrence
+- Preserves original date order
+- Works on any text document with dates (one per line)
+- Shows count of removed duplicates
+- Provides clear feedback on completion
+
+**Example**:
+
+```
+Before:
+2023-12-25T10:30:00Z
+2023-12-26T14:20:00Z
+2023-12-25T10:30:00Z
+2023-12-27T09:15:00Z
+
+After:
+2023-12-25T10:30:00Z
+2023-12-26T14:20:00Z
+2023-12-27T09:15:00Z
+```
+
+### 3. Sort Dates (`dates-le.postProcess.sort`)
+
+**Purpose**: Sort dates in the current document with multiple sort modes.
+
+**Usage**:
+
+- **Command Palette**: `Dates-LE: Sort Dates`
+
+**Sort Modes**:
+
+1. **Chronological (Oldest First)** - Sort by date/time value, earliest first
+2. **Reverse Chronological (Newest First)** - Sort by date/time value, latest first
+3. **Alphabetical (A → Z)** - Sort dates as strings, A to Z
+4. **Alphabetical (Z → A)** - Sort dates as strings, Z to A
+
+**Features**:
+
+- Interactive sort mode selection via quick pick
+- Smart date parsing for chronological sorting
+- Handles invalid dates gracefully (placed at end)
+- Works with any date format
+- Shows count of sorted dates
+- Provides clear feedback on completion
+
+**Example**:
+
+```
+Before:
+2023-12-27T09:15:00Z
+2023-12-25T10:30:00Z
+2023-12-26T14:20:00Z
+
+After (Chronological):
+2023-12-25T10:30:00Z
+2023-12-26T14:20:00Z
+2023-12-27T09:15:00Z
+```
+
 ## Settings Commands
 
-### 2. Open Settings (`dates-le.openSettings`)
+### 4. Open Settings (`dates-le.openSettings`)
 
 **Purpose**: Quick access to Dates-LE settings in VS Code.
 
@@ -74,7 +145,7 @@ Mon, 25 Dec 2023 10:30:00 GMT
 
 **Details**: Opens VS Code settings filtered to Dates-LE configuration options.
 
-### 3. Export Settings (`dates-le.settings.export`)
+### 5. Export Settings (`dates-le.settings.export`)
 
 **Purpose**: Export current Dates-LE settings to a JSON file.
 
@@ -103,7 +174,7 @@ Mon, 25 Dec 2023 10:30:00 GMT
 }
 ```
 
-### 4. Import Settings (`dates-le.settings.import`)
+### 6. Import Settings (`dates-le.settings.import`)
 
 **Purpose**: Import Dates-LE settings from a previously exported JSON file.
 
@@ -119,7 +190,7 @@ Mon, 25 Dec 2023 10:30:00 GMT
 
 **Safety**: Shows confirmation dialog before applying imported settings.
 
-### 5. Reset Settings (`dates-le.settings.reset`)
+### 7. Reset Settings (`dates-le.settings.reset`)
 
 **Purpose**: Reset all Dates-LE settings to their default values.
 
@@ -135,7 +206,7 @@ Mon, 25 Dec 2023 10:30:00 GMT
 
 **Safety**: Requires explicit confirmation before resetting.
 
-### 6. Help & Troubleshooting (`dates-le.help`)
+### 8. Help & Troubleshooting (`dates-le.help`)
 
 **Purpose**: Quick access to Dates-LE documentation and troubleshooting resources.
 

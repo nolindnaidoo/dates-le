@@ -59,9 +59,13 @@ It intelligently detects and extracts dates from your code, providing comprehens
 
   Automatically finds dates in multiple formats: ISO 8601, RFC 2822, Unix timestamps, and common date patterns.
 
-- **Simple extraction only**
+- **Simple extraction with powerful post-processing**
 
-  Focused on reliable date extraction from structured data without unnecessary complexity.
+  Focused on reliable date extraction from structured data with dedupe and sort capabilities for clean results.
+
+- **Interactive sorting options**
+
+  Sort dates chronologically (oldest/newest) or alphabetically with user-friendly quick pick selection.
 
 - **Data analysis support**
 
@@ -151,8 +155,32 @@ Identify date patterns and anomalies in large datasets for business intelligence
 1. Install from [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le) or [Open VSX](https://open-vsx.org/extension/nolindnaidoo/dates-le)
 2. Open any JSON, YAML, or CSV file containing dates
 3. Run Extract Dates (`Cmd+Alt+D` / `Ctrl+Alt+D` or via Command Palette)
+4. Use **Deduplicate Dates** or **Sort Dates** commands for post-processing
 
 > 💡 **First time?** Try the sample files in `sample/` directory to see Dates-LE in action!
+
+## 📋 Available Commands
+
+Dates-LE provides **8 commands** accessible via Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`):
+
+### Core Extraction
+
+- **Extract Dates** (`Cmd/Ctrl+Alt+D`) - Extract all dates from current document
+
+### Post-Processing
+
+- **Deduplicate Dates** - Remove duplicate date entries while preserving order
+- **Sort Dates** - Sort extracted dates with multiple modes:
+  - Chronological (Oldest First)
+  - Reverse Chronological (Newest First)
+  - Alphabetical (A → Z)
+  - Alphabetical (Z → A)
+
+### Settings & Help
+
+- **Open Settings** - Quick access to extension settings
+- **Help & Troubleshooting** - Comprehensive in-editor documentation
+- **Export/Import/Reset Settings** - Manage extension configuration
 
 ## ⚙️ Configuration
 
@@ -252,7 +280,10 @@ A: ISO 8601 (2023-12-25T10:30:00Z), RFC 2822 (Mon, 25 Dec 2023 10:30:00 GMT), Un
 A: No. Dates-LE focuses exclusively on structured data formats (JSON, YAML, CSV) for reliability. Unstructured formats like logs can produce unreliable results.
 
 **Q: Can I deduplicate extracted dates?**
-A: Yes, enable `dates-le.dedupeEnabled: true` to automatically remove duplicate dates from results.
+A: Yes! Use the **Deduplicate Dates** command from the Command Palette to remove duplicates, or enable `dates-le.dedupeEnabled: true` for automatic deduplication during extraction.
+
+**Q: Can I sort extracted dates?**
+A: Yes! Use the **Sort Dates** command to choose from 4 sort modes: Chronological (oldest/newest first) or Alphabetical (A→Z/Z→A). Perfect for organizing temporal data.
 
 **Q: What's the largest file size supported?**
 A: Dates-LE can handle files up to 200MB. The extension includes safety warnings that alert you when processing large files (default: 1MB threshold).

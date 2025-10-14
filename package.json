@@ -55,6 +55,8 @@
 		"onLanguage:yml",
 		"onLanguage:csv",
 		"onCommand:dates-le.extractDates",
+		"onCommand:dates-le.postProcess.dedupe",
+		"onCommand:dates-le.postProcess.sort",
 		"onCommand:dates-le.openSettings",
 		"onCommand:dates-le.help"
 	],
