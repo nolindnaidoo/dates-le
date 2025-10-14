@@ -4,12 +4,12 @@ This directory contains sample files designed to demonstrate and test Dates-LE's
 
 ## 📁 Sample Files Overview
 
-| File                   | Format | Dates | Description                                      |
-| ---------------------- | ------ | ----- | ------------------------------------------------ |
-| **api-response.json**  | JSON   | ~50   | API response with ISO 8601 timestamps, timezones |
-| **application.log**    | LOG    | ~50   | Application log with various timestamp formats   |
-| **schedule.csv**       | CSV    | ~45   | Project schedule with date columns               |
-| **config.yaml**        | YAML   | ~40   | Configuration file with date/time settings       |
+| File                  | Format | Dates | Description                                      |
+| --------------------- | ------ | ----- | ------------------------------------------------ |
+| **api-response.json** | JSON   | ~50   | API response with ISO 8601 timestamps, timezones |
+| **application.log**   | LOG    | ~50   | Application log with various timestamp formats   |
+| **schedule.csv**      | CSV    | ~45   | Project schedule with date columns               |
+| **config.yaml**       | YAML   | ~40   | Configuration file with date/time settings       |
 
 **Total**: ~185 dates across 4 files demonstrating multiple date formats.
 
@@ -79,6 +79,7 @@ This directory contains sample files designed to demonstrate and test Dates-LE's
 **Goal**: Verify date deduplication functionality.
 
 **Steps**:
+
 1. Open `api-response.json`
 2. Enable deduplication: `Settings → dates-le.dedupeEnabled: true`
 3. Run extraction
@@ -101,6 +102,7 @@ This directory contains sample files designed to demonstrate and test Dates-LE's
 **Goal**: Test safety warnings for large files.
 
 **Steps**:
+
 1. Create a copy of `application.log` and duplicate its contents 100x
 2. Open the large file
 3. Run extraction
@@ -112,6 +114,7 @@ This directory contains sample files designed to demonstrate and test Dates-LE's
 **Goal**: Verify side-by-side editor functionality.
 
 **Steps**:
+
 1. Enable: `Settings → dates-le.openResultsSideBySide: true`
 2. Open any sample file
 3. Run extraction
@@ -123,6 +126,7 @@ This directory contains sample files designed to demonstrate and test Dates-LE's
 **Goal**: Test automatic clipboard integration.
 
 **Steps**:
+
 1. Enable: `Settings → dates-le.copyToClipboardEnabled: true`
 2. Open `api-response.json`
 3. Run extraction
@@ -136,16 +140,19 @@ This directory contains sample files designed to demonstrate and test Dates-LE's
 **Test Sequence**:
 
 **A. Silent Mode** (default):
+
 - `Settings → dates-le.notificationsLevel: "silent"`
 - Run extraction on `api-response.json`
 - **Expected**: No notifications (except errors)
 
 **B. Important Mode**:
+
 - `Settings → dates-le.notificationsLevel: "important"`
 - Run extraction on very large file
 - **Expected**: Warnings only
 
 **C. All Mode**:
+
 - `Settings → dates-le.notificationsLevel: "all"`
 - Run extraction on `schedule.csv`
 - **Expected**: Success notification with count
@@ -155,11 +162,13 @@ This directory contains sample files designed to demonstrate and test Dates-LE's
 ## 🔍 Edge Cases & Advanced Testing
 
 ### Empty File
+
 - **Action**: Create empty file `empty.json`
 - **Expected**: No dates found, graceful handling
 - **Error**: None
 
 ### No Dates
+
 ```json
 {
   "name": "Test",
@@ -167,30 +176,36 @@ This directory contains sample files designed to demonstrate and test Dates-LE's
   "enabled": true
 }
 ```
+
 - **Expected**: "No dates found" message
 - **Error**: None
 
 ### Invalid JSON/YAML/CSV
+
 ```json
 {
   "broken": "json"
   "missing": "comma"
 }
 ```
+
 - **Expected**: Parse error (if `showParseErrors` enabled)
 - **Error**: Graceful error handling, no crash
 
 ### Mixed Valid/Invalid Dates
+
 - **File**: Create JSON with mix of valid ISO dates and invalid strings
 - **Expected**: Only valid dates extracted
 - **Error**: None (invalid dates skipped)
 
 ### Very Large Output
+
 - **Action**: Create file with 100,000+ dates
 - **Expected**: Warning before opening results
 - **Prompt**: "Output size (100,000 lines) exceeds threshold. Continue?"
 
 ### Timezone Edge Cases
+
 ```json
 {
   "utc": "2025-10-13T12:00:00Z",
@@ -199,26 +214,32 @@ This directory contains sample files designed to demonstrate and test Dates-LE's
   "no_timezone": "2025-10-13T12:00:00"
 }
 ```
+
 - **Expected**: All dates extracted with timezone info preserved
 
 ### Date Ranges
+
 ```yaml
 maintenance:
-  start: "2025-10-14T02:00:00Z"
-  end: "2025-10-14T04:00:00Z"
+  start: '2025-10-14T02:00:00Z'
+  end: '2025-10-14T04:00:00Z'
 ```
+
 - **Expected**: Both dates extracted separately
 
 ### Null Dates
+
 ```json
 {
   "shippedDate": null,
   "deliveredDate": null
 }
 ```
+
 - **Expected**: Null dates ignored (not extracted)
 
 ### String Dates vs Numeric Timestamps
+
 ```json
 {
   "isoString": "2025-10-13T12:00:00Z",
@@ -226,6 +247,7 @@ maintenance:
   "version": "1.0.0"
 }
 ```
+
 - **Expected**: ISO string extracted, numbers (version/timestamp) may be filtered
 
 ---
@@ -233,21 +255,25 @@ maintenance:
 ## ⚡ Performance Testing Guidelines
 
 ### Small Files (< 1KB)
+
 - **Test File**: Create minimal JSON with 5 dates
 - **Expected**: < 100ms extraction time
 - **Verify**: No performance warnings
 
 ### Medium Files (1KB - 1MB)
+
 - **Test Files**: All provided samples
 - **Expected**: < 1 second extraction time
 - **Verify**: Smooth, responsive extraction
 
 ### Large Files (1MB - 50MB)
+
 - **Action**: Duplicate `application.log` 100x
 - **Expected**: < 5 seconds extraction time
 - **Verify**: Progress indicator shown
 
 ### Very Large Files (> 50MB)
+
 - **Action**: Create/open file exceeding safety threshold
 - **Expected**: Safety warning before processing
 - **Verify**: Can cancel operation
@@ -259,12 +285,14 @@ maintenance:
 ### No Dates Extracted
 
 **Possible Causes**:
+
 1. File format not supported (only JSON, YAML, CSV)
 2. File not saved with correct extension
 3. No valid date formats in file
 4. Parse error (enable `showParseErrors`)
 
 **Solution**:
+
 - Check file extension (.json, .yaml, .yml, .csv)
 - Verify file contains valid date strings
 - Check Output panel → "Dates-LE" for errors
@@ -274,6 +302,7 @@ maintenance:
 **Symptoms**: Slow extraction, high memory usage
 
 **Solutions**:
+
 1. Enable safety warnings: `dates-le.safety.enabled: true`
 2. Reduce file size threshold: `dates-le.safety.fileSizeWarnBytes: 500000`
 3. Split large files into smaller chunks
@@ -284,6 +313,7 @@ maintenance:
 **Example**: Expected 50 dates, got 48
 
 **Debugging**:
+
 1. Check if deduplication is enabled
 2. Verify date formats are recognized
 3. Look for null values or invalid formats
@@ -306,6 +336,7 @@ maintenance:
 These sample files comprehensively test:
 
 ✅ **Date Formats**:
+
 - ISO 8601 (various precisions)
 - RFC 2822
 - Simple dates (YYYY-MM-DD)
@@ -313,12 +344,14 @@ These sample files comprehensively test:
 - Unix timestamps
 
 ✅ **File Formats**:
+
 - JSON (nested structures, arrays)
 - YAML (configurations, hierarchies)
 - CSV (tabular data)
 - LOG (mixed formats)
 
 ✅ **Edge Cases**:
+
 - Null values
 - Timezones (UTC, offsets)
 - Millisecond precision
@@ -327,6 +360,7 @@ These sample files comprehensively test:
 - Empty files
 
 ✅ **Features**:
+
 - Deduplication
 - Sorting
 - Side-by-side view
@@ -339,4 +373,3 @@ These sample files comprehensively test:
 **Happy Testing!** 🚀
 
 If you discover any issues or have suggestions for additional test cases, please [open an issue](https://github.com/nolindnaidoo/dates-le/issues).
-
