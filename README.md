@@ -59,17 +59,17 @@ It intelligently detects and extracts dates from your code, providing comprehens
 
   Automatically finds dates in multiple formats: ISO 8601, RFC 2822, Unix timestamps, and common date patterns.
 
-- **Smart analysis & insights**
+- **Simple extraction only**
 
-  Get detailed reports on date patterns, timezone analysis, and temporal data distribution across your codebase.
+  Focused on reliable date extraction from structured data without unnecessary complexity.
 
 - **Data analysis support**
 
-  Perfect for analyzing log files, API responses, and temporal datasets to identify patterns and anomalies.
+  Perfect for extracting dates from API responses, database exports, and temporal datasets for further analysis.
 
 - **Reliable file format support**
 
-  Works with JSON, YAML, and CSV with 100% test coverage and production-quality reliability.
+  Works with JSON, YAML, and CSV with 83.78% extraction coverage and production-quality reliability.
 
 - **Performance optimized**
 
@@ -88,13 +88,16 @@ It intelligently detects and extracts dates from your code, providing comprehens
 - **Numbers-LE** - Extract and analyze numeric data from JSON, YAML, CSV, TOML, INI, and .env  
   [[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.numbers-le)] [[Open VSX](https://open-vsx.org/extension/nolindnaidoo/numbers-le)]
 
-- **Colors-LE** - Extract and analyze colors from CSS, SCSS, JavaScript, HTML, and more  
-  [[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.colors-le)] [[Open VSX](https://open-vsx.org/extension/nolindnaidoo/colors-le)]
-
 - **Paths-LE** - Extract and analyze file paths from imports, configs, and code  
   [[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.paths-le)] [[Open VSX](https://open-vsx.org/extension/nolindnaidoo/paths-le)]
 
-- **URLs-LE** - Extract and analyze URLs from HTML, Markdown, configs, and documentation  
+- **Scrape-LE** - Verify page reachability and detect anti-scraping measures before deploying scrapers  
+  [[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.scrape-le)]
+
+- **Colors-LE** - Extract and analyze colors from CSS, HTML, JavaScript, and TypeScript  
+  [[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.colors-le)] [[Open VSX](https://open-vsx.org/extension/nolindnaidoo/colors-le)]
+
+- **URLs-LE** - Extract and analyze URLs from web content, APIs, and resources  
   [[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.urls-le)] [[Open VSX](https://open-vsx.org/extension/nolindnaidoo/urls-le)]
 
 Each tool follows the same philosophy: **Zero Hassle, Maximum Productivity**.
@@ -256,9 +259,11 @@ A: Dates-LE can handle files up to 200MB. The extension includes safety warnings
 
 ## 📊 Test Coverage
 
-- Tests powered by Vitest with V8 coverage.
-- Runs quickly and locally: `bun run test` or `bun run test:coverage`.
-- Coverage reports output to `coverage/` (HTML summary at `coverage/index.html`).
+- 39 passing tests across 4 test suites with 23.67% overall coverage
+- Core extraction logic has 83.78% coverage with comprehensive format testing
+- Tests powered by Vitest with V8 coverage
+- Runs quickly and locally: `bun run test` or `bun run test:coverage`
+- Coverage reports output to `coverage/` (HTML summary at `coverage/index.html`)
 
 ---
 
