@@ -12,6 +12,8 @@ vitest.config.ts
 docs/
 src/**/*.test.ts
 test/
+sample/
+coverage/
 README-STRINGLE.md
 src/
 !src/assets/images/preview.gif
