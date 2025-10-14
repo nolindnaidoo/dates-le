@@ -66,7 +66,7 @@ export type DateFormat =
 	| 'custom'
 	| 'unknown';
 
-export type FileType = 'json' | 'yaml' | 'yml' | 'csv' | 'unknown';
+export type FileType = 'json' | 'yaml' | 'yml' | 'csv' | 'xml' | 'unknown';
 
 export interface Configuration {
 	readonly copyToClipboardEnabled: boolean;

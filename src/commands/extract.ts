@@ -156,7 +156,12 @@ export function registerExtractCommand(
 				deps.telemetry.event('extract-success', { count: result.dates.length });
 			} catch (error) {
 				const message =
-					error instanceof Error ? error.message : 'Unknown error occurred';
+					error instanceof Error
+						? error.message
+						: localize(
+								'runtime.error.unknown-fallback',
+								'Unknown error occurred',
+							);
 				deps.notifier.showError(`Extraction failed: ${message}`);
 				deps.telemetry.event('extract-error', { error: message });
 			} finally {

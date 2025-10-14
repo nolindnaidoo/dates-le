@@ -3,7 +3,7 @@
 	"publisher": "nolindnaidoo",
 	"displayName": "Dates-LE",
 	"description": "Zero Hassle Date/Time Extraction and Analysis from Logs, Configs, and Code",
-	"version": "1.1.0",
+	"version": "1.3.0",
 	"license": "MIT",
 	"author": {
 		"name": "Nolin D Naidoo",
@@ -44,7 +44,10 @@
 		"validation",
 		"patterns",
 		"ranges",
-		"anomalies"
+		"anomalies",
+		"xml",
+		"maven",
+		"gradle"
 	],
 	"icon": "src/assets/images/icon.png",
 	"main": "./dist/extension.js",
@@ -54,6 +57,7 @@
 		"onLanguage:yaml",
 		"onLanguage:yml",
 		"onLanguage:csv",
+		"onLanguage:xml",
 		"onCommand:dates-le.extractDates",
 		"onCommand:dates-le.postProcess.dedupe",
 		"onCommand:dates-le.postProcess.sort",
@@ -110,7 +114,7 @@
 			"editor/context": [
 				{
 					"command": "dates-le.extractDates",
-					"when": "resourceExtname == .json || resourceExtname == .yaml || resourceExtname == .yml || resourceExtname == .csv",
+					"when": "resourceExtname == .json || resourceExtname == .yaml || resourceExtname == .yml || resourceExtname == .csv || resourceExtname == .xml",
 					"group": "1_modification@1"
 				}
 			],
@@ -204,7 +208,7 @@
 		"build": "tsc -p ./",
 		"clean": "rm -rf dist coverage",
 		"clean:i18n": "node -e \"const fs=require('fs');fs.readdirSync('.').filter(f=>f.startsWith('package.nls.')&&f.endsWith('.json')&&f!=='package.nls.json').forEach(f=>fs.unlinkSync(f));try{fs.rmSync('vsix',{recursive:true})}catch(e){}\"",
-		"copy:i18n": "cp src/i18n/package.nls.json .",
+		"copy:i18n": "cp src/i18n/package.nls.*.json . 2>/dev/null || true",
 		"watch": "tsc -watch -p ./",
 		"test": "vitest run --pool=threads",
 		"test:watch": "vitest --pool=threads",

@@ -6,6 +6,7 @@ import type {
 } from '../types';
 import { extractFromCsv } from './formats/csv';
 import { extractFromJson } from './formats/json';
+import { extractFromXml } from './formats/xml';
 import { extractFromYaml } from './formats/yaml';
 
 export async function extractDates(
@@ -27,6 +28,9 @@ export async function extractDates(
 				break;
 			case 'csv':
 				dates.push(...extractFromCsv(content));
+				break;
+			case 'xml':
+				dates.push(...extractFromXml(content));
 				break;
 			default:
 				// Unsupported file type - return empty results
@@ -59,6 +63,8 @@ function determineFileType(languageId: string): FileType {
 			return 'yaml';
 		case 'csv':
 			return 'csv';
+		case 'xml':
+			return 'xml';
 		default:
 			return 'unknown';
 	}

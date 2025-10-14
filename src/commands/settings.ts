@@ -94,7 +94,12 @@ function registerExportSettingsCommand(
 				deps.telemetry.event('settings-export-success', { path: uri.fsPath });
 			} catch (error) {
 				const message =
-					error instanceof Error ? error.message : 'Unknown error occurred';
+					error instanceof Error
+						? error.message
+						: localize(
+								'runtime.error.unknown-fallback',
+								'Unknown error occurred',
+							);
 				deps.notifier.showError(
 					localize(
 						'runtime.settings.export.error',
@@ -243,7 +248,12 @@ function registerImportSettingsCommand(
 				});
 			} catch (error) {
 				const message =
-					error instanceof Error ? error.message : 'Unknown error occurred';
+					error instanceof Error
+						? error.message
+						: localize(
+								'runtime.error.unknown-fallback',
+								'Unknown error occurred',
+							);
 				deps.notifier.showError(
 					localize(
 						'runtime.settings.import.error',
@@ -338,7 +348,12 @@ function registerResetSettingsCommand(
 				deps.telemetry.event('settings-reset-success');
 			} catch (error) {
 				const message =
-					error instanceof Error ? error.message : 'Unknown error occurred';
+					error instanceof Error
+						? error.message
+						: localize(
+								'runtime.error.unknown-fallback',
+								'Unknown error occurred',
+							);
 				deps.notifier.showError(
 					localize(
 						'runtime.settings.reset.error',

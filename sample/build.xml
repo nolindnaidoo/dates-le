@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="SampleBuild" default="build" basedir=".">
+    <description>Sample Ant build file demonstrating date extraction from XML</description>
+    
+    <!-- Build metadata with various date formats -->
+    <property name="project.version" value="1.0.0"/>
+    <property name="build.date" value="2024-01-15"/>
+    <property name="build.timestamp" value="2024-01-15T14:30:00Z"/>
+    <property name="release.date" value="2024-01-20T10:00:00.000Z"/>
+    <property name="last.modified" value="Mon, 15 Jan 2024 14:30:00 GMT"/>
+    
+    <!-- Unix timestamps -->
+    <property name="build.epoch" value="1705329000"/>
+    <property name="release.epoch.ms" value="1705748400000"/>
+    
+    <!-- Target with timestamp attributes -->
+    <target name="init" description="Initialize build">
+        <tstamp>
+            <format property="TODAY" pattern="2024-01-15"/>
+            <format property="NOW" pattern="2024-01-15T14:30:00Z"/>
+        </tstamp>
+        <echo message="Build started at: 2024-01-15T14:30:00.123Z"/>
+        <echo message="Last build: Mon, 15 Jan 2024 14:30:00 GMT"/>
+    </target>
+    
+    <!-- Dependency management with dates -->
+    <target name="check-dependencies">
+        <condition property="dependencies.updated">
+            <not>
+                <uptodate targetfile="libs/dependency.jar">
+                    <srcfiles dir="src" includes="**/*.java"/>
+                </uptodate>
+            </not>
+        </condition>
+        <echo message="Dependencies checked on: 2024-01-15"/>
+        <echo message="Last update: 2024-01-10T09:15:00Z"/>
+    </target>
+    
+    <!-- Compilation target -->
+    <target name="compile" depends="init" description="Compile sources">
+        <mkdir dir="build/classes"/>
+        <javac srcdir="src" 
+               destdir="build/classes" 
+               includeantruntime="false"
+               source="17"
+               target="17">
+            <compilerarg value="-Xlint:all"/>
+        </javac>
+        <echo message="Compilation completed: 2024-01-15T14:35:00Z"/>
+        <echo message="Timestamp: 1705329300"/>
+    </target>
+    
+    <!-- Testing with date tracking -->
+    <target name="test" depends="compile" description="Run tests">
+        <mkdir dir="build/test-reports"/>
+        <junit printsummary="yes" haltonfailure="no">
+            <formatter type="xml"/>
+            <classpath>
+                <pathelement location="build/classes"/>
+                <fileset dir="libs">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+            <batchtest todir="build/test-reports">
+                <fileset dir="test">
+                    <include name="**/*Test.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+        <echo message="Tests completed: 2024-01-15T14:40:00.456Z"/>
+        <echo message="Test start: Sun Jan 15 2024 14:35:00 GMT-0500"/>
+    </target>
+    
+    <!-- Packaging target -->
+    <target name="package" depends="test" description="Create JAR package">
+        <mkdir dir="dist"/>
+        <jar destfile="dist/sample-${project.version}.jar" 
+             basedir="build/classes">
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Built-Date" value="2024-01-15T14:45:00Z"/>
+                <attribute name="Implementation-Version" value="${project.version}"/>
+                <attribute name="Implementation-Date" value="2024-01-15"/>
+                <attribute name="Release-Timestamp" value="1705329900"/>
+                <attribute name="Last-Modified" value="Mon, 15 Jan 2024 14:45:00 GMT"/>
+            </manifest>
+        </jar>
+        <echo message="Package created: 2024-01-15T14:45:00.789Z"/>
+    </target>
+    
+    <!-- Deployment scheduling -->
+    <target name="deploy" depends="package" description="Deploy application">
+        <echo message="Scheduled deployment: 2024-01-20T10:00:00Z"/>
+        <echo message="Production release: 2024-01-20"/>
+        <echo message="Staging date: 2024-01-18T16:00:00.000Z"/>
+        <echo message="Rollback window: 2024-01-20T12:00:00Z to 2024-01-20T14:00:00Z"/>
+    </target>
+    
+    <!-- Cleanup with retention dates -->
+    <target name="clean" description="Clean build artifacts">
+        <delete dir="build"/>
+        <delete dir="dist"/>
+        <echo message="Cleanup performed: 2024-01-15T15:00:00Z"/>
+        <echo message="Logs retained until: 2024-02-15"/>
+        <echo message="Backup retention: 30 days from 2024-01-15"/>
+    </target>
+    
+    <!-- Main build target -->
+    <target name="build" depends="package" description="Full build">
+        <echo message="================================="/>
+        <echo message="Build Summary"/>
+        <echo message="================================="/>
+        <echo message="Start: 2024-01-15T14:30:00.123Z"/>
+        <echo message="End: 2024-01-15T14:45:00.789Z"/>
+        <echo message="Duration: 900000 ms"/>
+        <echo message="Next build: 2024-01-16T14:30:00Z"/>
+        <echo message="================================="/>
+    </target>
+    
+    <!-- Scheduled maintenance -->
+    <target name="maintenance" description="Scheduled maintenance tasks">
+        <echo message="Maintenance window: 2024-01-21T02:00:00Z to 2024-01-21T04:00:00Z"/>
+        <echo message="Database backup: 2024-01-21T02:15:00Z"/>
+        <echo message="Index rebuild: 2024-01-21T02:30:00Z"/>
+        <echo message="Cache clear: 2024-01-21T03:00:00Z"/>
+        <echo message="Service restart: 2024-01-21T03:45:00Z"/>
+    </target>
+</project>
+

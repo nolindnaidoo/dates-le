@@ -3,7 +3,7 @@
 </p>
 <h1 align="center">Dates-LE: Zero Hassle Date Extraction</h1>
 <p align="center">
-  <b>Extract dates and timestamps from JSON, YAML, and CSV files with smart validation</b><br/>
+  <b>Extract dates and timestamps from JSON, YAML, CSV, and XML files with smart validation</b><br/>
   <i>ISO 8601, RFC 2822, Unix timestamps, and common date patterns</i>
   <br/>
   <i>Designed for log analysis, API response parsing, and temporal data management.</i>
@@ -73,7 +73,7 @@ It intelligently detects and extracts dates from your code, providing comprehens
 
 - **Reliable file format support**
 
-  Works with JSON, YAML, and CSV with 83.78% extraction coverage and production-quality reliability.
+  Works with JSON, YAML, CSV, and XML with 83.78% extraction coverage and production-quality reliability.
 
 - **Performance optimized**
 
@@ -153,7 +153,7 @@ Identify date patterns and anomalies in large datasets for business intelligence
 ## 🚀 Quick Start
 
 1. Install from [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le) or [Open VSX](https://open-vsx.org/extension/nolindnaidoo/dates-le)
-2. Open any JSON, YAML, or CSV file containing dates
+2. Open any JSON, YAML, CSV, or XML file containing dates
 3. Run Extract Dates (`Cmd+Alt+D` / `Ctrl+Alt+D` or via Command Palette)
 4. Use **Deduplicate Dates** or **Sort Dates** commands for post-processing
 
@@ -197,7 +197,23 @@ Dates-LE provides **8 commands** accessible via Command Palette (`Ctrl+Shift+P` 
 
 ## 🌍 Language Support
 
-English only for v1.0.0. Additional languages may be added in future releases based on user feedback.
+**13 languages supported** with full localization:
+
+- 🇺🇸 **English** (en) - Default language
+- 🇩🇪 **German** (de) - Deutsche Lokalisierung
+- 🇪🇸 **Spanish** (es) - Soporte en español
+- 🇫🇷 **French** (fr) - Localisation française
+- 🇮🇩 **Indonesian** (id) - Dukungan bahasa Indonesia
+- 🇮🇹 **Italian** (it) - Localizzazione italiana
+- 🇯🇵 **Japanese** (ja) - 日本語サポート
+- 🇰🇷 **Korean** (ko) - 한국어 지원
+- 🇧🇷 **Portuguese (Brazil)** (pt-br) - Suporte em português brasileiro
+- 🇷🇺 **Russian** (ru) - Русская локализация
+- 🇺🇦 **Ukrainian** (uk) - Українська локалізація
+- 🇻🇳 **Vietnamese** (vi) - Hỗ trợ tiếng Việt
+- 🇨🇳 **Chinese Simplified** (zh-cn) - 简体中文支持
+
+All commands, settings, notifications, and help content automatically adapt to your VS Code language preference.
 
 ## 🧩 System Requirements
 
@@ -240,7 +256,7 @@ Dates-LE is built for speed with structured data formats:
 
 **Extension not detecting dates**
 
-- Ensure file is saved and has a supported extension (.json, .yaml, .yml, .csv)
+- Ensure file is saved and has a supported extension (.json, .yaml, .yml, .csv, .xml)
 - Try reloading VS Code window (`Ctrl/Cmd + Shift + P` → "Developer: Reload Window")
 - Check the Output panel → "Dates-LE" for any error messages
 
@@ -253,7 +269,7 @@ Dates-LE is built for speed with structured data formats:
 **Dates not appearing in results**
 
 - Verify the date format is supported (ISO 8601, RFC 2822, Unix timestamps, common date patterns)
-- Ensure the file is a valid JSON, YAML, or CSV format
+- Ensure the file is a valid JSON, YAML, CSV, or XML format
 - Check if `dates-le.dedupeEnabled` is removing duplicates you want to see
 
 **Extension crashes or freezes**
@@ -271,13 +287,13 @@ Dates-LE is built for speed with structured data formats:
 ## ❓ FAQ
 
 **Q: What file formats are supported?**
-A: Dates-LE supports JSON, YAML (.yaml, .yml), and CSV files. We focus on structured data formats for 100% reliability.
+A: Dates-LE supports JSON, YAML (.yaml, .yml), CSV, and XML files. We focus on structured data formats for 100% reliability.
 
 **Q: What date formats can be extracted?**
 A: ISO 8601 (2023-12-25T10:30:00Z), RFC 2822 (Mon, 25 Dec 2023 10:30:00 GMT), Unix timestamps (1703508600), UTC, local formats, and simple date patterns (2023-12-25).
 
 **Q: Does Dates-LE work with log files or JavaScript/TypeScript?**
-A: No. Dates-LE focuses exclusively on structured data formats (JSON, YAML, CSV) for reliability. Unstructured formats like logs can produce unreliable results.
+A: No. Dates-LE focuses exclusively on structured data formats (JSON, YAML, CSV, XML) for reliability. Unstructured formats like logs can produce unreliable results.
 
 **Q: Can I deduplicate extracted dates?**
 A: Yes! Use the **Deduplicate Dates** command from the Command Palette to remove duplicates, or enable `dates-le.dedupeEnabled: true` for automatic deduplication during extraction.
