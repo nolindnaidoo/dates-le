@@ -201,7 +201,7 @@ English only for v1.0.0. Additional languages may be added in future releases ba
 
 ## 🧩 System Requirements
 
-- **VS Code**: 1.85.0 or higher
+- **VS Code**: 1.70.0 or higher
 - **Node.js**: Not required (extension runs in VS Code's built-in runtime)
 - **Platform**: Windows, macOS, Linux
 - **Memory**: 50MB minimum, 200MB recommended for large files
@@ -258,7 +258,7 @@ Dates-LE is built for speed with structured data formats:
 
 **Extension crashes or freezes**
 
-- Check VS Code version compatibility (requires 1.85.0+)
+- Check VS Code version compatibility (requires 1.70.0+)
 - Disable other date-related extensions temporarily
 - Check Output panel → "Dates-LE" for error messages
 
