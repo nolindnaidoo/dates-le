@@ -148,7 +148,7 @@ Identify date patterns and anomalies in large datasets for business intelligence
 
 ## 🚀 Quick Start
 
-1. **Coming Soon** - Dates-LE will be available on VS Code Marketplace and Open VSX
+1. Install from [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le) or [Open VSX](https://open-vsx.org/extension/nolindnaidoo/dates-le)
 2. Open any JSON, YAML, or CSV file containing dates
 3. Run Extract Dates (`Cmd+Alt+D` / `Ctrl+Alt+D` or via Command Palette)
 
