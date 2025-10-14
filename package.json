@@ -3,7 +3,7 @@
 	"publisher": "nolindnaidoo",
 	"displayName": "Dates-LE",
 	"description": "Zero Hassle Date/Time Extraction and Analysis from Logs, Configs, and Code",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"license": "MIT",
 	"author": {
 		"name": "Nolin D Naidoo",
@@ -18,7 +18,7 @@
 	},
 	"homepage": "https://github.com/nolindnaidoo/dates-le#readme",
 	"engines": {
-		"vscode": "^1.105.0",
+		"vscode": "^1.70.0",
 		"node": ">=20.0.0"
 	},
 	"categories": [
@@ -232,7 +232,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.2.5",
 		"@types/node": "^24.7.1",
-		"@types/vscode": "^1.105.0",
+		"@types/vscode": "^1.70.0",
 		"@vitest/coverage-v8": "^3.2.4",
 		"@vitest/ui": "^3.2.4",
 		"@vscode/test-electron": "^2.5.2",
