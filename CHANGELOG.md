@@ -5,6 +5,23 @@ All notable changes to Dates-LE will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2025-10-14
+
+### Added
+
+- **Deduplicate command** - Added `dates-le.postProcess.dedupe` command to remove duplicate dates
+- **Sort command** - Added `dates-le.postProcess.sort` command with multiple sort modes:
+  - Chronological (Oldest First)
+  - Reverse Chronological (Newest First)
+  - Alphabetical (A → Z)
+  - Alphabetical (Z → A)
+- **Interactive sorting** - User can choose sort order via quick pick menu
+- **i18n entries** - Added localized command titles for dedupe and sort
+
+### Changed
+
+- **Command count** - Increased from 6 to 8 commands for full parity with other extraction extensions
+
 ## [1.0.1] - 2025-10-14
 
 ### Fixed

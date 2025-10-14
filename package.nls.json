@@ -3,6 +3,8 @@
 	"manifest.ext.description": "Zero Hassle Date/Time Extraction and Analysis from Logs, Configs, and Code",
 	"manifest.command.category": "Dates-LE",
 	"manifest.command.extract.title": "Extract Dates",
+	"manifest.command.dedupe.title": "Deduplicate Dates",
+	"manifest.command.sort.title": "Sort Dates",
 	"manifest.command.settings.title": "Open Settings",
 	"manifest.command.help.title": "Help & Troubleshooting",
 	"manifest.command.settings.export.title": "Export Settings",

@@ -1,79 +1,85 @@
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
-import { getConfiguration } from '../config/config';
-import { extractDates } from '../extraction/extract';
-import { showProgress } from '../utils/progress';
-import { sortDates } from '../utils/sort';
 
-const localize = nls.config({ messageFormat: nls.MessageFormat.file })();
+export function registerSortCommand(context: vscode.ExtensionContext): void {
+	const command = vscode.commands.registerCommand(
+		'dates-le.postProcess.sort',
+		async () => {
+			const editor = vscode.window.activeTextEditor;
+			if (!editor) {
+				vscode.window.showWarningMessage('No active editor found');
+				return;
+			}
 
-export async function sortDatesCommand(): Promise<void> {
-	const editor = vscode.window.activeTextEditor;
-	if (!editor) {
-		vscode.window.showWarningMessage(
-			localize('runtime.sort.no-editor', 'No active editor found'),
-		);
-		return;
-	}
+			// Prompt user for sort order
+			const sortOrder = await vscode.window.showQuickPick(
+				[
+					{ label: 'Chronological (Oldest First)', value: 'asc' },
+					{ label: 'Reverse Chronological (Newest First)', value: 'desc' },
+					{ label: 'Alphabetical (A → Z)', value: 'alpha-asc' },
+					{ label: 'Alphabetical (Z → A)', value: 'alpha-desc' },
+				],
+				{ placeHolder: 'Select sort order' },
+			);
 
-	const document = editor.document;
-	const content = document.getText();
-	const languageId = document.languageId;
+			if (!sortOrder) {
+				return; // User cancelled
+			}
 
-	if (!content.trim()) {
-		vscode.window.showWarningMessage(
-			localize('runtime.sort.empty', 'Document is empty'),
-		);
-		return;
-	}
+			try {
+				const document = editor.document;
+				const text = document.getText();
+				const lines = text
+					.split('\n')
+					.map((line) => line.trim())
+					.filter((line) => line.length > 0);
 
-	const _config = getConfiguration();
+				let sorted: string[];
+				if (sortOrder.value === 'asc' || sortOrder.value === 'desc') {
+					// Try to parse as dates and sort chronologically
+					const datesWithOriginal = lines.map((line) => ({
+						original: line,
+						date: new Date(line),
+					}));
 
-	try {
-		await showProgress(
-			localize('runtime.sort.progress', 'Sorting dates...'),
-			async () => {
-				const result = await extractDates(content, languageId);
-
-				if (result.dates.length === 0) {
-					vscode.window.showInformationMessage(
-						localize('runtime.sort.no-dates', 'No dates found to sort'),
-					);
-					return;
+					sorted = datesWithOriginal
+						.sort((a, b) => {
+							const aTime = a.date.getTime();
+							const bTime = b.date.getTime();
+							// Handle invalid dates by putting them at the end
+							if (isNaN(aTime) && isNaN(bTime)) return 0;
+							if (isNaN(aTime)) return 1;
+							if (isNaN(bTime)) return -1;
+							return sortOrder.value === 'asc' ? aTime - bTime : bTime - aTime;
+						})
+						.map((item) => item.original);
+				} else {
+					// Alphabetical sort
+					sorted = [...lines].sort((a, b) => {
+						return sortOrder.value === 'alpha-asc'
+							? a.localeCompare(b)
+							: b.localeCompare(a);
+					});
 				}
 
-				const sortedDates = sortDates([...result.dates], 'chronological');
-
-				// Create a new document with sorted dates
-				const sortedContent = sortedDates
-					.map((date) => `${date.value} - ${date.context || 'Extracted date'}`)
-					.join('\n');
-
-				// Open a new document with sorted results
-				const doc = await vscode.workspace.openTextDocument({
-					content: sortedContent,
-					language: 'plaintext',
-				});
-
-				await vscode.window.showTextDocument(doc);
+				// Replace document content
+				const edit = new vscode.WorkspaceEdit();
+				edit.replace(
+					document.uri,
+					new vscode.Range(0, 0, document.lineCount, 0),
+					sorted.join('\n'),
+				);
+				await vscode.workspace.applyEdit(edit);
 
 				vscode.window.showInformationMessage(
-					localize(
-						'runtime.sort.success',
-						'Sorted {0} dates chronologically',
-						sortedDates.length,
-					),
+					`Sorted ${sorted.length} dates (${sortOrder.label})`,
 				);
-			},
-		);
-	} catch (error) {
-		console.error('[Dates-LE] Sort command error:', error);
-		vscode.window.showErrorMessage(
-			localize(
-				'runtime.sort.error',
-				'Failed to sort dates: {0}',
-				error instanceof Error ? error.message : 'Unknown error',
-			),
-		);
-	}
+			} catch (error) {
+				const message =
+					error instanceof Error ? error.message : 'Unknown error occurred';
+				vscode.window.showErrorMessage(`Sorting failed: ${message}`);
+			}
+		},
+	);
+
+	context.subscriptions.push(command);
 }
