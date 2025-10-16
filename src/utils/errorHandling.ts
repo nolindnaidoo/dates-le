@@ -290,19 +290,6 @@ export function handleError(error: EnhancedError): void {
 }
 
 // Export interfaces for type definitions
-export interface ErrorHandler {
-	handleError(error: Error, context?: string): void;
-}
-
-export interface ErrorLogger {
-	log(message: string, level?: 'info' | 'warn' | 'error'): void;
-}
-
-export interface ErrorNotifier {
-	showError(message: string): void;
-	showWarning(message: string): void;
-	showInfo(message: string): void;
-}
 
 // Factory functions for error handling components
 export function createErrorHandler(_config: {
@@ -310,8 +297,11 @@ export function createErrorHandler(_config: {
 	notificationsLevel: string;
 }): ErrorHandler {
 	return {
-		handleError(error: Error, context?: string): void {
-			handleError(createEnhancedError(error, 'operational', context));
+		handle(error: EnhancedError): void {
+			console.error(`[Dates-LE] Error: ${error.message}`);
+		},
+		dispose(): void {
+			// Cleanup if needed
 		},
 	};
 }
@@ -320,28 +310,124 @@ export function createErrorLogger(outputChannel: {
 	appendLine: (message: string) => void;
 }): ErrorLogger {
 	return {
-		log(message: string, level: 'info' | 'warn' | 'error' = 'info'): void {
-			outputChannel.appendLine(`[${level.toUpperCase()}] ${message}`);
+		log(error: EnhancedError): void {
+			const sanitizedMessage = sanitizeErrorMessage(error.message);
+			outputChannel.appendLine(`[Dates-LE] ${sanitizedMessage}`);
+		},
+		dispose(): void {
+			// Cleanup if needed
 		},
 	};
 }
 
 export function createErrorNotifier(): ErrorNotifier {
 	return {
-		showError(message: string): void {
-			console.error(`[Dates-LE] ${message}`);
+		notify(error: EnhancedError): void {
+			const sanitizedMessage = sanitizeErrorMessage(error.userFriendlyMessage);
+			console.warn(`[Dates-LE] ${sanitizedMessage}`);
 		},
-		showWarning(message: string): void {
-			console.warn(`[Dates-LE] ${message}`);
-		},
-		showInfo(message: string): void {
-			console.info(`[Dates-LE] ${message}`);
+		dispose(): void {
+			// Cleanup if needed
 		},
 	};
 }
 
 export function createPerformanceError(message: string): Error {
 	return new Error(`Performance error: ${message}`);
+}
+
+/**
+ * Error Handler interface for dependency injection
+ */
+export interface ErrorHandler {
+	handle(error: EnhancedError): void;
+	dispose(): void;
+}
+
+/**
+ * Error Logger interface for dependency injection
+ */
+export interface ErrorLogger {
+	log(error: EnhancedError): void;
+	dispose(): void;
+}
+
+/**
+ * Error Notifier interface for dependency injection
+ */
+export interface ErrorNotifier {
+	notify(error: EnhancedError): void;
+	dispose(): void;
+}
+
+/**
+ * Create performance error for performance monitoring
+ */
+export function createPerformanceErrorForMonitoring(
+	operation: string,
+	error: Error,
+): EnhancedError {
+	return createEnhancedError(
+		error,
+		'operational',
+		`Performance monitoring for ${operation}`,
+	);
+}
+
+/**
+ * Error recovery strategies
+ */
+export interface ErrorRecoveryStrategy {
+	canRecover(error: EnhancedError): boolean;
+	recover(error: EnhancedError): Promise<boolean>;
+}
+
+/**
+ * Default recovery strategies
+ */
+export const defaultRecoveryStrategies: ErrorRecoveryStrategy[] = [
+	{
+		canRecover(error: EnhancedError): boolean {
+			return error.category === 'file-system' && error.recoverable;
+		},
+		async recover(_error: EnhancedError): Promise<boolean> {
+			// For file system errors, we can retry after a delay
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			return true;
+		},
+	},
+	{
+		canRecover(error: EnhancedError): boolean {
+			return error.category === 'configuration' && error.recoverable;
+		},
+		async recover(_error: EnhancedError): Promise<boolean> {
+			// For configuration errors, we can fallback to defaults
+			console.info('[Dates-LE] Falling back to default configuration');
+			return true;
+		},
+	},
+];
+
+/**
+ * Attempt to recover from an error using available strategies
+ */
+export async function attemptRecovery(error: EnhancedError): Promise<boolean> {
+	for (const strategy of defaultRecoveryStrategies) {
+		if (strategy.canRecover(error)) {
+			try {
+				const recovered = await strategy.recover(error);
+				if (recovered) {
+					console.info(
+						`[Dates-LE] Successfully recovered from ${error.category} error`,
+					);
+					return true;
+				}
+			} catch (recoveryError) {
+				console.error(`[Dates-LE] Recovery failed: ${recoveryError}`);
+			}
+		}
+	}
+	return false;
 }
 
 void localize;

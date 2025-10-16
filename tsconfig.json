@@ -21,6 +21,7 @@
         "vitest.config.ts",
         "**/*.test.ts",
         "**/*.bench.ts",
-        "sample/**/*"
+        "sample/**/*",
+        "scripts/**/*"
     ]
 }

@@ -3,7 +3,7 @@
 	"publisher": "nolindnaidoo",
 	"displayName": "Dates-LE",
 	"description": "Zero Hassle Date/Time Extraction and Analysis from Logs, Configs, and Code",
-	"version": "1.3.1",
+	"version": "1.4.5",
 	"license": "MIT",
 	"author": {
 		"name": "Nolin D Naidoo",
@@ -58,9 +58,18 @@
 		"onLanguage:yml",
 		"onLanguage:csv",
 		"onLanguage:xml",
+		"onLanguage:javascript",
+		"onLanguage:typescript",
+		"onLanguage:html",
+		"onLanguage:log",
+		"onLanguage:plaintext",
 		"onCommand:dates-le.extractDates",
 		"onCommand:dates-le.postProcess.dedupe",
 		"onCommand:dates-le.postProcess.sort",
+		"onCommand:dates-le.analyze",
+		"onCommand:dates-le.convert",
+		"onCommand:dates-le.filter",
+		"onCommand:dates-le.validate",
 		"onCommand:dates-le.openSettings",
 		"onCommand:dates-le.help"
 	],
@@ -97,8 +106,33 @@
 				"category": "%manifest.command.category%"
 			},
 			{
+				"command": "dates-le.analyze",
+				"title": "%manifest.command.analyze.title%",
+				"category": "%manifest.command.category%"
+			},
+			{
+				"command": "dates-le.convert",
+				"title": "%manifest.command.convert.title%",
+				"category": "%manifest.command.category%"
+			},
+			{
+				"command": "dates-le.filter",
+				"title": "%manifest.command.filter.title%",
+				"category": "%manifest.command.category%"
+			},
+			{
+				"command": "dates-le.validate",
+				"title": "%manifest.command.validate.title%",
+				"category": "%manifest.command.category%"
+			},
+			{
 				"command": "dates-le.help",
 				"title": "%manifest.command.help.title%",
+				"category": "%manifest.command.category%"
+			},
+			{
+				"command": "dates-le.csv.toggleStreaming",
+				"title": "%manifest.command.csv.toggle-streaming.title%",
 				"category": "%manifest.command.category%"
 			}
 		],
@@ -114,7 +148,7 @@
 			"editor/context": [
 				{
 					"command": "dates-le.extractDates",
-					"when": "resourceExtname == .json || resourceExtname == .yaml || resourceExtname == .yml || resourceExtname == .csv || resourceExtname == .xml",
+					"when": "resourceExtname == .json || resourceExtname == .yaml || resourceExtname == .yml || resourceExtname == .csv || resourceExtname == .xml || resourceExtname == .js || resourceExtname == .ts || resourceExtname == .jsx || resourceExtname == .tsx || resourceExtname == .html || resourceExtname == .log || resourceExtname == .txt",
 					"group": "1_modification@1"
 				}
 			],
@@ -129,10 +163,25 @@
 					"command": "dates-le.postProcess.sort"
 				},
 				{
+					"command": "dates-le.analyze"
+				},
+				{
+					"command": "dates-le.convert"
+				},
+				{
+					"command": "dates-le.filter"
+				},
+				{
+					"command": "dates-le.validate"
+				},
+				{
 					"command": "dates-le.openSettings"
 				},
 				{
 					"command": "dates-le.help"
+				},
+				{
+					"command": "dates-le.csv.toggleStreaming"
 				}
 			]
 		},
@@ -206,6 +255,105 @@
 					"type": "boolean",
 					"default": false,
 					"description": "%manifest.settings.telemetry.desc%"
+				},
+				"dates-le.csv.streamingEnabled": {
+					"type": "boolean",
+					"default": false,
+					"description": "%manifest.settings.csv.streaming.desc%"
+				},
+				"dates-le.postProcess.openInNewFile": {
+					"type": "boolean",
+					"default": true,
+					"description": "%manifest.settings.open.new-file.desc%"
+				},
+				"dates-le.analysis.enabled": {
+					"type": "boolean",
+					"default": true,
+					"description": "%manifest.settings.analysis.enabled.desc%"
+				},
+				"dates-le.analysis.includeStats": {
+					"type": "boolean",
+					"default": true,
+					"description": "%manifest.settings.analysis.stats.desc%"
+				},
+				"dates-le.performance.enabled": {
+					"type": "boolean",
+					"default": true,
+					"description": "%manifest.settings.performance.enabled.desc%"
+				},
+				"dates-le.performance.maxDuration": {
+					"type": "number",
+					"default": 5000,
+					"minimum": 1000,
+					"description": "%manifest.settings.performance.max-duration.desc%"
+				},
+				"dates-le.performance.maxMemoryUsage": {
+					"type": "number",
+					"default": 104857600,
+					"minimum": 1048576,
+					"description": "%manifest.settings.performance.max-memory.desc%"
+				},
+				"dates-le.performance.maxCpuUsage": {
+					"type": "number",
+					"default": 1000000,
+					"minimum": 100000,
+					"description": "%manifest.settings.performance.max-cpu.desc%"
+				},
+				"dates-le.performance.minThroughput": {
+					"type": "number",
+					"default": 1000,
+					"minimum": 100,
+					"description": "%manifest.settings.performance.min-throughput.desc%"
+				},
+				"dates-le.performance.maxCacheSize": {
+					"type": "number",
+					"default": 1000,
+					"minimum": 100,
+					"description": "%manifest.settings.performance.max-cache.desc%"
+				},
+				"dates-le.keyboard.shortcuts.enabled": {
+					"type": "boolean",
+					"default": true,
+					"description": "%manifest.settings.keyboard.shortcuts.enabled.desc%"
+				},
+				"dates-le.keyboard.extractShortcut": {
+					"type": "string",
+					"default": "ctrl+alt+d",
+					"description": "%manifest.settings.keyboard.extract.shortcut.desc%"
+				},
+				"dates-le.keyboard.dedupeShortcut": {
+					"type": "string",
+					"default": "ctrl+alt+e",
+					"description": "%manifest.settings.keyboard.dedupe.shortcut.desc%"
+				},
+				"dates-le.keyboard.sortShortcut": {
+					"type": "string",
+					"default": "ctrl+alt+s",
+					"description": "%manifest.settings.keyboard.sort.shortcut.desc%"
+				},
+				"dates-le.presets.enabled": {
+					"type": "boolean",
+					"default": true,
+					"description": "%manifest.settings.presets.enabled.desc%"
+				},
+				"dates-le.presets.defaultPreset": {
+					"type": "string",
+					"default": "balanced",
+					"enum": [
+						"minimal",
+						"balanced",
+						"comprehensive",
+						"performance",
+						"dates"
+					],
+					"enumDescriptions": [
+						"%manifest.settings.presets.default.option.minimal%",
+						"%manifest.settings.presets.default.option.balanced%",
+						"%manifest.settings.presets.default.option.comprehensive%",
+						"%manifest.settings.presets.default.option.performance%",
+						"%manifest.settings.presets.default.option.dates%"
+					],
+					"description": "%manifest.settings.presets.default.desc%"
 				}
 			}
 		}

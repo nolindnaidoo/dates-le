@@ -66,7 +66,16 @@ export type DateFormat =
 	| 'custom'
 	| 'unknown';
 
-export type FileType = 'json' | 'yaml' | 'yml' | 'csv' | 'xml' | 'unknown';
+export type FileType =
+	| 'json'
+	| 'yaml'
+	| 'yml'
+	| 'csv'
+	| 'xml'
+	| 'log'
+	| 'javascript'
+	| 'html'
+	| 'unknown';
 
 export interface Configuration {
 	readonly copyToClipboardEnabled: boolean;
@@ -80,6 +89,27 @@ export interface Configuration {
 	readonly showParseErrors: boolean;
 	readonly statusBarEnabled: boolean;
 	readonly telemetryEnabled: boolean;
+	readonly csvStreamingEnabled: boolean;
+	readonly postProcessOpenInNewFile: boolean;
+	readonly analysisEnabled: boolean;
+	readonly analysisIncludeStats: boolean;
+	readonly performanceEnabled: boolean;
+	readonly performanceMaxDuration: number;
+	readonly performanceMaxMemoryUsage: number;
+	readonly performanceMaxCpuUsage: number;
+	readonly performanceMinThroughput: number;
+	readonly performanceMaxCacheSize: number;
+	readonly keyboardShortcutsEnabled: boolean;
+	readonly keyboardExtractShortcut: string;
+	readonly keyboardDedupeShortcut: string;
+	readonly keyboardSortShortcut: string;
+	readonly presetsEnabled: boolean;
+	readonly presetsDefaultPreset:
+		| 'minimal'
+		| 'balanced'
+		| 'comprehensive'
+		| 'performance'
+		| 'dates';
 }
 
 // Re-export utility types for easier access

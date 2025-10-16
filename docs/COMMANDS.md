@@ -1,263 +1,312 @@
 # Dates-LE Commands
 
-## Overview
-
-Dates-LE provides **8 commands** for extracting, processing, and managing dates from structured data files (JSON, YAML, CSV). All commands are designed with the "Zero Hassle" philosophy, providing clear feedback and graceful error handling.
+Complete reference for all Dates-LE commands, their usage, and configuration options.
 
 ## Core Commands
 
-### 1. Extract Dates (`dates-le.extractDates`)
+### Extract Dates (`dates-le.extract`)
 
-**Purpose**: Extract all dates from the current document and display them in their original format.
+**Purpose**: Extract dates from the active document and display results.
 
 **Usage**:
 
-- **Command Palette**: `Dates-LE: Extract Dates`
-- **Keyboard Shortcut**: `Ctrl+Alt+D` (Windows/Linux) or `Cmd+Alt+D` (Mac)
-- **Context Menu**: Right-click in editor → `Extract Dates`
+- Command Palette: `Dates-LE: Extract Dates`
+- Context Menu: Right-click in supported file types
+- Keyboard Shortcut: `Ctrl+Shift+D` (configurable)
 
-**Supported File Types**:
+**Supported Formats**:
 
 - JSON (`.json`)
 - YAML (`.yaml`, `.yml`)
 - CSV (`.csv`)
+- XML (`.xml`)
+- Log files (`.log`, `.txt`)
+- HTML (`.html`)
+- JavaScript/TypeScript (`.js`, `.ts`, `.jsx`, `.tsx`)
 
-**Features**:
+**Output**:
 
-- Detects dates in various formats:
-  - ISO 8601: `2023-12-25T10:30:00.000Z`
-  - RFC 2822: `Mon, 25 Dec 2023 10:30:00 GMT`
-  - Unix timestamps: `1703508600` (both 10 and 13 digit)
-  - UTC format: `Mon Dec 25 2023 10:30:00 GMT+0000`
-  - Local format: `12/25/2023 10:30:00`
-  - Simple dates: `2023-12-25`
-- Smart deduplication to avoid duplicate results
-- Progress indication for large files
-- Safety warnings for files exceeding size thresholds
-- Results can be opened side-by-side or replace current document
-- Optional clipboard copying
-
-**Output Format**:
-
-Dates are extracted in their original format, one per line:
-
-```
-2023-12-25T10:30:00.000Z
-Mon, 25 Dec 2023 10:30:00 GMT
-1703508600
-2023-12-25
-```
+- Opens new editor with extracted dates
+- Copies results to clipboard
+- Shows performance metrics (throughput, processing time)
+- Displays extraction statistics
 
 **Configuration**:
 
-- `dates-le.copyToClipboardEnabled` - Auto-copy results to clipboard
-- `dates-le.dedupeEnabled` - Remove duplicate dates
-- `dates-le.openResultsSideBySide` - Open results in side-by-side editor
-- `dates-le.safety.enabled` - Enable safety checks for large files
-
-**Error Handling**:
-
-- Gracefully handles invalid date formats
-- Provides clear error messages for parsing failures
-- Continues processing despite individual date errors
-- Shows helpful messages when no dates are found
-
-## Post-Processing Commands
-
-### 2. Deduplicate Dates (`dates-le.postProcess.dedupe`)
-
-**Purpose**: Remove duplicate dates from the current document while preserving the original order.
-
-**Usage**:
-
-- **Command Palette**: `Dates-LE: Deduplicate Dates`
-
-**Features**:
-
-- Removes duplicate date entries while maintaining first occurrence
-- Preserves original date order
-- Works on any text document with dates (one per line)
-- Shows count of removed duplicates
-- Provides clear feedback on completion
-
-**Example**:
-
-```
-Before:
-2023-12-25T10:30:00Z
-2023-12-26T14:20:00Z
-2023-12-25T10:30:00Z
-2023-12-27T09:15:00Z
-
-After:
-2023-12-25T10:30:00Z
-2023-12-26T14:20:00Z
-2023-12-27T09:15:00Z
-```
-
-### 3. Sort Dates (`dates-le.postProcess.sort`)
-
-**Purpose**: Sort dates in the current document with multiple sort modes.
-
-**Usage**:
-
-- **Command Palette**: `Dates-LE: Sort Dates`
-
-**Sort Modes**:
-
-1. **Chronological (Oldest First)** - Sort by date/time value, earliest first
-2. **Reverse Chronological (Newest First)** - Sort by date/time value, latest first
-3. **Alphabetical (A → Z)** - Sort dates as strings, A to Z
-4. **Alphabetical (Z → A)** - Sort dates as strings, Z to A
-
-**Features**:
-
-- Interactive sort mode selection via quick pick
-- Smart date parsing for chronological sorting
-- Handles invalid dates gracefully (placed at end)
-- Works with any date format
-- Shows count of sorted dates
-- Provides clear feedback on completion
-
-**Example**:
-
-```
-Before:
-2023-12-27T09:15:00Z
-2023-12-25T10:30:00Z
-2023-12-26T14:20:00Z
-
-After (Chronological):
-2023-12-25T10:30:00Z
-2023-12-26T14:20:00Z
-2023-12-27T09:15:00Z
-```
-
-## Settings Commands
-
-### 4. Open Settings (`dates-le.openSettings`)
-
-**Purpose**: Quick access to Dates-LE settings in VS Code.
-
-**Usage**:
-
-- **Command Palette**: `Dates-LE: Open Settings`
-
-**Details**: Opens VS Code settings filtered to Dates-LE configuration options.
-
-### 5. Export Settings (`dates-le.settings.export`)
-
-**Purpose**: Export current Dates-LE settings to a JSON file.
-
-**Usage**:
-
-- **Command Palette**: `Dates-LE: Export Settings`
-
-**Features**:
-
-- Saves all Dates-LE configuration to a JSON file
-- Includes version and export timestamp
-- Useful for backing up configuration or sharing with team
-
-**Output Format**:
-
 ```json
 {
-  "version": "1.0.0",
-  "exportedAt": "2023-12-25T10:30:00.000Z",
-  "settings": {
-    "copyToClipboardEnabled": false,
-    "dedupeEnabled": false,
-    "notificationsLevel": "silent",
-    ...
-  }
+  "dates-le.extraction.dedupeEnabled": true,
+  "dates-le.extraction.sortEnabled": false,
+  "dates-le.safety.enabled": true,
+  "dates-le.safety.fileSizeWarnBytes": 1048576
 }
 ```
 
-### 6. Import Settings (`dates-le.settings.import`)
+### Analyze Dates (`dates-le.analyze`)
 
-**Purpose**: Import Dates-LE settings from a previously exported JSON file.
-
-**Usage**:
-
-- **Command Palette**: `Dates-LE: Import Settings`
-
-**Features**:
-
-- Validates imported settings file format
-- Confirms before overwriting current settings
-- Provides clear success/failure feedback
-
-**Safety**: Shows confirmation dialog before applying imported settings.
-
-### 7. Reset Settings (`dates-le.settings.reset`)
-
-**Purpose**: Reset all Dates-LE settings to their default values.
+**Purpose**: Perform comprehensive statistical analysis on extracted dates.
 
 **Usage**:
 
-- **Command Palette**: `Dates-LE: Reset Settings`
+- Command Palette: `Dates-LE: Analyze Dates`
+- Context Menu: Available after extraction
 
-**Features**:
+**Analysis Features**:
 
-- Resets all configuration to defaults
-- Shows confirmation dialog (cannot be undone)
-- Provides clear feedback on completion
+- **Statistics**: Total, unique, duplicates, date ranges, averages, medians
+- **Anomaly Detection**: Future dates, outliers, format inconsistencies
+- **Pattern Detection**: Frequency patterns, seasonal trends, temporal gaps
+- **Clustering**: Group similar dates by proximity
+- **Gap Analysis**: Identify missing date ranges
 
-**Safety**: Requires explicit confirmation before resetting.
+**Output**:
 
-### 8. Help & Troubleshooting (`dates-le.help`)
+- Generates markdown report with analysis results
+- Opens report in new editor
+- Includes visualizations and recommendations
 
-**Purpose**: Quick access to Dates-LE documentation and troubleshooting resources.
+**Configuration**:
+
+```json
+{
+  "dates-le.analysis.enabled": true,
+  "dates-le.analysis.includeStats": true,
+  "dates-le.analysis.detectAnomalies": true,
+  "dates-le.analysis.detectPatterns": true
+}
+```
+
+### Convert Dates (`dates-le.convert`)
+
+**Purpose**: Convert dates between different formats and timezones.
 
 **Usage**:
 
-- **Command Palette**: `Dates-LE: Help & Troubleshooting`
+- Command Palette: `Dates-LE: Convert Dates`
+- Context Menu: Available after extraction
 
-**Features**:
+**Conversion Options**:
 
-- Links to online documentation
-- Common troubleshooting tips
-- GitHub issues for support
+- **Target Formats**: ISO, RFC2822, Unix timestamp, UTC, local, custom
+- **Timezone Conversion**: Convert to any timezone
+- **Locale Support**: Format dates according to locale
+- **Custom Formats**: User-defined date format strings
 
-## Command Availability
+**Output**:
 
-All commands are available when:
+- Shows original and converted dates side-by-side
+- Displays conversion metadata (timezone, format, locale)
+- Copies converted dates to clipboard
 
-- A supported file type is open (JSON, YAML, CSV)
-- VS Code is in a trusted workspace
-- The extension is activated
+**Configuration**:
+
+```json
+{
+  "dates-le.conversion.defaultFormat": "iso",
+  "dates-le.conversion.defaultTimezone": "UTC",
+  "dates-le.conversion.defaultLocale": "en-US"
+}
+```
+
+### Filter Dates (`dates-le.filter`)
+
+**Purpose**: Filter dates based on various criteria.
+
+**Usage**:
+
+- Command Palette: `Dates-LE: Filter Dates`
+- Context Menu: Available after extraction
+
+**Filter Options**:
+
+- **Date Range**: Filter by start and end dates
+- **Format Inclusion**: Include only specific date formats
+- **Format Exclusion**: Exclude specific date formats
+- **Duplicate Removal**: Remove duplicate dates
+- **Invalid Removal**: Remove invalid or unparseable dates
+- **Future/Past Filtering**: Exclude future or past dates
+
+**Output**:
+
+- Shows filtered results with filter criteria
+- Displays count of filtered vs. original dates
+- Copies filtered dates to clipboard
+
+**Configuration**:
+
+```json
+{
+  "dates-le.filtering.defaultRange": "all",
+  "dates-le.filtering.removeDuplicates": true,
+  "dates-le.filtering.removeInvalid": true
+}
+```
+
+### Validate Dates (`dates-le.validate`)
+
+**Purpose**: Validate dates against configurable rules.
+
+**Usage**:
+
+- Command Palette: `Dates-LE: Validate Dates`
+- Context Menu: Available after extraction
+
+**Validation Rules**:
+
+- **Format Validation**: Ensure dates match expected formats
+- **Range Validation**: Check dates are within acceptable ranges
+- **Business Rules**: Custom validation logic
+- **Severity Levels**: Error, warning, or info level validation
+
+**Output**:
+
+- Generates validation report with results
+- Shows passed, failed, and warning validations
+- Provides suggestions for fixing invalid dates
+- Displays validation statistics
+
+**Configuration**:
+
+```json
+{
+  "dates-le.validation.enabled": true,
+  "dates-le.validation.severity": "warning",
+  "dates-le.validation.rules": [
+    {
+      "name": "future-dates",
+      "type": "range",
+      "max": "now",
+      "severity": "warning"
+    }
+  ]
+}
+```
+
+## Post-Processing Commands
+
+### Deduplicate Dates (`dates-le.dedupe`)
+
+**Purpose**: Remove duplicate dates from extraction results.
+
+**Usage**:
+
+- Command Palette: `Dates-LE: Deduplicate Dates`
+- Context Menu: Available after extraction
+
+**Deduplication Methods**:
+
+- **Exact Match**: Remove identical date strings
+- **Timestamp Match**: Remove dates with same timestamp
+- **Format Normalization**: Normalize formats before deduplication
+
+**Output**:
+
+- Shows deduplicated results
+- Displays count of removed duplicates
+- Copies deduplicated dates to clipboard
+
+### Sort Dates (`dates-le.sort`)
+
+**Purpose**: Sort dates in ascending or descending order.
+
+**Usage**:
+
+- Command Palette: `Dates-LE: Sort Dates`
+- Context Menu: Available after extraction
+
+**Sort Options**:
+
+- **Ascending**: Oldest dates first
+- **Descending**: Newest dates first
+- **Format Grouping**: Group by date format
+- **Custom Sorting**: User-defined sort criteria
+
+**Output**:
+
+- Shows sorted results
+- Displays sort criteria used
+- Copies sorted dates to clipboard
+
+## Configuration Commands
+
+### Open Settings (`dates-le.settings`)
+
+**Purpose**: Open Dates-LE configuration settings.
+
+**Usage**:
+
+- Command Palette: `Dates-LE: Open Settings`
+- Context Menu: Available in any editor
+
+**Settings Categories**:
+
+- **Extraction**: Format support, deduplication, sorting
+- **Analysis**: Statistical analysis, anomaly detection
+- **Conversion**: Default formats, timezones, locales
+- **Filtering**: Default filters, range settings
+- **Validation**: Validation rules, severity levels
+- **Safety**: File size limits, memory usage
+- **Performance**: Monitoring, benchmarking
+- **UI**: Status bar, notifications, prompts
 
 ## Keyboard Shortcuts
 
-| Command       | Windows/Linux | macOS       |
-| ------------- | ------------- | ----------- |
-| Extract Dates | `Ctrl+Alt+D`  | `Cmd+Alt+D` |
+| Command             | Default Shortcut | Description                        |
+| ------------------- | ---------------- | ---------------------------------- |
+| `dates-le.extract`  | `Ctrl+Shift+D`   | Extract dates from active document |
+| `dates-le.analyze`  | `Ctrl+Shift+A`   | Analyze extracted dates            |
+| `dates-le.convert`  | `Ctrl+Shift+C`   | Convert date formats               |
+| `dates-le.filter`   | `Ctrl+Shift+F`   | Filter dates by criteria           |
+| `dates-le.validate` | `Ctrl+Shift+V`   | Validate dates against rules       |
+| `dates-le.dedupe`   | `Ctrl+Shift+U`   | Remove duplicate dates             |
+| `dates-le.sort`     | `Ctrl+Shift+S`   | Sort dates                         |
 
-**Note**: Keyboard shortcuts can be customized in VS Code's keyboard shortcuts settings (`Ctrl+K Ctrl+S` or `Cmd+K Cmd+S`).
+## Context Menu Integration
 
-## Error Messages
+Dates-LE commands are available in the context menu for supported file types:
 
-Common error messages and their meanings:
+- **JSON files**: All commands available
+- **YAML files**: All commands available
+- **CSV files**: All commands available
+- **XML files**: All commands available
+- **Log files**: Extract and analyze commands
+- **HTML files**: Extract and analyze commands
+- **JavaScript/TypeScript**: Extract and analyze commands
 
-| Message                                  | Meaning                                     | Solution                                      |
-| ---------------------------------------- | ------------------------------------------- | --------------------------------------------- |
-| "No active editor found"                 | No file is currently open                   | Open a JSON, YAML, or CSV file                |
-| "No dates found in the current document" | Document doesn't contain recognizable dates | Verify file contains valid date formats       |
-| "Failed to extract dates"                | Parsing error occurred                      | Check file is valid JSON/YAML/CSV format      |
-| "File size exceeds threshold"            | File is large (>1MB by default)             | Confirm to proceed or adjust safety threshold |
-| "Results too large for clipboard"        | Output exceeds 1MB                          | Disable clipboard copy or reduce file size    |
+## Command Dependencies
 
-## Best Practices
+Some commands depend on others:
 
-1. **File Format**: Ensure files are valid JSON, YAML, or CSV before extraction
-2. **Large Files**: Enable safety warnings to get alerts for large files
-3. **Performance**: For files >10MB, consider splitting into smaller chunks
-4. **Deduplication**: Enable if working with files that may contain duplicate dates
-5. **Side-by-Side**: Use side-by-side viewing to compare extracted dates with source
+- **Analyze, Convert, Filter, Validate**: Require extracted dates
+- **Dedupe, Sort**: Can work on any date list
+- **Settings**: Independent of extraction state
 
-## Related Documentation
+## Error Handling
 
-- [Configuration Guide](./CONFIGURATION.md) - Detailed configuration options
-- [Troubleshooting Guide](./TROUBLESHOOTING.md) - Common issues and solutions
-- [Performance Guide](./PERFORMANCE.md) - Optimization tips for large files
+All commands include comprehensive error handling:
+
+- **Graceful Degradation**: Continue processing on partial failures
+- **User Feedback**: Clear error messages and recovery suggestions
+- **Logging**: Detailed error logs for debugging
+- **Recovery**: Automatic retry and fallback mechanisms
+
+## Performance Considerations
+
+- **Large Files**: Commands automatically handle large files with progress indicators
+- **Memory Usage**: Streaming processing for files >1MB
+- **Cancellation**: All commands support cancellation via VS Code
+- **Caching**: Results are cached to improve subsequent operations
+
+## Integration with Other Extensions
+
+Dates-LE integrates with:
+
+- **VS Code Explorer**: Context menu integration
+- **Command Palette**: All commands searchable
+- **Status Bar**: Real-time processing feedback
+- **Output Panel**: Detailed logging and debugging
+- **Settings UI**: Native VS Code settings integration
+
+---
+
+**Related**: [Architecture](ARCHITECTURE.md) • [Performance](PERFORMANCE.md) • [Configuration](../package.json)

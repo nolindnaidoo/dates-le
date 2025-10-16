@@ -545,3 +545,178 @@ function createTimer(): PerformanceTimer {
 		},
 	});
 }
+
+/**
+ * Performance monitoring service with enhanced features
+ */
+export interface PerformanceMonitoringService {
+	startOperation(operation: string): PerformanceOperation;
+	getMetrics(): PerformanceMetrics;
+	getThresholds(): PerformanceThresholds;
+	checkThresholds(
+		metrics: PerformanceMetrics,
+		thresholds: PerformanceThresholds,
+	): PerformanceCheckResult;
+	dispose(): void;
+}
+
+/**
+ * Performance operation tracker
+ */
+export interface PerformanceOperation {
+	end(): PerformanceMetrics;
+	cancel(): void;
+	isActive(): boolean;
+}
+
+/**
+ * Create enhanced performance monitoring service
+ */
+export function createPerformanceMonitoringService(): PerformanceMonitoringService {
+	let disposed = false;
+	const activeOperations = new Map<string, PerformanceOperation>();
+
+	return {
+		startOperation(operation: string): PerformanceOperation {
+			if (disposed) {
+				throw new Error('Performance monitoring service has been disposed');
+			}
+
+			const startTime = Date.now();
+			let ended = false;
+
+			const operationTracker: PerformanceOperation = {
+				end(): PerformanceMetrics {
+					if (ended) {
+						throw new Error('Operation already ended');
+					}
+					ended = true;
+					activeOperations.delete(operation);
+
+					const endTime = Date.now();
+					const duration = endTime - startTime;
+
+					// Get memory usage (simplified)
+					const memoryUsage = process.memoryUsage?.()?.heapUsed || 0;
+
+					return Object.freeze({
+						duration,
+						memoryUsage,
+						cpuUsage: 0, // This would be measured by the caller
+						throughput: 0, // This would be calculated by the caller
+						startTime,
+						endTime,
+					});
+				},
+
+				cancel(): void {
+					ended = true;
+					activeOperations.delete(operation);
+				},
+
+				isActive(): boolean {
+					return !ended;
+				},
+			};
+
+			activeOperations.set(operation, operationTracker);
+			return operationTracker;
+		},
+
+		getMetrics(): PerformanceMetrics {
+			// Return current system metrics
+			const now = Date.now();
+			return Object.freeze({
+				duration: 1000,
+				memoryUsage: process.memoryUsage?.()?.heapUsed || 0,
+				cpuUsage: 0,
+				throughput: 0,
+				startTime: now - 1000, // Mock 1 second ago
+				endTime: now,
+			});
+		},
+
+		getThresholds(): PerformanceThresholds {
+			return Object.freeze({
+				maxDuration: 5000,
+				maxMemoryUsage: 104857600, // 100MB
+				maxCpuUsage: 1000000,
+				minThroughput: 1000,
+			});
+		},
+
+		checkThresholds(
+			metrics: PerformanceMetrics,
+			thresholds: PerformanceThresholds,
+		): PerformanceCheckResult {
+			const warnings: PerformanceWarning[] = [];
+			const errors: UrlsLeError[] = [];
+
+			// Check duration threshold
+			if (metrics.duration > thresholds.maxDuration) {
+				const warning: PerformanceWarning = {
+					type: 'duration',
+					value: metrics.duration,
+					threshold: thresholds.maxDuration,
+					message: `Duration ${metrics.duration}ms exceeded threshold of ${thresholds.maxDuration}ms`,
+				};
+				warnings.push(warning);
+			}
+
+			// Check memory usage threshold
+			if (metrics.memoryUsage > thresholds.maxMemoryUsage) {
+				const warning: PerformanceWarning = {
+					type: 'memory',
+					value: metrics.memoryUsage,
+					threshold: thresholds.maxMemoryUsage,
+					message: `Memory usage ${formatBytes(
+						metrics.memoryUsage,
+					)} exceeded threshold of ${formatBytes(thresholds.maxMemoryUsage)}`,
+				};
+				warnings.push(warning);
+			}
+
+			// Check CPU usage threshold
+			if (metrics.cpuUsage && metrics.cpuUsage > thresholds.maxCpuUsage) {
+				const warning: PerformanceWarning = {
+					type: 'cpu',
+					value: metrics.cpuUsage,
+					threshold: thresholds.maxCpuUsage,
+					message: `CPU usage ${metrics.cpuUsage} exceeded threshold of ${thresholds.maxCpuUsage}`,
+				};
+				warnings.push(warning);
+			}
+
+			// Check throughput threshold
+			if (metrics.throughput < thresholds.minThroughput) {
+				const warning: PerformanceWarning = {
+					type: 'throughput',
+					value: metrics.throughput,
+					threshold: thresholds.minThroughput,
+					message: `Throughput ${metrics.throughput.toFixed(2)} dates/sec below threshold of ${
+						thresholds.minThroughput
+					} dates/sec`,
+				};
+				warnings.push(warning);
+			}
+
+			// Convert critical warnings to errors (none for now, all warnings are non-critical)
+			// This section can be expanded if we need to convert certain warnings to errors
+
+			return Object.freeze({
+				passed: warnings.length === 0,
+				warnings: Object.freeze(warnings),
+				errors: Object.freeze(errors),
+			});
+		},
+
+		dispose(): void {
+			disposed = true;
+			// Cancel all active operations
+			for (const operation of activeOperations.values()) {
+				operation.cancel();
+			}
+			activeOperations.clear();
+		},
+	};
+}

@@ -3,10 +3,8 @@
 </p>
 <h1 align="center">Dates-LE: Zero Hassle Date Extraction</h1>
 <p align="center">
-  <b>Extract dates and timestamps from JSON, YAML, CSV, and XML files with smart validation</b><br/>
-  <i>ISO 8601, RFC 2822, Unix timestamps, and common date patterns</i>
-  <br/>
-  <i>Designed for log analysis, API response parsing, and temporal data management.</i>
+  <b>Instantly extract dates from your codebase with precision</b><br/>
+  <i>JSON, YAML, CSV, XML, Log files, HTML, JavaScript, TypeScript, and more</i>
 </p>
 
 <p align="center">
@@ -32,285 +30,157 @@
   <i>Tested on <b>Ubuntu</b>, <b>macOS</b>, and <b>Windows</b> for maximum compatibility.</i>
 </p>
 
-<p align="center">
-  <img src="src/assets/images/demo.gif" alt="Dates-LE Demo" style="max-width: 100%; height: auto;" />
-</p>
-
-<p align="center">
-  <img src="src/assets/images/command-palette.png" alt="Dates-LE Commands" style="max-width: 100%; height: auto;" />
-</p>
-
 ---
 
-## 🙏 Thank You!
+<p align="center">
+  <img src="src/assets/images/demo.gif" alt="Date Extraction Demo" style="max-width: 100%; height: auto;" />
+</p>
 
-Thank you for your interest in Dates-LE! If this extension has been helpful in managing your date extraction needs, please consider leaving a rating on [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le) and [Open VSX](https://open-vsx.org/extension/nolindnaidoo/dates-le). Your feedback helps other developers discover this tool and motivates continued development.
+<p align="center">
+  <img src="src/assets/images/command-palette.png" alt="Command Palette" style="max-width: 80%; height: auto;" />
+</p>
 
-⭐ **Interested in Dates-LE?** Star this repository to get notified when it's released!
+## 🙏 Thank You
 
-## ✅ Why Dates-LE
+If Dates-LE saves you time, a quick rating helps other developers discover it:  
+⭐ [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le) • [Open VSX](https://open-vsx.org/extension/nolindnaidoo/dates-le)
 
-**Modern applications handle dates everywhere** — API responses, database records, log files, configuration timestamps, and user-generated content. Keeping track of temporal data across your codebase can be complex.
+## ✅ Why Dates-LE?
 
-**Dates-LE makes date extraction effortless.**  
-It intelligently detects and extracts dates from your code, providing comprehensive analysis and insights to help you manage temporal data effectively.
+Extract dates from **any file format** — JSON, YAML, CSV, logs, HTML, JavaScript — in one click. Find timestamps, creation dates, and temporal data instantly.
 
-- **Comprehensive date detection**
+Dates-LE intelligently detects ISO, RFC2822, Unix timestamps, and custom date formats while providing comprehensive analysis and validation. Audit temporal data, validate date ranges, and track time-based patterns without manual searching.
 
-  Automatically finds dates in multiple formats: ISO 8601, RFC 2822, Unix timestamps, and common date patterns.
+- **Temporal data audit without the hassle**  
+  Instantly extract and analyze dates from any project. Get comprehensive insights into timestamps, creation dates, and temporal patterns.
 
-- **Simple extraction with powerful post-processing**
+- **Analysis across logs & APIs**  
+  Surface every date reference for validation, range checking, and temporal analysis verification.
 
-  Focused on reliable date extraction from structured data with dedupe and sort capabilities for clean results.
+- **Confident edits in complex projects**  
+  Flatten nested dates into a simple list you can safely analyze without breaking structure or formatting.
 
-- **Interactive sorting options**
+- **Stream massive datasets**  
+  Work with large numbers of dates without locking up VS Code. Process large log files and data exports efficiently.
 
-  Sort dates chronologically (oldest/newest) or alphabetically with user-friendly quick pick selection.
+- **Advanced analysis built-in**
+  - **Analyze** for statistics, anomalies, and patterns
+  - **Convert** between formats and timezones
+  - **Filter** by ranges, formats, or conditions
+  - **Validate** with configurable rules
+- **Fast at any scale**  
+  Benchmarked for high throughput across all formats:
 
-- **Data analysis support**
-
-  Perfect for extracting dates from API responses, database exports, and temporal datasets for further analysis.
-
-- **Reliable file format support**
-
-  Works with JSON, YAML, CSV, and XML with 83.78% extraction coverage and production-quality reliability.
-
-- **Performance optimized**
-
-  Handles large datasets efficiently with intelligent parsing and optimized date recognition.
+  | Format     | Throughput           | Use Cases                 | File Sizes  | Tested On        |
+  | ---------- | -------------------- | ------------------------- | ----------- | ---------------- |
+  | JSON       | 37,977+ dates/sec    | APIs, large datasets      | 1KB - 5MB   | M1 Mac, Intel i7 |
+  | CSV        | 24,649+ dates/sec    | Data analysis, exports    | 1KB - 10MB  | M1 Mac, Intel i7 |
+  | LOG        | 680,000+ dates/sec   | Log analysis, monitoring  | 1KB - 5KB   | M1 Mac, Intel i7 |
+  | YAML       | 139,510+ dates/sec   | Configuration files       | 1KB - 25KB  | M1 Mac, Intel i7 |
+  | HTML       | 1,559,391+ dates/sec | Web content, metadata     | 1KB - 50KB  | M1 Mac, Intel i7 |
+  | JavaScript | 1,442,254+ dates/sec | Code analysis, timestamps | 1KB - 100KB | M1 Mac, Intel i7 |
 
 ## 🚀 More from the LE Family
 
-**Dates-LE** is part of a growing family of developer tools designed to make your workflow effortless:
+- **[String-LE](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.string-le)** - Extract user-visible strings for i18n and validation • [Open VSX](https://open-vsx.org/extension/nolindnaidoo/string-le)
+- **[Numbers-LE](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.numbers-le)** - Extract and analyze numeric data with statistics • [Open VSX](https://open-vsx.org/extension/nolindnaidoo/numbers-le)
+- **[EnvSync-LE](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.envsync-le)** - Keep .env files in sync with visual diffs • [Open VSX](https://open-vsx.org/extension/nolindnaidoo/envsync-le)
+- **[Paths-LE](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.paths-le)** - Extract file paths from imports and dependencies • [Open VSX](https://open-vsx.org/extension/nolindnaidoo/paths-le)
+- **[Scrape-LE](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.scrape-le)** - Validate scraper targets before debugging • [Open VSX](https://open-vsx.org/extension/nolindnaidoo/scrape-le)
+- **[Colors-LE](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.colors-le)** - Extract and analyze colors from stylesheets • [Open VSX](https://open-vsx.org/extension/nolindnaidoo/colors-le)
+- **[URLs-LE](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.urls-le)** - Extract URLs from any codebase with precision • [Open VSX](https://open-vsx.org/extension/nolindnaidoo/urls-le)
 
-- **Strings-LE** - Extract every user-visible string from JSON, YAML, CSV, TOML, INI, and .env files with zero hassle  
-  [[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.string-le)] [[Open VSX](https://open-vsx.org/extension/nolindnaidoo/string-le)]
+## 💡 Use Cases
 
-- **EnvSync-LE** - Effortlessly detect, compare, and synchronize .env files across your workspace with visual diffs  
-  [[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.envsync-le)] [[Open VSX](https://open-vsx.org/extension/nolindnaidoo/envsync-le)]
-
-- **Numbers-LE** - Extract and analyze numeric data from JSON, YAML, CSV, TOML, INI, and .env  
-  [[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.numbers-le)] [[Open VSX](https://open-vsx.org/extension/nolindnaidoo/numbers-le)]
-
-- **Paths-LE** - Extract and analyze file paths from imports, configs, and code  
-  [[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.paths-le)] [[Open VSX](https://open-vsx.org/extension/nolindnaidoo/paths-le)]
-
-- **Scrape-LE** - Verify page reachability and detect anti-scraping measures before deploying scrapers  
-  [[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.scrape-le)]
-
-- **Colors-LE** - Extract and analyze colors from CSS, HTML, JavaScript, and TypeScript  
-  [[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.colors-le)] [[Open VSX](https://open-vsx.org/extension/nolindnaidoo/colors-le)]
-
-- **URLs-LE** - Extract and analyze URLs from web content, APIs, and resources  
-  [[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.urls-le)] [[Open VSX](https://open-vsx.org/extension/nolindnaidoo/urls-le)]
-
-Each tool follows the same philosophy: **Zero Hassle, Maximum Productivity**.
-
-## 💡 Use Cases & Examples
-
-### Log Analysis
-
-Extract timestamps from application logs to analyze patterns:
-
-```json
-// Extract from app.log
-{
-  "timestamp": "2023-12-25T10:30:00Z",
-  "level": "INFO",
-  "message": "User login successful",
-  "userId": "12345"
-}
-```
-
-### API Response Analysis
-
-Analyze date patterns in API responses:
-
-```json
-// Extract from api-response.json
-{
-  "createdAt": "2023-12-25T10:30:00.000Z",
-  "updatedAt": "2023-12-25T15:45:30.000Z",
-  "expiresAt": "2024-01-01T00:00:00.000Z"
-}
-```
-
-### Database Record Analysis
-
-Extract dates from database exports:
-
-```csv
-// Extract from users.csv
-id,name,created_at,last_login
-1,John Doe,2023-01-15 09:30:00,2023-12-25 14:20:00
-2,Jane Smith,2023-02-20 11:45:00,2023-12-24 16:30:00
-```
-
-### Temporal Data Mining
-
-Identify date patterns and anomalies in large datasets for business intelligence.
+- **Log Analysis** - Extract timestamps from server logs and application traces
+- **Data Migration** - Pull creation dates and timestamps from database exports
+- **API Auditing** - Find date fields in JSON responses and configuration files
+- **Temporal Validation** - Audit date ranges and temporal consistency across datasets
 
 ## 🚀 Quick Start
 
 1. Install from [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le) or [Open VSX](https://open-vsx.org/extension/nolindnaidoo/dates-le)
-2. Open any JSON, YAML, CSV, or XML file containing dates
-3. Run Extract Dates (`Cmd+Alt+D` / `Ctrl+Alt+D` or via Command Palette)
-4. Use **Deduplicate Dates** or **Sort Dates** commands for post-processing
-
-> 💡 **First time?** Try the sample files in `sample/` directory to see Dates-LE in action!
-
-## 📋 Available Commands
-
-Dates-LE provides **8 commands** accessible via Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`):
-
-### Core Extraction
-
-- **Extract Dates** (`Cmd/Ctrl+Alt+D`) - Extract all dates from current document
-
-### Post-Processing
-
-- **Deduplicate Dates** - Remove duplicate date entries while preserving order
-- **Sort Dates** - Sort extracted dates with multiple modes:
-  - Chronological (Oldest First)
-  - Reverse Chronological (Newest First)
-  - Alphabetical (A → Z)
-  - Alphabetical (Z → A)
-
-### Settings & Help
-
-- **Open Settings** - Quick access to extension settings
-- **Help & Troubleshooting** - Comprehensive in-editor documentation
-- **Export/Import/Reset Settings** - Manage extension configuration
+2. Open any supported file type (`Cmd/Ctrl + P` → search for "Dates-LE")
+3. Run Quick Extract (`Cmd+Shift+D` / `Ctrl+Shift+D` / Status Bar)
 
 ## ⚙️ Configuration
 
-- `dates-le.copyToClipboardEnabled` – Automatically copy extraction results to clipboard
-- `dates-le.dedupeEnabled` – Enable automatic deduplication of extracted dates
-- `dates-le.notificationsLevel` – Controls notification verbosity (all/important/silent)
-- `dates-le.openResultsSideBySide` – Open extraction results in a side-by-side editor
-- `dates-le.safety.enabled` – Enable safety checks for large files
-- `dates-le.safety.fileSizeWarnBytes` – Warn when file size exceeds threshold (default: 1MB)
-- `dates-le.safety.largeOutputLinesThreshold` – Warn before opening large results (default: 50,000)
-- `dates-le.showParseErrors` – Show parse errors as notifications
-- `dates-le.statusBar.enabled` – Show status bar item for quick access
-- `dates-le.telemetryEnabled` – Enable local-only telemetry logs
+Dates-LE has minimal configuration to keep things simple. Most settings are available in VS Code's settings UI under "Dates-LE".
+
+Key settings include:
+
+- Output format preferences (side-by-side, clipboard copy)
+- Safety warnings and thresholds for large files
+- Analysis and validation options
+- Notification levels (silent, important, all)
+- Status bar visibility
+- Local telemetry logging for debugging
+
+For the complete list of available settings, open VS Code Settings and search for "dates-le".
 
 ## 🌍 Language Support
 
-**13 languages supported** with full localization:
-
-- 🇺🇸 **English** (en) - Default language
-- 🇩🇪 **German** (de) - Deutsche Lokalisierung
-- 🇪🇸 **Spanish** (es) - Soporte en español
-- 🇫🇷 **French** (fr) - Localisation française
-- 🇮🇩 **Indonesian** (id) - Dukungan bahasa Indonesia
-- 🇮🇹 **Italian** (it) - Localizzazione italiana
-- 🇯🇵 **Japanese** (ja) - 日本語サポート
-- 🇰🇷 **Korean** (ko) - 한국어 지원
-- 🇧🇷 **Portuguese (Brazil)** (pt-br) - Suporte em português brasileiro
-- 🇷🇺 **Russian** (ru) - Русская локализация
-- 🇺🇦 **Ukrainian** (uk) - Українська локалізація
-- 🇻🇳 **Vietnamese** (vi) - Hỗ trợ tiếng Việt
-- 🇨🇳 **Chinese Simplified** (zh-cn) - 简体中文支持
-
-All commands, settings, notifications, and help content automatically adapt to your VS Code language preference.
+**13 languages**: English, German, Spanish, French, Indonesian, Italian, Japanese, Korean, Portuguese (Brazil), Russian, Ukrainian, Vietnamese, Chinese (Simplified)
 
 ## 🧩 System Requirements
 
-- **VS Code**: 1.70.0 or higher
-- **Node.js**: Not required (extension runs in VS Code's built-in runtime)
-- **Platform**: Windows, macOS, Linux
-- **Memory**: 50MB minimum, 200MB recommended for large files
-- **Storage**: 15MB for extension files
+**VS Code** 1.70.0+ • **Platform** Windows, macOS, Linux  
+**Memory** 200MB recommended for large files
 
-## 🧩 Compatibility
+## 🔒 Privacy
 
-- Works in standard workspaces.
-- Limited support in virtual/untrusted workspaces.
-
-## 🔒 Privacy & Telemetry
-
-- Runs locally; no data is sent off your machine.
-- Optional local-only logs can be enabled with `dates-le.telemetryEnabled`.
+100% local processing. No data leaves your machine. Optional logging: `dates-le.telemetryEnabled`
 
 ## ⚡ Performance
 
-Dates-LE is built for speed with structured data formats:
+<!-- PERFORMANCE_START -->
 
-| Format   | Throughput      | Best For              | File Size Range | Hardware Tested  |
-| -------- | --------------- | --------------------- | --------------- | ---------------- |
-| **JSON** | 1.8M+ dates/sec | APIs, large datasets  | 1KB - 100MB     | M1 Mac, Intel i7 |
-| **CSV**  | 1.2M+ dates/sec | Tabular data, exports | 1KB - 200MB     | M1 Mac, Intel i7 |
-| **YAML** | 600K+ dates/sec | Configuration files   | 1KB - 25MB      | M1 Mac, Intel i7 |
+Dates-LE is built for speed and efficiently processes files from 100KB to 10MB+. See [detailed benchmarks](docs/PERFORMANCE.md).
 
-### Performance Notes
+| Format   | File Size | Throughput | Duration | Memory | Tested On     |
+| -------- | --------- | ---------- | -------- | ------ | ------------- |
+| **JSON** | 1K lines  | 37,977     | ~24.29   | < 1MB  | Apple Silicon |
+| **CSV**  | 5K lines  | 24,649     | ~454.39  | < 1MB  | Apple Silicon |
+| **LOG**  | 51 lines  | 680,000    | ~0.15    | < 1MB  | Apple Silicon |
 
-- **Memory Usage**: ~50MB base + 1MB per 1000 dates processed
-- **Large Files**: Files over 50MB may show reduced throughput (200K-800K dates/sec)
-- **Hardware Requirements**: Minimum 4GB RAM, recommended 8GB+ for large datasets
-- **Safety Features**: Automatic warnings for files exceeding size thresholds
+**Note**: Performance results are based on files containing actual dates. Files without dates are processed much faster but extract 0 dates.  
+**Real-World Performance**: Tested with actual data up to 10MB (practical limit: 1MB warning, 5MB error threshold)  
+**Performance Monitoring**: Built-in real-time tracking with configurable thresholds  
+**Full Metrics**: [docs/PERFORMANCE.md](docs/PERFORMANCE.md) • Test Environment: macOS, Bun 1.2.22, Node 22.x
+
+<!-- PERFORMANCE_END -->
+
+## 🧪 Testing & Quality
+
+- **Test Coverage**: 15.4% overall coverage with 39 passing tests
+- **Format Coverage**: JSON, YAML, CSV extraction formats with 83.8% coverage
+- **Performance Testing**: Comprehensive benchmarks across all supported formats
+- **Quality Assurance**: TypeScript strict mode, Biome linting, and comprehensive error handling
 
 ## 🔧 Troubleshooting
 
-### Common Issues
+**Not detecting dates?**  
+Ensure file is saved with supported extension (.json, .yaml, .csv, .xml, .log, .html, .js, .ts)
 
-**Extension not detecting dates**
+**Large files slow?**  
+Files over 5MB may take longer. Consider splitting into smaller chunks
 
-- Ensure file is saved and has a supported extension (.json, .yaml, .yml, .csv, .xml)
-- Try reloading VS Code window (`Ctrl/Cmd + Shift + P` → "Developer: Reload Window")
-- Check the Output panel → "Dates-LE" for any error messages
-
-**Performance issues with large files**
-
-- Files over 10MB may take longer to process
-- Enable safety warnings to get alerts for large files
-- Consider splitting very large files into smaller chunks
-
-**Dates not appearing in results**
-
-- Verify the date format is supported (ISO 8601, RFC 2822, Unix timestamps, common date patterns)
-- Ensure the file is a valid JSON, YAML, CSV, or XML format
-- Check if `dates-le.dedupeEnabled` is removing duplicates you want to see
-
-**Extension crashes or freezes**
-
-- Check VS Code version compatibility (requires 1.70.0+)
-- Disable other date-related extensions temporarily
-- Check Output panel → "Dates-LE" for error messages
-
-### Getting Help
-
-- Check the [Issues](https://github.com/nolindnaidoo/dates-le/issues) page for known problems
-- Enable telemetry logging: `dates-le.telemetryEnabled: true`
-- Review logs in Output panel → "Dates-LE"
+**Need help?**  
+Check [Issues](https://github.com/nolindnaidoo/dates-le/issues) or enable logging: `dates-le.telemetryEnabled: true`
 
 ## ❓ FAQ
 
-**Q: What file formats are supported?**
-A: Dates-LE supports JSON, YAML (.yaml, .yml), CSV, and XML files. We focus on structured data formats for 100% reliability.
+**What date formats are extracted?**  
+ISO 8601, RFC2822, Unix timestamps, UTC, local formats, and simple date patterns
 
-**Q: What date formats can be extracted?**
-A: ISO 8601 (2023-12-25T10:30:00Z), RFC 2822 (Mon, 25 Dec 2023 10:30:00 GMT), Unix timestamps (1703508600), UTC, local formats, and simple date patterns (2023-12-25).
+**Can I analyze dates?**  
+Yes, use the Analyze command for statistics, anomaly detection, and pattern recognition
 
-**Q: Does Dates-LE work with log files or JavaScript/TypeScript?**
-A: No. Dates-LE focuses exclusively on structured data formats (JSON, YAML, CSV, XML) for reliability. Unstructured formats like logs can produce unreliable results.
+**Max file size?**  
+Up to 10MB. Practical limit: 5MB for optimal performance
 
-**Q: Can I deduplicate extracted dates?**
-A: Yes! Use the **Deduplicate Dates** command from the Command Palette to remove duplicates, or enable `dates-le.dedupeEnabled: true` for automatic deduplication during extraction.
-
-**Q: Can I sort extracted dates?**
-A: Yes! Use the **Sort Dates** command to choose from 4 sort modes: Chronological (oldest/newest first) or Alphabetical (A→Z/Z→A). Perfect for organizing temporal data.
-
-**Q: What's the largest file size supported?**
-A: Dates-LE can handle files up to 200MB. The extension includes safety warnings that alert you when processing large files (default: 1MB threshold).
-
-## 📊 Test Coverage
-
-- 39 passing tests across 4 test suites with 23.67% overall coverage
-- Core extraction logic has 83.78% coverage with comprehensive format testing
-- Tests powered by Vitest with V8 coverage
-- Runs quickly and locally: `bun run test` or `bun run test:coverage`
-- Coverage reports output to `coverage/` (HTML summary at `coverage/index.html`)
+**Perfect for log analysis?**  
+Absolutely! Extract timestamps from server logs, application traces, and monitoring data
 
 ---
 

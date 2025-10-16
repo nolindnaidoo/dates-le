@@ -5,7 +5,10 @@ import type {
 	ParseError,
 } from '../types';
 import { extractFromCsv } from './formats/csv';
+import { extractFromHtml } from './formats/html';
+import { extractFromJavaScript } from './formats/javascript';
 import { extractFromJson } from './formats/json';
+import { extractFromLog } from './formats/log';
 import { extractFromXml } from './formats/xml';
 import { extractFromYaml } from './formats/yaml';
 
@@ -31,6 +34,15 @@ export async function extractDates(
 				break;
 			case 'xml':
 				dates.push(...extractFromXml(content));
+				break;
+			case 'log':
+				dates.push(...extractFromLog(content));
+				break;
+			case 'javascript':
+				dates.push(...extractFromJavaScript(content));
+				break;
+			case 'html':
+				dates.push(...extractFromHtml(content));
 				break;
 			default:
 				// Unsupported file type - return empty results
@@ -65,6 +77,14 @@ function determineFileType(languageId: string): FileType {
 			return 'csv';
 		case 'xml':
 			return 'xml';
+		case 'log':
+		case 'plaintext':
+			return 'log';
+		case 'javascript':
+		case 'typescript':
+			return 'javascript';
+		case 'html':
+			return 'html';
 		default:
 			return 'unknown';
 	}

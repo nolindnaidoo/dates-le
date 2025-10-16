@@ -5,6 +5,8 @@ import { extractDates } from '../extraction/extract';
 import type { Telemetry } from '../telemetry/telemetry';
 import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
+import type { PerformanceMonitor } from '../utils/performance';
+import { formatThroughput } from '../utils/performance';
 import { handleSafetyChecks } from '../utils/safety';
 
 const localize = nls.config({ messageFormat: nls.MessageFormat.file })();
@@ -15,6 +17,7 @@ export function registerExtractCommand(
 		telemetry: Telemetry;
 		notifier: Notifier;
 		statusBar: StatusBar;
+		performanceMonitor: PerformanceMonitor;
 	}>,
 ): void {
 	const command = vscode.commands.registerCommand(
@@ -45,10 +48,13 @@ export function registerExtractCommand(
 					localize('runtime.extract.progress', 'Extracting dates...'),
 				);
 
+				// Start performance monitoring
+				const timer = deps.performanceMonitor.startTimer('extract-dates');
 				const result = await extractDates(
 					document.getText(),
 					document.languageId,
 				);
+				const metrics = deps.performanceMonitor.endTimer(timer);
 
 				if (!result.success) {
 					deps.notifier.showError(
@@ -70,6 +76,12 @@ export function registerExtractCommand(
 					);
 					return;
 				}
+
+				// Calculate throughput (dates per second)
+				const throughput =
+					metrics.duration > 0
+						? (result.dates.length * 1000) / metrics.duration
+						: 0;
 
 				// Output dates in original format (one per line)
 				const dateValues = result.dates.map((date) => date.value);
@@ -122,8 +134,9 @@ export function registerExtractCommand(
 							deps.notifier.showInfo(
 								localize(
 									'runtime.extract.success.clipboard',
-									'Extracted {0} dates and copied to clipboard',
+									'Extracted {0} dates ({1}) and copied to clipboard',
 									result.dates.length,
+									formatThroughput(throughput),
 								),
 							);
 						}
@@ -138,8 +151,9 @@ export function registerExtractCommand(
 						deps.notifier.showInfo(
 							localize(
 								'runtime.extract.success',
-								'Extracted {0} dates',
+								'Extracted {0} dates ({1})',
 								result.dates.length,
+								formatThroughput(throughput),
 							),
 						);
 					}
@@ -147,8 +161,9 @@ export function registerExtractCommand(
 					deps.notifier.showInfo(
 						localize(
 							'runtime.extract.success',
-							'Extracted {0} dates',
+							'Extracted {0} dates ({1})',
 							result.dates.length,
+							formatThroughput(throughput),
 						),
 					);
 				}

@@ -5,11 +5,16 @@ import type { StatusBar } from '../ui/statusBar';
 import type { ErrorHandler } from '../utils/errorHandling';
 import type { Localizer } from '../utils/localization';
 import type { PerformanceMonitor } from '../utils/performance';
+import { registerAnalyzeCommand } from './analyze';
+import { registerConvertCommand } from './convert';
 import { registerDedupeCommand } from './dedupe';
 import { registerExtractCommand } from './extract';
+import { registerFilterCommand } from './filter';
 import { registerHelpCommand } from './help';
 import { registerSettingsCommands } from './settings';
 import { registerSortCommand } from './sort';
+import { registerToggleCsvStreamingCommand } from './toggleCsvStreaming';
+import { registerValidateCommand } from './validate';
 
 export function registerCommands(
 	context: vscode.ExtensionContext,
@@ -22,9 +27,19 @@ export function registerCommands(
 		errorHandler: ErrorHandler;
 	}>,
 ): void {
-	registerExtractCommand(context, deps);
+	registerExtractCommand(context, {
+		telemetry: deps.telemetry,
+		notifier: deps.notifier,
+		statusBar: deps.statusBar,
+		performanceMonitor: deps.performanceMonitor,
+	});
 	registerDedupeCommand(context);
 	registerSortCommand(context);
+	registerAnalyzeCommand(context, deps);
+	registerConvertCommand(context, deps);
+	registerFilterCommand(context, deps);
+	registerValidateCommand(context, deps);
 	registerHelpCommand(context, deps);
 	registerSettingsCommands(context, deps);
+	registerToggleCsvStreamingCommand(context, deps.telemetry);
 }

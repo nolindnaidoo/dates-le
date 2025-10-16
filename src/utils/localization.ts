@@ -374,3 +374,57 @@ export function formatObject(
 
 	return `{${formatted}}`;
 }
+
+export function formatDateCount(count: number): string {
+	return formatCount(count, 'date', 'dates');
+}
+
+export function formatDateAnalysis(analysis: {
+	totalDates: number;
+	uniqueDates: number;
+	formats: Record<string, number>;
+	timezones: number;
+}): string {
+	const lines = [
+		`Total Dates: ${analysis.totalDates}`,
+		`Unique Dates: ${analysis.uniqueDates}`,
+		`Formats: ${formatDateFormatDistribution(analysis.formats)}`,
+	];
+
+	if (analysis.timezones > 0) {
+		lines.push(`Timezones: ${analysis.timezones}`);
+	}
+
+	return lines.join('\n');
+}
+
+export function formatDateStatistics(stats: {
+	total: number;
+	unique: number;
+	duplicates: number;
+	formats: Record<string, number>;
+}): string {
+	return [
+		`Total: ${stats.total}`,
+		`Unique: ${stats.unique}`,
+		`Duplicates: ${stats.duplicates}`,
+		`Formats: ${formatDateFormatDistribution(stats.formats)}`,
+	].join(' | ');
+}
+
+export function formatDateFormatDistribution(
+	formats: Record<string, number>,
+): string {
+	const localizer = createLocalizer();
+	const entries = Object.entries(formats).filter(([, count]) => count > 0);
+	if (entries.length === 0)
+		return localizer.localize('runtime.formats.none', 'No date formats');
+
+	const total = entries.reduce((sum, [, count]) => sum + count, 0);
+	const formatted = entries.map(
+		([format, count]) =>
+			`${format.toUpperCase()} (${formatPercentage(count, total)})`,
+	);
+
+	return formatList(formatted);
+}

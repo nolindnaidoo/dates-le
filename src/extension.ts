@@ -1,45 +1,26 @@
 import type * as vscode from 'vscode';
 import { registerCommands } from './commands';
 import { registerOpenSettingsCommand } from './config/settings';
-import { createTelemetry } from './telemetry/telemetry';
-import { createNotifier } from './ui/notifier';
-import { createStatusBar } from './ui/statusBar';
-import { createErrorHandler } from './utils/errorHandling';
-import { createLocalizer } from './utils/localization';
-import { createPerformanceMonitor } from './utils/performance';
+import { createServices } from './services/serviceFactory';
 
 export function activate(context: vscode.ExtensionContext): void {
-	// Create core services
-	const telemetry = createTelemetry();
-	const notifier = createNotifier();
-	const statusBar = createStatusBar(context);
-	const localizer = createLocalizer();
-	const performanceMonitor = createPerformanceMonitor();
+	// Create all core services using the service factory
+	const services = createServices(context);
 
-	// Register disposables to prevent memory leaks
-	context.subscriptions.push(telemetry);
-	context.subscriptions.push(statusBar);
-
-	// Create error handling service
-	const errorHandler = createErrorHandler({
-		showParseErrors: true,
-		notificationsLevel: 'all',
-	});
-
-	// Register all commands
+	// Register commands with services
 	registerCommands(context, {
-		telemetry,
-		notifier,
-		statusBar,
-		localizer,
-		performanceMonitor,
-		errorHandler,
+		telemetry: services.telemetry,
+		notifier: services.notifier,
+		statusBar: services.statusBar,
+		localizer: services.localizer,
+		performanceMonitor: services.performanceMonitor,
+		errorHandler: services.errorHandler,
 	});
 
 	// Register settings command
-	registerOpenSettingsCommand(context, telemetry);
+	registerOpenSettingsCommand(context, services.telemetry);
 
-	telemetry.event('extension-activated');
+	services.telemetry.event('extension-activated');
 }
 
 export function deactivate(): void {
