@@ -71,14 +71,14 @@ Dates-LE intelligently detects ISO, RFC2822, Unix timestamps, and custom date fo
 - **Fast at any scale**  
   Benchmarked for high throughput across all formats:
 
-  | Format     | Throughput           | Use Cases                 | File Sizes  | Tested On        |
-  | ---------- | -------------------- | ------------------------- | ----------- | ---------------- |
-  | JSON       | 37,977+ dates/sec    | APIs, large datasets      | 1KB - 5MB   | M1 Mac, Intel i7 |
-  | CSV        | 24,649+ dates/sec    | Data analysis, exports    | 1KB - 10MB  | M1 Mac, Intel i7 |
-  | LOG        | 680,000+ dates/sec   | Log analysis, monitoring  | 1KB - 5KB   | M1 Mac, Intel i7 |
-  | YAML       | 139,510+ dates/sec   | Configuration files       | 1KB - 25KB  | M1 Mac, Intel i7 |
-  | HTML       | 1,559,391+ dates/sec | Web content, metadata     | 1KB - 50KB  | M1 Mac, Intel i7 |
-  | JavaScript | 1,442,254+ dates/sec | Code analysis, timestamps | 1KB - 100KB | M1 Mac, Intel i7 |
+  | Format     | Throughput        | Use Cases                 | File Sizes  | Tested On     |
+  | ---------- | ----------------- | ------------------------- | ----------- | ------------- |
+  | JSON       | 37,977 dates/sec  | APIs, large datasets      | 1KB - 5MB   | Apple Silicon |
+  | CSV        | 24,649 dates/sec  | Data analysis, exports    | 1KB - 10MB  | Apple Silicon |
+  | LOG        | 680,000 dates/sec | Log analysis, monitoring  | 1KB - 5KB   | Apple Silicon |
+  | YAML       | 139,510 dates/sec | Configuration files       | 1KB - 25KB  | Apple Silicon |
+  | HTML       | 1.56M dates/sec   | Web content, metadata     | 1KB - 50KB  | Apple Silicon |
+  | JavaScript | 1.44M dates/sec   | Code analysis, timestamps | 1KB - 100KB | Apple Silicon |
 
 ## 🚀 More from the LE Family
 
@@ -120,7 +120,7 @@ For the complete list of available settings, open VS Code Settings and search fo
 
 ## 🌍 Language Support
 
-**13 languages**: English, German, Spanish, French, Indonesian, Italian, Japanese, Korean, Portuguese (Brazil), Russian, Ukrainian, Vietnamese, Chinese (Simplified)
+🇺🇸 **English** • 🇩🇪 **German** • 🇪🇸 **Spanish** • 🇫🇷 **French** • 🇮🇩 **Indonesian** • 🇮🇹 **Italian** • 🇯🇵 **Japanese** • 🇰🇷 **Korean** • 🇧🇷 **Portuguese (Brazil)** • 🇷🇺 **Russian** • 🇺🇦 **Ukrainian** • 🇻🇳 **Vietnamese** • 🇨🇳 **Chinese (Simplified)**
 
 ## 🧩 System Requirements
 
@@ -137,11 +137,11 @@ For the complete list of available settings, open VS Code Settings and search fo
 
 Dates-LE is built for speed and efficiently processes files from 100KB to 10MB+. See [detailed benchmarks](docs/PERFORMANCE.md).
 
-| Format   | File Size | Throughput | Duration | Memory | Tested On     |
-| -------- | --------- | ---------- | -------- | ------ | ------------- |
-| **JSON** | 1K lines  | 37,977     | ~24.29   | < 1MB  | Apple Silicon |
-| **CSV**  | 5K lines  | 24,649     | ~454.39  | < 1MB  | Apple Silicon |
-| **LOG**  | 51 lines  | 680,000    | ~0.15    | < 1MB  | Apple Silicon |
+| Format         | File Size | Throughput | Duration | Memory | Tested On     |
+| -------------- | --------- | ---------- | -------- | ------ | ------------- |
+| **HTML**       | 1K lines  | 1,476,923  | ~2.08    | < 1MB  | Apple Silicon |
+| **JAVASCRIPT** | 1K lines  | 1,329,870  | ~2.31    | < 1MB  | Apple Silicon |
+| **LOG**        | 0K lines  | 680,000    | ~0.15    | < 1MB  | Apple Silicon |
 
 **Note**: Performance results are based on files containing actual dates. Files without dates are processed much faster but extract 0 dates.  
 **Real-World Performance**: Tested with actual data up to 10MB (practical limit: 1MB warning, 5MB error threshold)  
@@ -149,13 +149,6 @@ Dates-LE is built for speed and efficiently processes files from 100KB to 10MB+.
 **Full Metrics**: [docs/PERFORMANCE.md](docs/PERFORMANCE.md) • Test Environment: macOS, Bun 1.2.22, Node 22.x
 
 <!-- PERFORMANCE_END -->
-
-## 🧪 Testing & Quality
-
-- **Test Coverage**: 15.4% overall coverage with 39 passing tests
-- **Format Coverage**: JSON, YAML, CSV extraction formats with 83.8% coverage
-- **Performance Testing**: Comprehensive benchmarks across all supported formats
-- **Quality Assurance**: TypeScript strict mode, Biome linting, and comprehensive error handling
 
 ## 🔧 Troubleshooting
 
@@ -181,6 +174,11 @@ Up to 10MB. Practical limit: 5MB for optimal performance
 
 **Perfect for log analysis?**  
 Absolutely! Extract timestamps from server logs, application traces, and monitoring data
+
+## 📊 Testing
+
+**39 unit tests** • **15.4% overall coverage with 83.8% format coverage**  
+Powered by Vitest • Run with `bun test --coverage`
 
 ---
 

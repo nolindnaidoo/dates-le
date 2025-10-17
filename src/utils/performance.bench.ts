@@ -95,7 +95,7 @@ bench('extractDates: Memory usage - Large Log', async () => {
 	});
 
 	// Log memory usage if available
-	if (typeof process !== 'undefined' && process.memoryUsage) {
+	if (process?.memoryUsage) {
 		console.log('Memory usage:', process.memoryUsage());
 	}
 
@@ -109,7 +109,7 @@ bench('extractDates: Memory usage - Large JavaScript', async () => {
 	});
 
 	// Log memory usage if available
-	if (typeof process !== 'undefined' && process.memoryUsage) {
+	if (process?.memoryUsage) {
 		console.log('Memory usage:', process.memoryUsage());
 	}
 
