@@ -1,92 +1,43 @@
 import type { DateValue } from '../../types';
-import { extractDatesFromLines } from '../dateExtractor';
+import { type DatePatternSpec, scanDates } from '../heuristics';
 
-const LOG_PATTERN = /(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}(?:\.\d{3})?)/g;
-const SYSLOG_PATTERN = /([A-Za-z]{3}\s+\d{1,2}\s\d{2}:\d{2}:\d{2})/g;
-const APACHE_PATTERN =
-	/(\[\d{2}\/[A-Za-z]{3}\/\d{4}:\d{2}:\d{2}:\d{2}\s[+-]\d{4}\])/g;
+/**
+ * Log-specific patterns on top of the shared core:
+ * - `YYYY-MM-DD HH:mm:ss(.SSS)` log timestamps (classified 'iso' — the
+ *   space-separated form parses identically),
+ * - syslog `Mon DD HH:mm:ss` (no year on the line; the current year is
+ *   assumed — documented limitation),
+ * - Apache access-log `[DD/Mon/YYYY:HH:mm:ss +0000]` (the value is the
+ *   timestamp itself, without the brackets v1.x included).
+ * Containment dedupe replaces the v1.x behavior of emitting both the
+ * shared-core match and the log match for the same characters.
+ */
+const LOG_SPECS: readonly DatePatternSpec[] = [
+	{
+		pattern: /(?<!\d)\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?!\d)/dg,
+		format: 'iso',
+	},
+	{
+		pattern: /(?<![A-Za-z])[A-Za-z]{3}\s+\d{1,2}\s\d{2}:\d{2}:\d{2}(?!\d)/dg,
+		format: 'custom',
+		toTimestamp: (value) => Date.parse(`${value} ${currentYear()}`),
+	},
+	{
+		pattern: /\[(\d{2}\/[A-Za-z]{3}\/\d{4}:\d{2}:\d{2}:\d{2}\s[+-]\d{4})\]/dg,
+		format: 'custom',
+		toTimestamp: apacheToTimestamp,
+	},
+];
 
 export function extractFromLog(content: string): DateValue[] {
-	const standardDates = extractDatesFromLines(content);
-	const logSpecificDates = extractLogSpecificDates(content);
-
-	return [...standardDates, ...logSpecificDates];
+	return scanDates(content, LOG_SPECS);
 }
 
-function extractLogSpecificDates(content: string): DateValue[] {
-	const lines = content.split('\n');
-	const dates: DateValue[] = [];
-
-	for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-		const line = lines[lineIndex];
-		if (!line) {
-			continue;
-		}
-
-		extractLogFormat(line, lineIndex, dates);
-		extractSyslogFormat(line, lineIndex, dates);
-		extractApacheFormat(line, lineIndex, dates);
-	}
-
-	return dates;
+function currentYear(): number {
+	return new Date().getFullYear();
 }
 
-function extractLogFormat(
-	line: string,
-	lineIndex: number,
-	dates: DateValue[],
-): void {
-	let match: RegExpExecArray | null;
-	while ((match = LOG_PATTERN.exec(line)) !== null) {
-		dates.push({
-			value: match[0],
-			format: 'iso',
-			timestamp: Date.parse(match[0]),
-			position: { line: lineIndex + 1, column: match.index + 1 },
-			context: line.trim(),
-		});
-	}
-}
-
-function extractSyslogFormat(
-	line: string,
-	lineIndex: number,
-	dates: DateValue[],
-): void {
-	let match: RegExpExecArray | null;
-	while ((match = SYSLOG_PATTERN.exec(line)) !== null) {
-		const currentYear = new Date().getFullYear();
-		const fullDate = `${match[0]} ${currentYear}`;
-		const parsed = Date.parse(fullDate);
-
-		if (Number.isNaN(parsed)) {
-			continue;
-		}
-
-		dates.push({
-			value: match[0],
-			format: 'custom',
-			timestamp: parsed,
-			position: { line: lineIndex + 1, column: match.index + 1 },
-			context: line.trim(),
-		});
-	}
-}
-
-function extractApacheFormat(
-	line: string,
-	lineIndex: number,
-	dates: DateValue[],
-): void {
-	let match: RegExpExecArray | null;
-	while ((match = APACHE_PATTERN.exec(line)) !== null) {
-		const cleanDate = match[0].replace(/[[\]]/g, '');
-		dates.push({
-			value: match[0],
-			format: 'custom',
-			timestamp: Date.parse(cleanDate),
-			position: { line: lineIndex + 1, column: match.index + 1 },
-			context: line.trim(),
-		});
-	}
+/** `15/Jan/2024:10:30:08 +0000` → `15 Jan 2024 10:30:08 +0000` */
+function apacheToTimestamp(value: string): number {
+	return Date.parse(value.replace(/\//g, ' ').replace(':', ' '));
 }

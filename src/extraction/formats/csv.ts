@@ -1,6 +1,6 @@
 import type { DateValue } from '../../types';
-import { extractDatesFromLines } from '../dateExtractor';
+import { scanDates } from '../heuristics';
 
 export function extractFromCsv(content: string): DateValue[] {
-	return extractDatesFromLines(content);
+	return scanDates(content);
 }

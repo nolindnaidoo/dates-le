@@ -35,7 +35,6 @@ function extractByFileType(content: string, fileType: FileType): DateValue[] {
 		case 'json':
 			return extractFromJson(content);
 		case 'yaml':
-		case 'yml':
 			return extractFromYaml(content);
 		case 'csv':
 			return extractFromCsv(content);
@@ -67,7 +66,9 @@ function determineFileType(languageId: string): FileType {
 		case 'plaintext':
 			return 'log';
 		case 'javascript':
+		case 'javascriptreact':
 		case 'typescript':
+		case 'typescriptreact':
 			return 'javascript';
 		case 'html':
 			return 'html';

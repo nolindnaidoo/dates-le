@@ -35,16 +35,6 @@ exports[`extraction characterization > dates.csv as csv 1`] = `
     },
     {
       "context": "2,1705312200,12/25/2023 23:59:59,invoice 12345678901234567890",
-      "format": "unix",
-      "position": {
-        "column": 42,
-        "line": 3,
-      },
-      "timestamp": 1234567890123,
-      "value": "1234567890123",
-    },
-    {
-      "context": "2,1705312200,12/25/2023 23:59:59,invoice 12345678901234567890",
       "format": "local",
       "position": {
         "column": 14,
@@ -62,6 +52,16 @@ exports[`extraction characterization > dates.csv as csv 1`] = `
       },
       "timestamp": 1705314600000,
       "value": "2024-01-15T10:30:00Z",
+    },
+    {
+      "context": "3,2024-01-15T10:30:00Z,2024-01-15,substring date cell",
+      "format": "simple",
+      "position": {
+        "column": 24,
+        "line": 4,
+      },
+      "timestamp": 1705276800000,
+      "value": "2024-01-15",
     },
   ],
   "errors": [],
@@ -83,16 +83,6 @@ exports[`extraction characterization > dates.html as html 1`] = `
       "value": "2024-01-15",
     },
     {
-      "context": "<meta property="date" content="2024-01-15" />",
-      "format": "custom",
-      "position": {
-        "column": 2,
-        "line": 4,
-      },
-      "timestamp": 1705276800000,
-      "value": "2024-01-15",
-    },
-    {
       "context": "{"datePublished": "2024-02-01T09:00:00Z", "dateModified": "2024-02-02T10:00:00Z"}",
       "format": "iso",
       "position": {
@@ -113,46 +103,6 @@ exports[`extraction characterization > dates.html as html 1`] = `
       "value": "2024-02-02T10:00:00Z",
     },
     {
-      "context": "{"datePublished": "2024-02-01T09:00:00Z", "dateModified": "2024-02-02T10:00:00Z"}",
-      "format": "simple",
-      "position": {
-        "column": 22,
-        "line": 6,
-      },
-      "timestamp": 1706745600000,
-      "value": "2024-02-01",
-    },
-    {
-      "context": "{"datePublished": "2024-02-01T09:00:00Z", "dateModified": "2024-02-02T10:00:00Z"}",
-      "format": "simple",
-      "position": {
-        "column": 62,
-        "line": 6,
-      },
-      "timestamp": 1706832000000,
-      "value": "2024-02-02",
-    },
-    {
-      "context": "{"datePublished": "2024-02-01T09:00:00Z", "dateModified": "2024-02-02T10:00:00Z"}",
-      "format": "custom",
-      "position": {
-        "column": 4,
-        "line": 6,
-      },
-      "timestamp": 1706778000000,
-      "value": "2024-02-01T09:00:00Z",
-    },
-    {
-      "context": "{"datePublished": "2024-02-01T09:00:00Z", "dateModified": "2024-02-02T10:00:00Z"}",
-      "format": "custom",
-      "position": {
-        "column": 45,
-        "line": 6,
-      },
-      "timestamp": 1706868000000,
-      "value": "2024-02-02T10:00:00Z",
-    },
-    {
       "context": "<time datetime="2024-03-15T12:00:00Z">March 15</time>",
       "format": "iso",
       "position": {
@@ -161,46 +111,6 @@ exports[`extraction characterization > dates.html as html 1`] = `
       },
       "timestamp": 1710504000000,
       "value": "2024-03-15T12:00:00Z",
-    },
-    {
-      "context": "<time datetime="2024-03-15T12:00:00Z">March 15</time>",
-      "format": "simple",
-      "position": {
-        "column": 18,
-        "line": 10,
-      },
-      "timestamp": 1710460800000,
-      "value": "2024-03-15",
-    },
-    {
-      "context": "<time datetime="2024-03-15T12:00:00Z">March 15</time>",
-      "format": "custom",
-      "position": {
-        "column": 8,
-        "line": 10,
-      },
-      "timestamp": 1710504000000,
-      "value": "2024-03-15T12:00:00Z",
-    },
-    {
-      "context": "<time datetime="2024-03-15T12:00:00Z">March 15</time>",
-      "format": "custom",
-      "position": {
-        "column": 2,
-        "line": 10,
-      },
-      "timestamp": 1710504000000,
-      "value": "2024-03-15T12:00:00Z",
-    },
-    {
-      "context": "<p>Event on 12/25/2023 18:00:00, epoch 1703527200.</p>",
-      "format": "unix",
-      "position": {
-        "column": 41,
-        "line": 11,
-      },
-      "timestamp": 1703527200000,
-      "value": "1703527200",
     },
     {
       "context": "<p>Event on 12/25/2023 18:00:00, epoch 1703527200.</p>",
@@ -211,6 +121,16 @@ exports[`extraction characterization > dates.html as html 1`] = `
       },
       "timestamp": 1703527200000,
       "value": "12/25/2023 18:00:00",
+    },
+    {
+      "context": "<p>Event on 12/25/2023 18:00:00, epoch 1703527200.</p>",
+      "format": "unix",
+      "position": {
+        "column": 41,
+        "line": 11,
+      },
+      "timestamp": 1703527200000,
+      "value": "1703527200",
     },
   ],
   "errors": [],
@@ -232,26 +152,6 @@ exports[`extraction characterization > dates.js as javascript 1`] = `
       "value": "2024-01-15T10:30:00Z",
     },
     {
-      "context": "const created = new Date('2024-01-15T10:30:00Z');",
-      "format": "simple",
-      "position": {
-        "column": 27,
-        "line": 1,
-      },
-      "timestamp": 1705276800000,
-      "value": "2024-01-15",
-    },
-    {
-      "context": "const created = new Date('2024-01-15T10:30:00Z');",
-      "format": "custom",
-      "position": {
-        "column": 17,
-        "line": 1,
-      },
-      "timestamp": 1705314600000,
-      "value": "2024-01-15T10:30:00Z",
-    },
-    {
       "context": "const parsedAt = Date.parse('2024-02-01');",
       "format": "simple",
       "position": {
@@ -262,16 +162,6 @@ exports[`extraction characterization > dates.js as javascript 1`] = `
       "value": "2024-02-01",
     },
     {
-      "context": "const parsedAt = Date.parse('2024-02-01');",
-      "format": "custom",
-      "position": {
-        "column": 18,
-        "line": 2,
-      },
-      "timestamp": 1706745600000,
-      "value": "2024-02-01",
-    },
-    {
       "context": "const viaMoment = moment('2024-03-15');",
       "format": "simple",
       "position": {
@@ -282,16 +172,6 @@ exports[`extraction characterization > dates.js as javascript 1`] = `
       "value": "2024-03-15",
     },
     {
-      "context": "const viaMoment = moment('2024-03-15');",
-      "format": "custom",
-      "position": {
-        "column": 19,
-        "line": 3,
-      },
-      "timestamp": 1710460800000,
-      "value": "2024-03-15",
-    },
-    {
       "context": "const viaDayjs = dayjs('2024-04-01T00:00:00.000Z');",
       "format": "iso",
       "position": {
@@ -302,50 +182,10 @@ exports[`extraction characterization > dates.js as javascript 1`] = `
       "value": "2024-04-01T00:00:00.000Z",
     },
     {
-      "context": "const viaDayjs = dayjs('2024-04-01T00:00:00.000Z');",
-      "format": "simple",
-      "position": {
-        "column": 25,
-        "line": 4,
-      },
-      "timestamp": 1711929600000,
-      "value": "2024-04-01",
-    },
-    {
-      "context": "const viaDayjs = dayjs('2024-04-01T00:00:00.000Z');",
-      "format": "custom",
-      "position": {
-        "column": 18,
-        "line": 4,
-      },
-      "timestamp": 1711929600000,
-      "value": "2024-04-01T00:00:00.000Z",
-    },
-    {
       "context": "const viaLuxon = DateTime.fromISO('2024-05-20T14:30:00+02:00');",
       "format": "iso",
       "position": {
         "column": 36,
-        "line": 5,
-      },
-      "timestamp": 1716208200000,
-      "value": "2024-05-20T14:30:00+02:00",
-    },
-    {
-      "context": "const viaLuxon = DateTime.fromISO('2024-05-20T14:30:00+02:00');",
-      "format": "simple",
-      "position": {
-        "column": 36,
-        "line": 5,
-      },
-      "timestamp": 1716163200000,
-      "value": "2024-05-20",
-    },
-    {
-      "context": "const viaLuxon = DateTime.fromISO('2024-05-20T14:30:00+02:00');",
-      "format": "custom",
-      "position": {
-        "column": 18,
         "line": 5,
       },
       "timestamp": 1716208200000,
@@ -362,16 +202,6 @@ exports[`extraction characterization > dates.js as javascript 1`] = `
       "value": "2024-06-15T10:30:00Z",
     },
     {
-      "context": "'2024-06-15T10:30:00Z',",
-      "format": "simple",
-      "position": {
-        "column": 3,
-        "line": 7,
-      },
-      "timestamp": 1718409600000,
-      "value": "2024-06-15",
-    },
-    {
       "context": "const epochSeconds = 1705312200;",
       "format": "unix",
       "position": {
@@ -380,16 +210,6 @@ exports[`extraction characterization > dates.js as javascript 1`] = `
       },
       "timestamp": 1705312200000,
       "value": "1705312200",
-    },
-    {
-      "context": "const maxSafe = 9007199254740991;",
-      "format": "unix",
-      "position": {
-        "column": 17,
-        "line": 10,
-      },
-      "timestamp": 9007199254740,
-      "value": "9007199254740",
     },
     {
       "context": "// released 2024-07-04 per the roadmap",
@@ -421,26 +241,6 @@ exports[`extraction characterization > dates.js as typescript 1`] = `
       "value": "2024-01-15T10:30:00Z",
     },
     {
-      "context": "const created = new Date('2024-01-15T10:30:00Z');",
-      "format": "simple",
-      "position": {
-        "column": 27,
-        "line": 1,
-      },
-      "timestamp": 1705276800000,
-      "value": "2024-01-15",
-    },
-    {
-      "context": "const created = new Date('2024-01-15T10:30:00Z');",
-      "format": "custom",
-      "position": {
-        "column": 17,
-        "line": 1,
-      },
-      "timestamp": 1705314600000,
-      "value": "2024-01-15T10:30:00Z",
-    },
-    {
       "context": "const parsedAt = Date.parse('2024-02-01');",
       "format": "simple",
       "position": {
@@ -451,16 +251,6 @@ exports[`extraction characterization > dates.js as typescript 1`] = `
       "value": "2024-02-01",
     },
     {
-      "context": "const parsedAt = Date.parse('2024-02-01');",
-      "format": "custom",
-      "position": {
-        "column": 18,
-        "line": 2,
-      },
-      "timestamp": 1706745600000,
-      "value": "2024-02-01",
-    },
-    {
       "context": "const viaMoment = moment('2024-03-15');",
       "format": "simple",
       "position": {
@@ -471,16 +261,6 @@ exports[`extraction characterization > dates.js as typescript 1`] = `
       "value": "2024-03-15",
     },
     {
-      "context": "const viaMoment = moment('2024-03-15');",
-      "format": "custom",
-      "position": {
-        "column": 19,
-        "line": 3,
-      },
-      "timestamp": 1710460800000,
-      "value": "2024-03-15",
-    },
-    {
       "context": "const viaDayjs = dayjs('2024-04-01T00:00:00.000Z');",
       "format": "iso",
       "position": {
@@ -491,50 +271,10 @@ exports[`extraction characterization > dates.js as typescript 1`] = `
       "value": "2024-04-01T00:00:00.000Z",
     },
     {
-      "context": "const viaDayjs = dayjs('2024-04-01T00:00:00.000Z');",
-      "format": "simple",
-      "position": {
-        "column": 25,
-        "line": 4,
-      },
-      "timestamp": 1711929600000,
-      "value": "2024-04-01",
-    },
-    {
-      "context": "const viaDayjs = dayjs('2024-04-01T00:00:00.000Z');",
-      "format": "custom",
-      "position": {
-        "column": 18,
-        "line": 4,
-      },
-      "timestamp": 1711929600000,
-      "value": "2024-04-01T00:00:00.000Z",
-    },
-    {
       "context": "const viaLuxon = DateTime.fromISO('2024-05-20T14:30:00+02:00');",
       "format": "iso",
       "position": {
         "column": 36,
-        "line": 5,
-      },
-      "timestamp": 1716208200000,
-      "value": "2024-05-20T14:30:00+02:00",
-    },
-    {
-      "context": "const viaLuxon = DateTime.fromISO('2024-05-20T14:30:00+02:00');",
-      "format": "simple",
-      "position": {
-        "column": 36,
-        "line": 5,
-      },
-      "timestamp": 1716163200000,
-      "value": "2024-05-20",
-    },
-    {
-      "context": "const viaLuxon = DateTime.fromISO('2024-05-20T14:30:00+02:00');",
-      "format": "custom",
-      "position": {
-        "column": 18,
         "line": 5,
       },
       "timestamp": 1716208200000,
@@ -551,16 +291,6 @@ exports[`extraction characterization > dates.js as typescript 1`] = `
       "value": "2024-06-15T10:30:00Z",
     },
     {
-      "context": "'2024-06-15T10:30:00Z',",
-      "format": "simple",
-      "position": {
-        "column": 3,
-        "line": 7,
-      },
-      "timestamp": 1718409600000,
-      "value": "2024-06-15",
-    },
-    {
       "context": "const epochSeconds = 1705312200;",
       "format": "unix",
       "position": {
@@ -569,16 +299,6 @@ exports[`extraction characterization > dates.js as typescript 1`] = `
       },
       "timestamp": 1705312200000,
       "value": "1705312200",
-    },
-    {
-      "context": "const maxSafe = 9007199254740991;",
-      "format": "unix",
-      "position": {
-        "column": 17,
-        "line": 10,
-      },
-      "timestamp": 9007199254740,
-      "value": "9007199254740",
     },
     {
       "context": "// released 2024-07-04 per the roadmap",
@@ -650,16 +370,6 @@ exports[`extraction characterization > dates.json as json 1`] = `
       "value": "1705312200123",
     },
     {
-      "context": ""bigId": 12345678901234567,",
-      "format": "unix",
-      "position": {
-        "column": 11,
-        "line": 7,
-      },
-      "timestamp": 1234567890123,
-      "value": "1234567890123",
-    },
-    {
       "context": ""note": "meeting on 2024-01-15 was moved",",
       "format": "simple",
       "position": {
@@ -668,6 +378,16 @@ exports[`extraction characterization > dates.json as json 1`] = `
       },
       "timestamp": 1705276800000,
       "value": "2024-01-15",
+    },
+    {
+      "context": ""dup": "2024-03-01 and 2024-03-01",",
+      "format": "simple",
+      "position": {
+        "column": 10,
+        "line": 9,
+      },
+      "timestamp": 1709251200000,
+      "value": "2024-03-01",
     },
     {
       "context": ""dup": "2024-03-01 and 2024-03-01",",
@@ -720,13 +440,23 @@ exports[`extraction characterization > dates.log as log 1`] = `
   "dates": [
     {
       "context": "2024-01-15 10:30:00.123 ERROR db connection failed",
-      "format": "simple",
+      "format": "iso",
       "position": {
         "column": 1,
         "line": 1,
       },
-      "timestamp": 1705276800000,
-      "value": "2024-01-15",
+      "timestamp": 1705314600123,
+      "value": "2024-01-15 10:30:00.123",
+    },
+    {
+      "context": "2024-01-15 10:30:05 WARN retrying at 2024-01-15T10:30:06Z",
+      "format": "iso",
+      "position": {
+        "column": 1,
+        "line": 2,
+      },
+      "timestamp": 1705314605000,
+      "value": "2024-01-15 10:30:05",
     },
     {
       "context": "2024-01-15 10:30:05 WARN retrying at 2024-01-15T10:30:06Z",
@@ -737,6 +467,26 @@ exports[`extraction characterization > dates.log as log 1`] = `
       },
       "timestamp": 1705314606000,
       "value": "2024-01-15T10:30:06Z",
+    },
+    {
+      "context": "Jan 15 10:30:07 myhost sshd[1234]: session opened",
+      "format": "custom",
+      "position": {
+        "column": 1,
+        "line": 3,
+      },
+      "timestamp": 1768473007000,
+      "value": "Jan 15 10:30:07",
+    },
+    {
+      "context": "[15/Jan/2024:10:30:08 +0000] "GET /health HTTP/1.1" 200",
+      "format": "custom",
+      "position": {
+        "column": 2,
+        "line": 4,
+      },
+      "timestamp": 1705314608000,
+      "value": "15/Jan/2024:10:30:08 +0000",
     },
     {
       "context": "Mon, 15 Jan 2024 10:30:09 GMT response cached",
@@ -757,46 +507,6 @@ exports[`extraction characterization > dates.log as log 1`] = `
       },
       "timestamp": 1705312209000,
       "value": "1705312209000",
-    },
-    {
-      "context": "2024-01-15 10:30:00.123 ERROR db connection failed",
-      "format": "iso",
-      "position": {
-        "column": 1,
-        "line": 1,
-      },
-      "timestamp": 1705314600123,
-      "value": "2024-01-15 10:30:00.123",
-    },
-    {
-      "context": "2024-01-15 10:30:05 WARN retrying at 2024-01-15T10:30:06Z",
-      "format": "iso",
-      "position": {
-        "column": 1,
-        "line": 2,
-      },
-      "timestamp": 1705314605000,
-      "value": "2024-01-15 10:30:05",
-    },
-    {
-      "context": "Jan 15 10:30:07 myhost sshd[1234]: session opened",
-      "format": "custom",
-      "position": {
-        "column": 1,
-        "line": 3,
-      },
-      "timestamp": 1768473007000,
-      "value": "Jan 15 10:30:07",
-    },
-    {
-      "context": "[15/Jan/2024:10:30:08 +0000] "GET /health HTTP/1.1" 200",
-      "format": "custom",
-      "position": {
-        "column": 1,
-        "line": 4,
-      },
-      "timestamp": NaN,
-      "value": "[15/Jan/2024:10:30:08 +0000]",
     },
   ],
   "errors": [],
@@ -809,13 +519,23 @@ exports[`extraction characterization > dates.log as plaintext 1`] = `
   "dates": [
     {
       "context": "2024-01-15 10:30:00.123 ERROR db connection failed",
-      "format": "simple",
+      "format": "iso",
       "position": {
         "column": 1,
         "line": 1,
       },
-      "timestamp": 1705276800000,
-      "value": "2024-01-15",
+      "timestamp": 1705314600123,
+      "value": "2024-01-15 10:30:00.123",
+    },
+    {
+      "context": "2024-01-15 10:30:05 WARN retrying at 2024-01-15T10:30:06Z",
+      "format": "iso",
+      "position": {
+        "column": 1,
+        "line": 2,
+      },
+      "timestamp": 1705314605000,
+      "value": "2024-01-15 10:30:05",
     },
     {
       "context": "2024-01-15 10:30:05 WARN retrying at 2024-01-15T10:30:06Z",
@@ -826,6 +546,26 @@ exports[`extraction characterization > dates.log as plaintext 1`] = `
       },
       "timestamp": 1705314606000,
       "value": "2024-01-15T10:30:06Z",
+    },
+    {
+      "context": "Jan 15 10:30:07 myhost sshd[1234]: session opened",
+      "format": "custom",
+      "position": {
+        "column": 1,
+        "line": 3,
+      },
+      "timestamp": 1768473007000,
+      "value": "Jan 15 10:30:07",
+    },
+    {
+      "context": "[15/Jan/2024:10:30:08 +0000] "GET /health HTTP/1.1" 200",
+      "format": "custom",
+      "position": {
+        "column": 2,
+        "line": 4,
+      },
+      "timestamp": 1705314608000,
+      "value": "15/Jan/2024:10:30:08 +0000",
     },
     {
       "context": "Mon, 15 Jan 2024 10:30:09 GMT response cached",
@@ -846,46 +586,6 @@ exports[`extraction characterization > dates.log as plaintext 1`] = `
       },
       "timestamp": 1705312209000,
       "value": "1705312209000",
-    },
-    {
-      "context": "2024-01-15 10:30:00.123 ERROR db connection failed",
-      "format": "iso",
-      "position": {
-        "column": 1,
-        "line": 1,
-      },
-      "timestamp": 1705314600123,
-      "value": "2024-01-15 10:30:00.123",
-    },
-    {
-      "context": "2024-01-15 10:30:05 WARN retrying at 2024-01-15T10:30:06Z",
-      "format": "iso",
-      "position": {
-        "column": 1,
-        "line": 2,
-      },
-      "timestamp": 1705314605000,
-      "value": "2024-01-15 10:30:05",
-    },
-    {
-      "context": "Jan 15 10:30:07 myhost sshd[1234]: session opened",
-      "format": "custom",
-      "position": {
-        "column": 1,
-        "line": 3,
-      },
-      "timestamp": 1768473007000,
-      "value": "Jan 15 10:30:07",
-    },
-    {
-      "context": "[15/Jan/2024:10:30:08 +0000] "GET /health HTTP/1.1" 200",
-      "format": "custom",
-      "position": {
-        "column": 1,
-        "line": 4,
-      },
-      "timestamp": NaN,
-      "value": "[15/Jan/2024:10:30:08 +0000]",
     },
   ],
   "errors": [],
@@ -901,7 +601,7 @@ exports[`extraction characterization > dates.xml as xml 1`] = `
       "format": "iso",
       "position": {
         "column": 12,
-        "line": 3,
+        "line": 4,
       },
       "timestamp": 1709208000000,
       "value": "2024-02-29T12:00:00Z",
@@ -911,7 +611,7 @@ exports[`extraction characterization > dates.xml as xml 1`] = `
       "format": "unix",
       "position": {
         "column": 9,
-        "line": 4,
+        "line": 5,
       },
       "timestamp": 1706745600000,
       "value": "1706745600",
@@ -921,20 +621,10 @@ exports[`extraction characterization > dates.xml as xml 1`] = `
       "format": "local",
       "position": {
         "column": 16,
-        "line": 5,
+        "line": 6,
       },
       "timestamp": 1710408413000,
       "value": "3/14/2024 09:26:53",
-    },
-    {
-      "context": "<legacy>archived <!-- inline comment 1999-12-31 still scanned --></legacy>",
-      "format": "simple",
-      "position": {
-        "column": 39,
-        "line": 6,
-      },
-      "timestamp": 946598400000,
-      "value": "1999-12-31",
     },
   ],
   "errors": [],

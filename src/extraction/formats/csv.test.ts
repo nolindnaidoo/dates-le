@@ -230,25 +230,30 @@ describe('extractFromCsv', () => {
 
 		const result = extractFromCsv(csv);
 
-		// Deduplication: Simple dates within ISO dates on same line are filtered out
-		expect(result.length).toBe(6);
+		// A simple date in its own cell is a separate occurrence and
+		// survives even when an ISO on the same line contains the same
+		// characters (v1.x dropped it by substring comparison).
+		expect(result.length).toBe(8);
 		// ISO dates
 		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
 		expect(result[0]?.format).toBe('iso');
-		expect(result[3]?.value).toBe('2024-01-01T00:00:00Z');
-		expect(result[3]?.format).toBe('iso');
+		expect(result[4]?.value).toBe('2024-01-01T00:00:00Z');
+		expect(result[4]?.format).toBe('iso');
 		// RFC dates
 		expect(result[1]?.value).toBe('Mon, 25 Dec 2023 10:30:00 GMT');
 		expect(result[1]?.format).toBe('rfc2822');
-		expect(result[4]?.value).toBe('Tue, 01 Jan 2024 00:00:00 GMT');
-		expect(result[4]?.format).toBe('rfc2822');
+		expect(result[5]?.value).toBe('Tue, 01 Jan 2024 00:00:00 GMT');
+		expect(result[5]?.format).toBe('rfc2822');
 		// Unix timestamps
 		expect(result[2]?.value).toBe('1703508600');
 		expect(result[2]?.format).toBe('unix');
-		expect(result[5]?.value).toBe('1672531200');
-		expect(result[5]?.format).toBe('unix');
-		// Note: Simple dates (2023-12-25, 2024-01-01) are filtered out by deduplication
-		// because they're substrings of ISO dates on the same line
+		expect(result[6]?.value).toBe('1672531200');
+		expect(result[6]?.format).toBe('unix');
+		// Simple-date cells
+		expect(result[3]?.value).toBe('2023-12-25');
+		expect(result[3]?.format).toBe('simple');
+		expect(result[7]?.value).toBe('2024-01-01');
+		expect(result[7]?.format).toBe('simple');
 	});
 
 	test('extractFromCsv: should handle different delimiters', () => {

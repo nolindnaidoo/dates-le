@@ -69,7 +69,6 @@ export type DateFormat =
 export type FileType =
 	| 'json'
 	| 'yaml'
-	| 'yml'
 	| 'csv'
 	| 'xml'
 	| 'log'

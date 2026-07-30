@@ -179,12 +179,14 @@ describe('extractFromJson', () => {
 
 		const result = extractFromJson(json);
 
-		// Deduplication: Same value on same line is extracted only once (zero hassle!)
-		expect(result.length).toBe(2);
+		// Every occurrence is reported with its own position; collapsing
+		// repeats is the dedupe command's job, not the extractor's.
+		expect(result.length).toBe(200);
 		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
 		expect(result[0]?.format).toBe('iso');
-		expect(result[1]?.value).toBe('1703508600');
-		expect(result[1]?.format).toBe('unix');
+		expect(result[99]?.position?.column).not.toBe(result[0]?.position?.column);
+		expect(result[100]?.value).toBe('1703508600');
+		expect(result[100]?.format).toBe('unix');
 	});
 
 	test('extractFromJson: should track positions correctly', () => {

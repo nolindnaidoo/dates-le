@@ -59,6 +59,8 @@
 		"onLanguage:xml",
 		"onLanguage:javascript",
 		"onLanguage:typescript",
+		"onLanguage:typescriptreact",
+		"onLanguage:javascriptreact",
 		"onLanguage:html",
 		"onLanguage:log",
 		"onLanguage:plaintext"
@@ -133,7 +135,7 @@
 			"editor/context": [
 				{
 					"command": "dates-le.extractDates",
-					"when": "editorLangId =~ /^(json|yaml|yml|csv|xml|javascript|typescript|html|log|plaintext)$/",
+					"when": "editorLangId =~ /^(json|yaml|yml|csv|xml|javascript|javascriptreact|typescript|typescriptreact|html|log|plaintext)$/",
 					"group": "1_modification@1"
 				}
 			],
