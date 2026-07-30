@@ -105,7 +105,7 @@ async function openResults(
 		const edit = new vscode.WorkspaceEdit();
 		edit.replace(
 			document.uri,
-			new vscode.Range(0, 0, document.lineCount, 0),
+			fullDocumentRange(document),
 			dateValues.join('\n'),
 		);
 		await vscode.workspace.applyEdit(edit);
@@ -141,4 +141,11 @@ async function handleClipboard(
 			`Failed to copy to clipboard: ${error instanceof Error ? error.message : 'Unknown error'}`,
 		);
 	}
+}
+
+function fullDocumentRange(document: vscode.TextDocument): vscode.Range {
+	return new vscode.Range(
+		document.positionAt(0),
+		document.lineAt(document.lineCount - 1).range.end,
+	);
 }

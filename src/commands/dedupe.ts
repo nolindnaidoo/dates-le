@@ -12,8 +12,11 @@ export function registerDedupeCommand(context: vscode.ExtensionContext): void {
 
 			try {
 				const document = editor.document;
-				const text = document.getText();
-				const lines = text.split('\n').map((line) => line.trim());
+				const lines = document
+					.getText()
+					.split('\n')
+					.map((line) => line.trim())
+					.filter((line) => line.length > 0);
 
 				const deduped = deduplicateLines(lines);
 				const removedCount = lines.length - deduped.length;
@@ -34,12 +37,12 @@ export function registerDedupeCommand(context: vscode.ExtensionContext): void {
 	context.subscriptions.push(command);
 }
 
-function deduplicateLines(lines: string[]): string[] {
+function deduplicateLines(lines: readonly string[]): string[] {
 	const seen = new Set<string>();
 	const deduped: string[] = [];
 
 	for (const line of lines) {
-		if (line === '' || seen.has(line)) {
+		if (seen.has(line)) {
 			continue;
 		}
 
@@ -55,10 +58,13 @@ async function replaceDocumentContent(
 	lines: string[],
 ): Promise<void> {
 	const edit = new vscode.WorkspaceEdit();
-	edit.replace(
-		document.uri,
-		new vscode.Range(0, 0, document.lineCount, 0),
-		lines.join('\n'),
-	);
+	edit.replace(document.uri, fullDocumentRange(document), lines.join('\n'));
 	await vscode.workspace.applyEdit(edit);
+}
+
+function fullDocumentRange(document: vscode.TextDocument): vscode.Range {
+	return new vscode.Range(
+		document.positionAt(0),
+		document.lineAt(document.lineCount - 1).range.end,
+	);
 }
