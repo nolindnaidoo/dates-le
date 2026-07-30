@@ -71,8 +71,8 @@ Key settings:
 - Telemetry: Enable local-only logging
 
 ## Support
-- GitHub Issues: https://github.com/OffensiveEdge/dates-le/issues
-- Documentation: https://github.com/OffensiveEdge/dates-le#readme
+- GitHub Issues: https://github.com/nolindnaidoo/dates-le/issues
+- Documentation: https://github.com/nolindnaidoo/dates-le#readme
 		`.trim();
 
 		const doc = await vscode.workspace.openTextDocument({

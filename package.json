@@ -1,22 +1,22 @@
 {
 	"name": "dates-le",
-	"publisher": "OffensiveEdge",
+	"publisher": "nolindnaidoo",
 	"displayName": "Dates-LE",
 	"description": "Zero Hassle Date/Time Extraction and Analysis from Logs, Configs, and Code",
 	"version": "2.0.0",
 	"license": "MIT",
 	"author": {
-		"name": "OffensiveEdge",
-		"url": "https://github.com/OffensiveEdge"
+		"name": "nolindnaidoo",
+		"url": "https://github.com/nolindnaidoo"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/OffensiveEdge/dates-le.git"
+		"url": "https://github.com/nolindnaidoo/dates-le.git"
 	},
 	"bugs": {
-		"url": "https://github.com/OffensiveEdge/dates-le/issues"
+		"url": "https://github.com/nolindnaidoo/dates-le/issues"
 	},
-	"homepage": "https://github.com/OffensiveEdge/dates-le#readme",
+	"homepage": "https://github.com/nolindnaidoo/dates-le#readme",
 	"engines": {
 		"vscode": "^1.90.0",
 		"node": ">=20.0.0"
