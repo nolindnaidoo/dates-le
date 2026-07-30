@@ -9,7 +9,6 @@ import type { Telemetry } from '../telemetry/telemetry';
 import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
 import type { ErrorHandler } from '../utils/errorHandling';
-import type { PerformanceMonitor } from '../utils/performance';
 
 export function registerAnalyzeCommand(
 	context: vscode.ExtensionContext,
@@ -17,7 +16,6 @@ export function registerAnalyzeCommand(
 		telemetry: Telemetry;
 		notifier: Notifier;
 		statusBar: StatusBar;
-		performanceMonitor: PerformanceMonitor;
 		errorHandler: ErrorHandler;
 	}>,
 ): void {

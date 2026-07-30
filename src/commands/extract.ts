@@ -5,8 +5,6 @@ import type { Telemetry } from '../telemetry/telemetry';
 import type { Configuration } from '../types';
 import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
-import type { PerformanceMonitor } from '../utils/performance';
-import { formatThroughput } from '../utils/performance';
 import { handleSafetyChecks } from '../utils/safety';
 
 export function registerExtractCommand(
@@ -15,7 +13,6 @@ export function registerExtractCommand(
 		telemetry: Telemetry;
 		notifier: Notifier;
 		statusBar: StatusBar;
-		performanceMonitor: PerformanceMonitor;
 	}>,
 ): void {
 	const command = vscode.commands.registerCommand(
@@ -41,12 +38,10 @@ export function registerExtractCommand(
 			try {
 				deps.statusBar.showProgress('Extracting dates...');
 
-				const timer = deps.performanceMonitor.startTimer('extract-dates');
 				const result = await extractDates(
 					document.getText(),
 					document.languageId,
 				);
-				const metrics = deps.performanceMonitor.endTimer(timer);
 
 				if (!result.success) {
 					const errorMessage = result.errors[0]?.message || 'Unknown error';
@@ -59,10 +54,6 @@ export function registerExtractCommand(
 					return;
 				}
 
-				const throughput = calculateThroughput(
-					result.dates.length,
-					metrics.duration,
-				);
 				const dateValues = result.dates.map((date) => date.value);
 
 				const opened = await openResults(document, dateValues, config);
@@ -78,7 +69,7 @@ export function registerExtractCommand(
 				);
 
 				deps.notifier.showInfo(
-					`Extracted ${result.dates.length} dates (${formatThroughput(throughput)})`,
+					`Extracted ${result.dates.length} dates from document`,
 				);
 
 				deps.telemetry.event('extract-success', { count: result.dates.length });
@@ -94,14 +85,6 @@ export function registerExtractCommand(
 	);
 
 	context.subscriptions.push(command);
-}
-
-function calculateThroughput(count: number, duration: number): number {
-	if (duration <= 0) {
-		return 0;
-	}
-
-	return (count * 1000) / duration;
 }
 
 async function openResults(

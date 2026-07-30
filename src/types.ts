@@ -118,8 +118,3 @@ export type {
 	ErrorLogger,
 	ErrorNotifier,
 } from './utils/errorHandling';
-export type {
-	PerformanceMetrics,
-	PerformanceMonitor,
-	PerformanceThresholds,
-} from './utils/performance';

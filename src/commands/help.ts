@@ -19,55 +19,44 @@ export function registerHelpCommand(
 
 ## Commands
 - **Extract Dates** (Ctrl+Alt+D / Cmd+Alt+D): Extract dates from the current document
+- **Analyze Dates**: Statistics, patterns, clusters, and anomalies for extracted dates
+- **Convert Dates**: Convert dates in the document to another format
+- **Filter Dates**: Extract dates matching a range or condition
+- **Validate Dates**: Check date values in the document
+- **Deduplicate Dates**: Remove duplicate lines from an extraction result
+- **Sort Dates**: Sort extraction results chronologically or alphabetically
 - **Open Settings**: Configure Dates-LE settings
-- **Export Settings**: Export your configuration to a JSON file
-- **Import Settings**: Import configuration from a JSON file
-- **Reset Settings**: Reset all settings to defaults
+- **Help**: Open this document
 
-## Supported Formats
-Dates-LE works with structured data formats for reliable extraction:
+## Supported File Types
 - **JSON** (.json)
 - **YAML** (.yaml, .yml)
 - **CSV** (.csv)
+- **XML** (.xml)
+- **Log / plain text** (.log, .txt)
+- **JavaScript / TypeScript** (.js, .ts)
+- **HTML** (.html)
 
 ## Date Formats Detected
 - ISO 8601: 2023-12-25T10:30:00.000Z, 2023-12-25
 - RFC 2822: Mon, 25 Dec 2023 10:30:00 GMT
-- Unix timestamp: 1703508600 (seconds since epoch)
+- Unix timestamp: 1703508600 (seconds or milliseconds since epoch)
 - UTC string: Mon Dec 25 2023 10:30:00 GMT+0000
-- Local string: Mon Dec 25 2023 10:30:00 GMT-0500
-- Custom formats: 12/25/2023, 25-Dec-2023, etc.
-
-## Features
-
-### Date Extraction
-- Detects dates in various formats
-- Extracts from JSON properties, YAML values, CSV columns
-- Outputs dates in their original format
-- Optional deduplication of repeated dates
-
-### Post-Processing
-- **Deduplication**: Remove duplicate dates (enable via settings)
-- **Clipboard**: Automatically copy results (enable via settings)
-- **Side-by-side**: View results alongside source file
+- Local string: 12/25/2023 10:30:00
 
 ## Troubleshooting
 
 ### No dates found
-- Ensure the file is JSON, YAML, or CSV format
-- Check that the file contains valid date patterns
-- Verify the file is saved with the correct extension
-- Try reloading the VS Code window
+- Ensure the file type is one of the supported formats above
+- Check that the file contains recognizable date patterns
+- Verify the editor language mode matches the file content
 
 ### Performance issues
 - Large files may take time to process
-- Enable safety warnings to get alerts for files over 1MB
-- Consider breaking very large files into smaller chunks
+- Safety warnings alert before processing files over the configured size
 
 ### Extension not working
-- Check VS Code version (requires 1.105.0+)
 - Check Output panel → "Dates-LE" for error messages
-- Try disabling other date-related extensions
 
 ## Settings
 Access settings via Command Palette: "Dates-LE: Open Settings"

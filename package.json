@@ -128,11 +128,6 @@
 				"command": "dates-le.help",
 				"title": "%manifest.command.help.title%",
 				"category": "%manifest.command.category%"
-			},
-			{
-				"command": "dates-le.csv.toggleStreaming",
-				"title": "%manifest.command.csv.toggle-streaming.title%",
-				"category": "%manifest.command.category%"
 			}
 		],
 		"keybindings": [
@@ -178,9 +173,6 @@
 				},
 				{
 					"command": "dates-le.help"
-				},
-				{
-					"command": "dates-le.csv.toggleStreaming"
 				}
 			]
 		},
