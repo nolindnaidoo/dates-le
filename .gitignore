@@ -110,3 +110,5 @@ dist/
 
 # Release packages
 release/
+out-test/
+.vscode-test/
