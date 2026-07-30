@@ -1,7 +1,4 @@
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
-
-const _localize = nls.config({ messageFormat: nls.MessageFormat.file })();
 
 export interface Notifier {
 	showInfo(message: string): void;

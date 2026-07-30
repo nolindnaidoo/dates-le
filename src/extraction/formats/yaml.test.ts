@@ -12,12 +12,12 @@ describe('extractFromYaml', () => {
 		const result = extractFromYaml(yaml);
 
 		expect(result.length).toBe(3);
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[1].value).toBe('2024-01-01T00:00:00Z');
-		expect(result[1].format).toBe('iso');
-		expect(result[2].value).toBe('2023-06-15T14:45:30.000Z');
-		expect(result[2].format).toBe('iso');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[1]?.value).toBe('2024-01-01T00:00:00Z');
+		expect(result[1]?.format).toBe('iso');
+		expect(result[2]?.value).toBe('2023-06-15T14:45:30.000Z');
+		expect(result[2]?.format).toBe('iso');
 	});
 
 	test('extractFromYaml: should extract Unix timestamps from YAML', () => {
@@ -30,12 +30,12 @@ describe('extractFromYaml', () => {
 		const result = extractFromYaml(yaml);
 
 		expect(result.length).toBe(3);
-		expect(result[0].value).toBe('1703508600');
-		expect(result[0].format).toBe('unix');
-		expect(result[1].value).toBe('1672531200');
-		expect(result[1].format).toBe('unix');
-		expect(result[2].value).toBe('1703508600000');
-		expect(result[2].format).toBe('unix');
+		expect(result[0]?.value).toBe('1703508600');
+		expect(result[0]?.format).toBe('unix');
+		expect(result[1]?.value).toBe('1672531200');
+		expect(result[1]?.format).toBe('unix');
+		expect(result[2]?.value).toBe('1703508600000');
+		expect(result[2]?.format).toBe('unix');
 	});
 
 	test('extractFromYaml: should extract simple dates from YAML', () => {
@@ -48,12 +48,12 @@ describe('extractFromYaml', () => {
 		const result = extractFromYaml(yaml);
 
 		expect(result.length).toBe(3);
-		expect(result[0].value).toBe('2023-12-25');
-		expect(result[0].format).toBe('simple');
-		expect(result[1].value).toBe('2023-01-01');
-		expect(result[1].format).toBe('simple');
-		expect(result[2].value).toBe('2023-06-15');
-		expect(result[2].format).toBe('simple');
+		expect(result[0]?.value).toBe('2023-12-25');
+		expect(result[0]?.format).toBe('simple');
+		expect(result[1]?.value).toBe('2023-01-01');
+		expect(result[1]?.format).toBe('simple');
+		expect(result[2]?.value).toBe('2023-06-15');
+		expect(result[2]?.format).toBe('simple');
 	});
 
 	test('extractFromYaml: should extract RFC 2822 dates from YAML', () => {
@@ -66,12 +66,12 @@ describe('extractFromYaml', () => {
 		const result = extractFromYaml(yaml);
 
 		expect(result.length).toBe(3);
-		expect(result[0].value).toBe('Mon, 25 Dec 2023 10:30:00 GMT');
-		expect(result[0].format).toBe('rfc2822');
-		expect(result[1].value).toBe('Tue, 01 Jan 2024 00:00:00 GMT');
-		expect(result[1].format).toBe('rfc2822');
-		expect(result[2].value).toBe('Wed, 15 Jun 2023 12:45:30 GMT');
-		expect(result[2].format).toBe('rfc2822');
+		expect(result[0]?.value).toBe('Mon, 25 Dec 2023 10:30:00 GMT');
+		expect(result[0]?.format).toBe('rfc2822');
+		expect(result[1]?.value).toBe('Tue, 01 Jan 2024 00:00:00 GMT');
+		expect(result[1]?.format).toBe('rfc2822');
+		expect(result[2]?.value).toBe('Wed, 15 Jun 2023 12:45:30 GMT');
+		expect(result[2]?.format).toBe('rfc2822');
 	});
 
 	test('extractFromYaml: should handle nested YAML objects', () => {
@@ -88,14 +88,14 @@ describe('extractFromYaml', () => {
 		const result = extractFromYaml(yaml);
 
 		expect(result.length).toBe(4);
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[1].value).toBe('2024-01-01T00:00:00Z');
-		expect(result[1].format).toBe('iso');
-		expect(result[2].value).toBe('1703508600');
-		expect(result[2].format).toBe('unix');
-		expect(result[3].value).toBe('2023-12-25');
-		expect(result[3].format).toBe('simple');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[1]?.value).toBe('2024-01-01T00:00:00Z');
+		expect(result[1]?.format).toBe('iso');
+		expect(result[2]?.value).toBe('1703508600');
+		expect(result[2]?.format).toBe('unix');
+		expect(result[3]?.value).toBe('2023-12-25');
+		expect(result[3]?.format).toBe('simple');
 	});
 
 	test('extractFromYaml: should handle YAML arrays', () => {
@@ -117,24 +117,24 @@ describe('extractFromYaml', () => {
 
 		expect(result.length).toBe(8);
 		// Unix timestamps
-		expect(result[0].value).toBe('1703508600');
-		expect(result[0].format).toBe('unix');
-		expect(result[1].value).toBe('1672531200');
-		expect(result[1].format).toBe('unix');
-		expect(result[2].value).toBe('1703508600000');
-		expect(result[2].format).toBe('unix');
+		expect(result[0]?.value).toBe('1703508600');
+		expect(result[0]?.format).toBe('unix');
+		expect(result[1]?.value).toBe('1672531200');
+		expect(result[1]?.format).toBe('unix');
+		expect(result[2]?.value).toBe('1703508600000');
+		expect(result[2]?.format).toBe('unix');
 		// Simple dates
-		expect(result[3].value).toBe('2023-12-25');
-		expect(result[3].format).toBe('simple');
-		expect(result[4].value).toBe('2024-01-01');
-		expect(result[4].format).toBe('simple');
-		expect(result[5].value).toBe('2023-06-15');
-		expect(result[5].format).toBe('simple');
+		expect(result[3]?.value).toBe('2023-12-25');
+		expect(result[3]?.format).toBe('simple');
+		expect(result[4]?.value).toBe('2024-01-01');
+		expect(result[4]?.format).toBe('simple');
+		expect(result[5]?.value).toBe('2023-06-15');
+		expect(result[5]?.format).toBe('simple');
 		// ISO dates
-		expect(result[6].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[6].format).toBe('iso');
-		expect(result[7].value).toBe('2024-01-01T00:00:00Z');
-		expect(result[7].format).toBe('iso');
+		expect(result[6]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[6]?.format).toBe('iso');
+		expect(result[7]?.value).toBe('2024-01-01T00:00:00Z');
+		expect(result[7]?.format).toBe('iso');
 	});
 
 	test('extractFromYaml: should handle empty YAML', () => {
@@ -156,10 +156,10 @@ describe('extractFromYaml', () => {
 
 		// Should still extract valid dates even from malformed YAML
 		expect(result.length).toBe(2);
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[1].value).toBe('1703508600');
-		expect(result[1].format).toBe('unix');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[1]?.value).toBe('1703508600');
+		expect(result[1]?.format).toBe('unix');
 	});
 
 	test('extractFromYaml: should handle large YAML files', () => {
@@ -176,10 +176,10 @@ describe('extractFromYaml', () => {
 
 		// Deduplication: Same value on different lines but each unique line keeps one
 		expect(result.length).toBe(200);
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[100].value).toBe('1703508600');
-		expect(result[100].format).toBe('unix');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[100]?.value).toBe('1703508600');
+		expect(result[100]?.format).toBe('unix');
 	});
 
 	test('extractFromYaml: should track positions correctly', () => {
@@ -191,10 +191,10 @@ describe('extractFromYaml', () => {
 		const result = extractFromYaml(yaml);
 
 		expect(result.length).toBe(2);
-		expect(result[0].position.line).toBe(2);
-		expect(result[0].position.column).toBe(10);
-		expect(result[1].position.line).toBe(3);
-		expect(result[1].position.column).toBe(10);
+		expect(result[0]?.position?.line).toBe(2);
+		expect(result[0]?.position?.column).toBe(10);
+		expect(result[1]?.position?.line).toBe(3);
+		expect(result[1]?.position?.column).toBe(10);
 	});
 
 	test('extractFromYaml: should handle mixed date formats', () => {
@@ -208,14 +208,14 @@ describe('extractFromYaml', () => {
 		const result = extractFromYaml(yaml);
 
 		expect(result.length).toBe(4);
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[1].value).toBe('Mon, 25 Dec 2023 10:30:00 GMT');
-		expect(result[1].format).toBe('rfc2822');
-		expect(result[2].value).toBe('1703508600');
-		expect(result[2].format).toBe('unix');
-		expect(result[3].value).toBe('2023-12-25');
-		expect(result[3].format).toBe('simple');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[1]?.value).toBe('Mon, 25 Dec 2023 10:30:00 GMT');
+		expect(result[1]?.format).toBe('rfc2822');
+		expect(result[2]?.value).toBe('1703508600');
+		expect(result[2]?.format).toBe('unix');
+		expect(result[3]?.value).toBe('2023-12-25');
+		expect(result[3]?.format).toBe('simple');
 	});
 
 	test('extractFromYaml: should handle quoted values', () => {
@@ -229,14 +229,14 @@ describe('extractFromYaml', () => {
 		const result = extractFromYaml(yaml);
 
 		expect(result.length).toBe(4);
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[1].value).toBe('2024-01-01T00:00:00Z');
-		expect(result[1].format).toBe('iso');
-		expect(result[2].value).toBe('1703508600');
-		expect(result[2].format).toBe('unix');
-		expect(result[3].value).toBe('2023-12-25');
-		expect(result[3].format).toBe('simple');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[1]?.value).toBe('2024-01-01T00:00:00Z');
+		expect(result[1]?.format).toBe('iso');
+		expect(result[2]?.value).toBe('1703508600');
+		expect(result[2]?.format).toBe('unix');
+		expect(result[3]?.value).toBe('2023-12-25');
+		expect(result[3]?.format).toBe('simple');
 	});
 
 	test('extractFromYaml: should handle complex nested structures', () => {
@@ -263,23 +263,23 @@ describe('extractFromYaml', () => {
 
 		expect(result.length).toBe(8);
 		// ISO dates
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[1].value).toBe('2024-01-01T00:00:00Z');
-		expect(result[1].format).toBe('iso');
-		expect(result[2].value).toBe('2023-06-15T14:45:30Z');
-		expect(result[2].format).toBe('iso');
-		expect(result[3].value).toBe('2023-12-31T23:59:59Z');
-		expect(result[3].format).toBe('iso');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[1]?.value).toBe('2024-01-01T00:00:00Z');
+		expect(result[1]?.format).toBe('iso');
+		expect(result[2]?.value).toBe('2023-06-15T14:45:30Z');
+		expect(result[2]?.format).toBe('iso');
+		expect(result[3]?.value).toBe('2023-12-31T23:59:59Z');
+		expect(result[3]?.format).toBe('iso');
 		// Unix timestamps
-		expect(result[4].value).toBe('1703508600');
-		expect(result[4].format).toBe('unix');
-		expect(result[5].value).toBe('1672531200');
-		expect(result[5].format).toBe('unix');
+		expect(result[4]?.value).toBe('1703508600');
+		expect(result[4]?.format).toBe('unix');
+		expect(result[5]?.value).toBe('1672531200');
+		expect(result[5]?.format).toBe('unix');
 		// Simple dates
-		expect(result[6].value).toBe('2023-12-25');
-		expect(result[6].format).toBe('simple');
-		expect(result[7].value).toBe('2024-01-01');
-		expect(result[7].format).toBe('simple');
+		expect(result[6]?.value).toBe('2023-12-25');
+		expect(result[6]?.format).toBe('simple');
+		expect(result[7]?.value).toBe('2024-01-01');
+		expect(result[7]?.format).toBe('simple');
 	});
 });

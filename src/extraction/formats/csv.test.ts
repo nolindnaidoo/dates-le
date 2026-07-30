@@ -12,14 +12,14 @@ describe('extractFromCsv', () => {
 		const result = extractFromCsv(csv);
 
 		expect(result.length).toBe(4);
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[1].value).toBe('2024-01-01T00:00:00Z');
-		expect(result[1].format).toBe('iso');
-		expect(result[2].value).toBe('2023-06-15T14:45:30.000Z');
-		expect(result[2].format).toBe('iso');
-		expect(result[3].value).toBe('2023-12-31T23:59:59Z');
-		expect(result[3].format).toBe('iso');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[1]?.value).toBe('2024-01-01T00:00:00Z');
+		expect(result[1]?.format).toBe('iso');
+		expect(result[2]?.value).toBe('2023-06-15T14:45:30.000Z');
+		expect(result[2]?.format).toBe('iso');
+		expect(result[3]?.value).toBe('2023-12-31T23:59:59Z');
+		expect(result[3]?.format).toBe('iso');
 	});
 
 	test('extractFromCsv: should extract Unix timestamps from CSV', () => {
@@ -32,18 +32,18 @@ describe('extractFromCsv', () => {
 		const result = extractFromCsv(csv);
 
 		expect(result.length).toBe(6);
-		expect(result[0].value).toBe('1703508600');
-		expect(result[0].format).toBe('unix');
-		expect(result[1].value).toBe('1672531200');
-		expect(result[1].format).toBe('unix');
-		expect(result[2].value).toBe('1703508600000');
-		expect(result[2].format).toBe('unix');
-		expect(result[3].value).toBe('1672531200');
-		expect(result[3].format).toBe('unix');
-		expect(result[4].value).toBe('1703508600');
-		expect(result[4].format).toBe('unix');
-		expect(result[5].value).toBe('1703508600000');
-		expect(result[5].format).toBe('unix');
+		expect(result[0]?.value).toBe('1703508600');
+		expect(result[0]?.format).toBe('unix');
+		expect(result[1]?.value).toBe('1672531200');
+		expect(result[1]?.format).toBe('unix');
+		expect(result[2]?.value).toBe('1703508600000');
+		expect(result[2]?.format).toBe('unix');
+		expect(result[3]?.value).toBe('1672531200');
+		expect(result[3]?.format).toBe('unix');
+		expect(result[4]?.value).toBe('1703508600');
+		expect(result[4]?.format).toBe('unix');
+		expect(result[5]?.value).toBe('1703508600000');
+		expect(result[5]?.format).toBe('unix');
 	});
 
 	test('extractFromCsv: should extract simple dates from CSV', () => {
@@ -56,18 +56,18 @@ describe('extractFromCsv', () => {
 		const result = extractFromCsv(csv);
 
 		expect(result.length).toBe(6);
-		expect(result[0].value).toBe('2023-12-25');
-		expect(result[0].format).toBe('simple');
-		expect(result[1].value).toBe('2023-01-01');
-		expect(result[1].format).toBe('simple');
-		expect(result[2].value).toBe('2023-06-15');
-		expect(result[2].format).toBe('simple');
-		expect(result[3].value).toBe('2023-01-01');
-		expect(result[3].format).toBe('simple');
-		expect(result[4].value).toBe('2023-12-25');
-		expect(result[4].format).toBe('simple');
-		expect(result[5].value).toBe('2023-06-15');
-		expect(result[5].format).toBe('simple');
+		expect(result[0]?.value).toBe('2023-12-25');
+		expect(result[0]?.format).toBe('simple');
+		expect(result[1]?.value).toBe('2023-01-01');
+		expect(result[1]?.format).toBe('simple');
+		expect(result[2]?.value).toBe('2023-06-15');
+		expect(result[2]?.format).toBe('simple');
+		expect(result[3]?.value).toBe('2023-01-01');
+		expect(result[3]?.format).toBe('simple');
+		expect(result[4]?.value).toBe('2023-12-25');
+		expect(result[4]?.format).toBe('simple');
+		expect(result[5]?.value).toBe('2023-06-15');
+		expect(result[5]?.format).toBe('simple');
 	});
 
 	test('extractFromCsv: should extract RFC 2822 dates from CSV', () => {
@@ -80,18 +80,18 @@ describe('extractFromCsv', () => {
 		const result = extractFromCsv(csv);
 
 		expect(result.length).toBe(6);
-		expect(result[0].value).toBe('Mon, 25 Dec 2023 10:30:00 GMT');
-		expect(result[0].format).toBe('rfc2822');
-		expect(result[1].value).toBe('Tue, 01 Jan 2024 00:00:00 GMT');
-		expect(result[1].format).toBe('rfc2822');
-		expect(result[2].value).toBe('Wed, 15 Jun 2023 12:45:30 GMT');
-		expect(result[2].format).toBe('rfc2822');
-		expect(result[3].value).toBe('Tue, 01 Jan 2024 00:00:00 GMT');
-		expect(result[3].format).toBe('rfc2822');
-		expect(result[4].value).toBe('Wed, 15 Jun 2023 12:45:30 GMT');
-		expect(result[4].format).toBe('rfc2822');
-		expect(result[5].value).toBe('Mon, 25 Dec 2023 10:30:00 GMT');
-		expect(result[5].format).toBe('rfc2822');
+		expect(result[0]?.value).toBe('Mon, 25 Dec 2023 10:30:00 GMT');
+		expect(result[0]?.format).toBe('rfc2822');
+		expect(result[1]?.value).toBe('Tue, 01 Jan 2024 00:00:00 GMT');
+		expect(result[1]?.format).toBe('rfc2822');
+		expect(result[2]?.value).toBe('Wed, 15 Jun 2023 12:45:30 GMT');
+		expect(result[2]?.format).toBe('rfc2822');
+		expect(result[3]?.value).toBe('Tue, 01 Jan 2024 00:00:00 GMT');
+		expect(result[3]?.format).toBe('rfc2822');
+		expect(result[4]?.value).toBe('Wed, 15 Jun 2023 12:45:30 GMT');
+		expect(result[4]?.format).toBe('rfc2822');
+		expect(result[5]?.value).toBe('Mon, 25 Dec 2023 10:30:00 GMT');
+		expect(result[5]?.format).toBe('rfc2822');
 	});
 
 	test('extractFromCsv: should handle CSV with headers', () => {
@@ -104,14 +104,14 @@ describe('extractFromCsv', () => {
 		const result = extractFromCsv(csv);
 
 		expect(result.length).toBe(4);
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[1].value).toBe('2024-01-01T00:00:00Z');
-		expect(result[1].format).toBe('iso');
-		expect(result[2].value).toBe('2023-06-15T14:45:30Z');
-		expect(result[2].format).toBe('iso');
-		expect(result[3].value).toBe('2023-12-31T23:59:59Z');
-		expect(result[3].format).toBe('iso');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[1]?.value).toBe('2024-01-01T00:00:00Z');
+		expect(result[1]?.format).toBe('iso');
+		expect(result[2]?.value).toBe('2023-06-15T14:45:30Z');
+		expect(result[2]?.format).toBe('iso');
+		expect(result[3]?.value).toBe('2023-12-31T23:59:59Z');
+		expect(result[3]?.format).toBe('iso');
 	});
 
 	test('extractFromCsv: should handle CSV without headers', () => {
@@ -123,14 +123,14 @@ describe('extractFromCsv', () => {
 		const result = extractFromCsv(csv);
 
 		expect(result.length).toBe(4);
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[1].value).toBe('2024-01-01T00:00:00Z');
-		expect(result[1].format).toBe('iso');
-		expect(result[2].value).toBe('2023-06-15T14:45:30Z');
-		expect(result[2].format).toBe('iso');
-		expect(result[3].value).toBe('2023-12-31T23:59:59Z');
-		expect(result[3].format).toBe('iso');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[1]?.value).toBe('2024-01-01T00:00:00Z');
+		expect(result[1]?.format).toBe('iso');
+		expect(result[2]?.value).toBe('2023-06-15T14:45:30Z');
+		expect(result[2]?.format).toBe('iso');
+		expect(result[3]?.value).toBe('2023-12-31T23:59:59Z');
+		expect(result[3]?.format).toBe('iso');
 	});
 
 	test('extractFromCsv: should handle quoted values', () => {
@@ -143,14 +143,14 @@ describe('extractFromCsv', () => {
 		const result = extractFromCsv(csv);
 
 		expect(result.length).toBe(4);
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[1].value).toBe('2024-01-01T00:00:00Z');
-		expect(result[1].format).toBe('iso');
-		expect(result[2].value).toBe('2023-06-15T14:45:30Z');
-		expect(result[2].format).toBe('iso');
-		expect(result[3].value).toBe('2023-12-31T23:59:59Z');
-		expect(result[3].format).toBe('iso');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[1]?.value).toBe('2024-01-01T00:00:00Z');
+		expect(result[1]?.format).toBe('iso');
+		expect(result[2]?.value).toBe('2023-06-15T14:45:30Z');
+		expect(result[2]?.format).toBe('iso');
+		expect(result[3]?.value).toBe('2023-12-31T23:59:59Z');
+		expect(result[3]?.format).toBe('iso');
 	});
 
 	test('extractFromCsv: should handle empty CSV', () => {
@@ -181,14 +181,14 @@ describe('extractFromCsv', () => {
 
 		// Should still extract valid dates even from malformed CSV
 		expect(result.length).toBe(4);
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[1].value).toBe('2024-01-01T00:00:00Z');
-		expect(result[1].format).toBe('iso');
-		expect(result[2].value).toBe('2023-12-31T23:59:59Z');
-		expect(result[2].format).toBe('iso');
-		expect(result[3].value).toBe('2023-06-15T14:45:30Z');
-		expect(result[3].format).toBe('iso');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[1]?.value).toBe('2024-01-01T00:00:00Z');
+		expect(result[1]?.format).toBe('iso');
+		expect(result[2]?.value).toBe('2023-12-31T23:59:59Z');
+		expect(result[2]?.format).toBe('iso');
+		expect(result[3]?.value).toBe('2023-06-15T14:45:30Z');
+		expect(result[3]?.format).toBe('iso');
 	});
 
 	test('extractFromCsv: should handle large CSV files', () => {
@@ -200,10 +200,10 @@ describe('extractFromCsv', () => {
 		const result = extractFromCsv(csv);
 
 		expect(result.length).toBe(200);
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[1].value).toBe('2024-01-01T00:00:00Z');
-		expect(result[1].format).toBe('iso');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[1]?.value).toBe('2024-01-01T00:00:00Z');
+		expect(result[1]?.format).toBe('iso');
 	});
 
 	test('extractFromCsv: should track positions correctly', () => {
@@ -215,10 +215,10 @@ describe('extractFromCsv', () => {
 		const result = extractFromCsv(csv);
 
 		expect(result.length).toBe(2);
-		expect(result[0].position.line).toBe(3);
-		expect(result[0].position.column).toBe(9);
-		expect(result[1].position.line).toBe(3);
-		expect(result[1].position.column).toBe(30);
+		expect(result[0]?.position?.line).toBe(3);
+		expect(result[0]?.position?.column).toBe(9);
+		expect(result[1]?.position?.line).toBe(3);
+		expect(result[1]?.position?.column).toBe(30);
 	});
 
 	test('extractFromCsv: should handle mixed date formats', () => {
@@ -233,20 +233,20 @@ describe('extractFromCsv', () => {
 		// Deduplication: Simple dates within ISO dates on same line are filtered out
 		expect(result.length).toBe(6);
 		// ISO dates
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[3].value).toBe('2024-01-01T00:00:00Z');
-		expect(result[3].format).toBe('iso');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[3]?.value).toBe('2024-01-01T00:00:00Z');
+		expect(result[3]?.format).toBe('iso');
 		// RFC dates
-		expect(result[1].value).toBe('Mon, 25 Dec 2023 10:30:00 GMT');
-		expect(result[1].format).toBe('rfc2822');
-		expect(result[4].value).toBe('Tue, 01 Jan 2024 00:00:00 GMT');
-		expect(result[4].format).toBe('rfc2822');
+		expect(result[1]?.value).toBe('Mon, 25 Dec 2023 10:30:00 GMT');
+		expect(result[1]?.format).toBe('rfc2822');
+		expect(result[4]?.value).toBe('Tue, 01 Jan 2024 00:00:00 GMT');
+		expect(result[4]?.format).toBe('rfc2822');
 		// Unix timestamps
-		expect(result[2].value).toBe('1703508600');
-		expect(result[2].format).toBe('unix');
-		expect(result[5].value).toBe('1672531200');
-		expect(result[5].format).toBe('unix');
+		expect(result[2]?.value).toBe('1703508600');
+		expect(result[2]?.format).toBe('unix');
+		expect(result[5]?.value).toBe('1672531200');
+		expect(result[5]?.format).toBe('unix');
 		// Note: Simple dates (2023-12-25, 2024-01-01) are filtered out by deduplication
 		// because they're substrings of ISO dates on the same line
 	});
@@ -261,13 +261,13 @@ describe('extractFromCsv', () => {
 		const result = extractFromCsv(csv);
 
 		expect(result.length).toBe(4);
-		expect(result[0].value).toBe('2023-12-25T10:30:00Z');
-		expect(result[0].format).toBe('iso');
-		expect(result[1].value).toBe('2024-01-01T00:00:00Z');
-		expect(result[1].format).toBe('iso');
-		expect(result[2].value).toBe('2023-06-15T14:45:30Z');
-		expect(result[2].format).toBe('iso');
-		expect(result[3].value).toBe('2023-12-31T23:59:59Z');
-		expect(result[3].format).toBe('iso');
+		expect(result[0]?.value).toBe('2023-12-25T10:30:00Z');
+		expect(result[0]?.format).toBe('iso');
+		expect(result[1]?.value).toBe('2024-01-01T00:00:00Z');
+		expect(result[1]?.format).toBe('iso');
+		expect(result[2]?.value).toBe('2023-06-15T14:45:30Z');
+		expect(result[2]?.format).toBe('iso');
+		expect(result[3]?.value).toBe('2023-12-31T23:59:59Z');
+		expect(result[3]?.format).toBe('iso');
 	});
 });
