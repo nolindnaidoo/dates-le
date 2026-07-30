@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import { getConfiguration } from '../config/config';
 
+const IDLE_TEXT = 'Dates-LE';
+
 export interface StatusBar {
 	showProgress(message: string): void;
 	hideProgress(): void;
@@ -8,34 +10,41 @@ export interface StatusBar {
 }
 
 export function createStatusBar(context: vscode.ExtensionContext): StatusBar {
-	const config = getConfiguration();
-	let statusBarItem: vscode.StatusBarItem | undefined;
+	const statusBarItem = vscode.window.createStatusBarItem(
+		vscode.StatusBarAlignment.Left,
+		100,
+	);
+	statusBarItem.text = IDLE_TEXT;
+	statusBarItem.tooltip = 'Dates-LE: Date extraction and analysis';
+	statusBarItem.command = 'dates-le.extractDates';
+	context.subscriptions.push(statusBarItem);
 
-	if (config.statusBarEnabled) {
-		statusBarItem = vscode.window.createStatusBarItem(
-			vscode.StatusBarAlignment.Left,
-			100,
-		);
-		statusBarItem.text = 'Dates-LE';
-		statusBarItem.tooltip = 'Dates-LE: Date extraction and analysis';
-		statusBarItem.command = 'dates-le.extractDates';
-		context.subscriptions.push(statusBarItem);
-		statusBarItem.show();
-	}
+	const applyVisibility = (): void => {
+		if (getConfiguration().statusBarEnabled) {
+			statusBarItem.show();
+		} else {
+			statusBarItem.hide();
+		}
+	};
+	applyVisibility();
+
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeConfiguration((event) => {
+			if (event.affectsConfiguration('dates-le.statusBar.enabled')) {
+				applyVisibility();
+			}
+		}),
+	);
 
 	return Object.freeze({
 		showProgress(message: string): void {
-			if (statusBarItem) {
-				statusBarItem.text = `$(loading~spin) ${message}`;
-			}
+			statusBarItem.text = `$(loading~spin) ${message}`;
 		},
 		hideProgress(): void {
-			if (statusBarItem) {
-				statusBarItem.text = 'Dates-LE';
-			}
+			statusBarItem.text = IDLE_TEXT;
 		},
 		dispose(): void {
-			statusBarItem?.dispose();
+			statusBarItem.dispose();
 		},
 	});
 }
