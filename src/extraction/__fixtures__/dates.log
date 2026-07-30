@@ -1,0 +1,6 @@
+2024-01-15 10:30:00.123 ERROR db connection failed
+2024-01-15 10:30:05 WARN retrying at 2024-01-15T10:30:06Z
+Jan 15 10:30:07 myhost sshd[1234]: session opened
+[15/Jan/2024:10:30:08 +0000] "GET /health HTTP/1.1" 200
+Mon, 15 Jan 2024 10:30:09 GMT response cached
+processed 1705312209000 events in 42ms
