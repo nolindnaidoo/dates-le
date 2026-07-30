@@ -1,12 +1,9 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import { getConfiguration } from '../config/config';
 import type { Telemetry } from '../telemetry/telemetry';
 import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
-
-const localize = nls.config({ messageFormat: nls.MessageFormat.file })();
 
 export function registerSettingsCommands(
 	context: vscode.ExtensionContext,
@@ -35,9 +32,7 @@ function registerExportSettingsCommand(
 			deps.telemetry.event('command-settings-export');
 
 			try {
-				deps.statusBar.showProgress(
-					localize('runtime.progress.exporting', 'Exporting settings...'),
-				);
+				deps.statusBar.showProgress('Exporting settings...');
 
 				const config = getConfiguration();
 				const settingsData = {
@@ -69,12 +64,7 @@ function registerExportSettingsCommand(
 				});
 
 				if (!uri) {
-					deps.notifier.showInfo(
-						localize(
-							'runtime.settings.export.cancelled',
-							'Settings export cancelled',
-						),
-					);
+					deps.notifier.showInfo('Settings export cancelled');
 					return;
 				}
 
@@ -85,28 +75,13 @@ function registerExportSettingsCommand(
 				);
 
 				deps.notifier.showInfo(
-					localize(
-						'runtime.settings.export.success',
-						'Settings exported successfully to {0}',
-						path.basename(uri.fsPath),
-					),
+					`Settings exported successfully to ${path.basename(uri.fsPath)}`,
 				);
 				deps.telemetry.event('settings-export-success', { path: uri.fsPath });
 			} catch (error) {
 				const message =
-					error instanceof Error
-						? error.message
-						: localize(
-								'runtime.error.unknown-fallback',
-								'Unknown error occurred',
-							);
-				deps.notifier.showError(
-					localize(
-						'runtime.settings.export.error',
-						'Failed to export settings: {0}',
-						message,
-					),
-				);
+					error instanceof Error ? error.message : 'Unknown error occurred';
+				deps.notifier.showError(`Failed to export settings: ${message}`);
 				deps.telemetry.event('settings-export-error', { error: message });
 			} finally {
 				deps.statusBar.hideProgress();
@@ -131,9 +106,7 @@ function registerImportSettingsCommand(
 			deps.telemetry.event('command-settings-import');
 
 			try {
-				deps.statusBar.showProgress(
-					localize('runtime.progress.importing', 'Importing settings...'),
-				);
+				deps.statusBar.showProgress('Importing settings...');
 
 				// Show open dialog
 				const uri = await vscode.window.showOpenDialog({
@@ -145,24 +118,14 @@ function registerImportSettingsCommand(
 				});
 
 				if (!uri || uri.length === 0) {
-					deps.notifier.showInfo(
-						localize(
-							'runtime.settings.import.cancelled',
-							'Settings import cancelled',
-						),
-					);
+					deps.notifier.showInfo('Settings import cancelled');
 					return;
 				}
 
 				// Read settings file
 				const selectedUri = uri[0];
 				if (!selectedUri) {
-					deps.notifier.showInfo(
-						localize(
-							'runtime.settings.import.cancelled',
-							'Settings import cancelled',
-						),
-					);
+					deps.notifier.showInfo('Settings import cancelled');
 					return;
 				}
 
@@ -176,32 +139,19 @@ function registerImportSettingsCommand(
 					!settingsData.settings ||
 					typeof settingsData.settings !== 'object'
 				) {
-					throw new Error(
-						localize(
-							'runtime.settings.import.invalid',
-							'Invalid settings file format',
-						),
-					);
+					throw new Error('Invalid settings file format');
 				}
 
 				// Confirm import
 				const confirm = await vscode.window.showWarningMessage(
-					localize(
-						'runtime.settings.import.confirm',
-						'This will overwrite your current Dates-LE settings. Continue?',
-					),
+					'This will overwrite your current Dates-LE settings. Continue?',
 					{ modal: true },
-					localize('runtime.confirmation.continue', 'Continue'),
-					localize('runtime.confirmation.cancel', 'Cancel'),
+					'Continue',
+					'Cancel',
 				);
 
-				if (confirm !== localize('runtime.confirmation.continue', 'Continue')) {
-					deps.notifier.showInfo(
-						localize(
-							'runtime.settings.import.cancelled',
-							'Settings import cancelled',
-						),
-					);
+				if (confirm !== 'Continue') {
+					deps.notifier.showInfo('Settings import cancelled');
 					return;
 				}
 
@@ -237,30 +187,15 @@ function registerImportSettingsCommand(
 				}
 
 				deps.notifier.showInfo(
-					localize(
-						'runtime.settings.import.success',
-						'Settings imported successfully from {0}',
-						path.basename(selectedUri.fsPath),
-					),
+					`Settings imported successfully from ${path.basename(selectedUri.fsPath)}`,
 				);
 				deps.telemetry.event('settings-import-success', {
 					path: selectedUri.fsPath,
 				});
 			} catch (error) {
 				const message =
-					error instanceof Error
-						? error.message
-						: localize(
-								'runtime.error.unknown-fallback',
-								'Unknown error occurred',
-							);
-				deps.notifier.showError(
-					localize(
-						'runtime.settings.import.error',
-						'Failed to import settings: {0}',
-						message,
-					),
-				);
+					error instanceof Error ? error.message : 'Unknown error occurred';
+				deps.notifier.showError(`Failed to import settings: ${message}`);
 				deps.telemetry.event('settings-import-error', { error: message });
 			} finally {
 				deps.statusBar.hideProgress();
@@ -287,28 +222,18 @@ function registerResetSettingsCommand(
 			try {
 				// Confirm reset
 				const confirm = await vscode.window.showWarningMessage(
-					localize(
-						'runtime.settings.reset.confirm',
-						'This will reset all Dates-LE settings to their default values. This action cannot be undone. Continue?',
-					),
+					'This will reset all Dates-LE settings to their default values. This action cannot be undone. Continue?',
 					{ modal: true },
-					localize('runtime.confirmation.continue', 'Continue'),
-					localize('runtime.confirmation.cancel', 'Cancel'),
+					'Continue',
+					'Cancel',
 				);
 
-				if (confirm !== localize('runtime.confirmation.continue', 'Continue')) {
-					deps.notifier.showInfo(
-						localize(
-							'runtime.settings.reset.cancelled',
-							'Settings reset cancelled',
-						),
-					);
+				if (confirm !== 'Continue') {
+					deps.notifier.showInfo('Settings reset cancelled');
 					return;
 				}
 
-				deps.statusBar.showProgress(
-					localize('runtime.progress.resetting', 'Resetting settings...'),
-				);
+				deps.statusBar.showProgress('Resetting settings...');
 
 				// Get default configuration
 				const config = vscode.workspace.getConfiguration('dates-le');
@@ -339,28 +264,12 @@ function registerResetSettingsCommand(
 					await config.update(key, value, vscode.ConfigurationTarget.Global);
 				}
 
-				deps.notifier.showInfo(
-					localize(
-						'runtime.settings.reset.success',
-						'Settings reset to default values',
-					),
-				);
+				deps.notifier.showInfo('Settings reset to default values');
 				deps.telemetry.event('settings-reset-success');
 			} catch (error) {
 				const message =
-					error instanceof Error
-						? error.message
-						: localize(
-								'runtime.error.unknown-fallback',
-								'Unknown error occurred',
-							);
-				deps.notifier.showError(
-					localize(
-						'runtime.settings.reset.error',
-						'Failed to reset settings: {0}',
-						message,
-					),
-				);
+					error instanceof Error ? error.message : 'Unknown error occurred';
+				deps.notifier.showError(`Failed to reset settings: ${message}`);
 				deps.telemetry.event('settings-reset-error', { error: message });
 			} finally {
 				deps.statusBar.hideProgress();

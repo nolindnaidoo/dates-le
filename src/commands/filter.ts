@@ -5,7 +5,6 @@ import type { DateValue } from '../types';
 import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
 import type { ErrorHandler } from '../utils/errorHandling';
-import type { Localizer } from '../utils/localization';
 import type { PerformanceMonitor } from '../utils/performance';
 
 export interface DateFilterOptions {
@@ -28,7 +27,6 @@ export function registerFilterCommand(
 		telemetry: Telemetry;
 		notifier: Notifier;
 		statusBar: StatusBar;
-		localizer: Localizer;
 		performanceMonitor: PerformanceMonitor;
 		errorHandler: ErrorHandler;
 	}>,

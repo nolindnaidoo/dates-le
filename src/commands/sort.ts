@@ -1,7 +1,4 @@
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
-
-const localize = nls.config({ messageFormat: nls.MessageFormat.file })();
 
 type SortOrder = 'asc' | 'desc' | 'alpha-asc' | 'alpha-desc';
 
@@ -16,9 +13,7 @@ export function registerSortCommand(context: vscode.ExtensionContext): void {
 		async () => {
 			const editor = vscode.window.activeTextEditor;
 			if (!editor) {
-				vscode.window.showWarningMessage(
-					localize('runtime.sort.no-editor', 'No active editor found'),
-				);
+				vscode.window.showWarningMessage('No active editor found');
 				return;
 			}
 
@@ -35,24 +30,12 @@ export function registerSortCommand(context: vscode.ExtensionContext): void {
 				await replaceDocumentContent(document, sorted);
 
 				vscode.window.showInformationMessage(
-					localize(
-						'runtime.sort.success',
-						'Sorted {0} dates ({1})',
-						sorted.length,
-						sortOrder.label,
-					),
+					`Sorted ${sorted.length} dates (${sortOrder.label})`,
 				);
 			} catch (error) {
 				const message =
-					error instanceof Error
-						? error.message
-						: localize(
-								'runtime.error.unknown-fallback',
-								'Unknown error occurred',
-							);
-				vscode.window.showErrorMessage(
-					localize('runtime.sort.error', 'Sorting failed: {0}', message),
-				);
+					error instanceof Error ? error.message : 'Unknown error occurred';
+				vscode.window.showErrorMessage(`Sorting failed: ${message}`);
 			}
 		},
 	);
@@ -64,33 +47,24 @@ async function promptSortOrder(): Promise<SortOption | undefined> {
 	return vscode.window.showQuickPick<SortOption>(
 		[
 			{
-				label: localize(
-					'runtime.sort.pick.chronological-asc',
-					'Chronological (Oldest First)',
-				),
+				label: 'Chronological (Oldest First)',
 				value: 'asc',
 			},
 			{
-				label: localize(
-					'runtime.sort.pick.chronological-desc',
-					'Reverse Chronological (Newest First)',
-				),
+				label: 'Reverse Chronological (Newest First)',
 				value: 'desc',
 			},
 			{
-				label: localize('runtime.sort.pick.alpha-asc', 'Alphabetical (A → Z)'),
+				label: 'Alphabetical (A → Z)',
 				value: 'alpha-asc',
 			},
 			{
-				label: localize('runtime.sort.pick.alpha-desc', 'Alphabetical (Z → A)'),
+				label: 'Alphabetical (Z → A)',
 				value: 'alpha-desc',
 			},
 		],
 		{
-			placeHolder: localize(
-				'runtime.sort.pick.placeholder',
-				'Select sort order',
-			),
+			placeHolder: 'Select sort order',
 		},
 	);
 }

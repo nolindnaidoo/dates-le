@@ -1,7 +1,3 @@
-import * as nls from 'vscode-nls';
-
-const localize = nls.config({ messageFormat: nls.MessageFormat.file })();
-
 export type ErrorCategory =
 	| 'parse'
 	| 'validation'
@@ -124,88 +120,37 @@ function buildUserFriendlyMessage(
 ): string {
 	switch (category) {
 		case 'parse':
-			return localize(
-				'runtime.error.parse',
-				'Failed to parse date values: {0}',
-				context || 'unknown file',
-			);
+			return `Failed to parse date values: ${context || 'unknown file'}`;
 		case 'file-system':
-			return localize(
-				'runtime.error.file-system',
-				'File system error: {0}',
-				error.message,
-			);
+			return `File system error: ${error.message}`;
 		case 'configuration':
-			return localize(
-				'runtime.error.configuration',
-				'Configuration error: {0}',
-				error.message,
-			);
+			return `Configuration error: ${error.message}`;
 		case 'validation':
-			return localize(
-				'runtime.error.validation',
-				'Date validation failed: {0}',
-				error.message,
-			);
+			return `Date validation failed: ${error.message}`;
 		case 'safety':
-			return localize(
-				'runtime.error.safety',
-				'Safety threshold exceeded: {0}',
-				error.message,
-			);
+			return `Safety threshold exceeded: ${error.message}`;
 		case 'operational':
-			return localize(
-				'runtime.error.operational',
-				'Date extraction failed: {0}',
-				error.message,
-			);
+			return `Date extraction failed: ${error.message}`;
 		default:
-			return localize(
-				'runtime.error.unknown',
-				'Unknown error: {0}',
-				error.message,
-			);
+			return `Unknown error: ${error.message}`;
 	}
 }
 
 function buildSuggestion(category: ErrorCategory): string {
 	switch (category) {
 		case 'parse':
-			return localize(
-				'runtime.error.parse.suggestion',
-				'Check the date format and ensure values are valid',
-			);
+			return 'Check the date format and ensure values are valid';
 		case 'file-system':
-			return localize(
-				'runtime.error.file-system.suggestion',
-				'Check file permissions and ensure the file exists',
-			);
+			return 'Check file permissions and ensure the file exists';
 		case 'configuration':
-			return localize(
-				'runtime.error.configuration.suggestion',
-				'Reset to default settings or check configuration syntax',
-			);
+			return 'Reset to default settings or check configuration syntax';
 		case 'validation':
-			return localize(
-				'runtime.error.validation.suggestion',
-				'Review date values and ensure they meet validation criteria',
-			);
+			return 'Review date values and ensure they meet validation criteria';
 		case 'safety':
-			return localize(
-				'runtime.error.safety.suggestion',
-				'Reduce file size or adjust safety thresholds',
-			);
+			return 'Reduce file size or adjust safety thresholds';
 		case 'operational':
-			return localize(
-				'runtime.error.operational.suggestion',
-				'Try again or check system resources',
-			);
+			return 'Try again or check system resources';
 		default:
-			return localize(
-				'runtime.error.unknown.suggestion',
-				'Check the logs for more details and consider reporting this issue',
-			);
+			return 'Check the logs for more details and consider reporting this issue';
 	}
 }
-
-void localize;

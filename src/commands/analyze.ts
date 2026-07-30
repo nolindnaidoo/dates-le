@@ -9,8 +9,6 @@ import type { Telemetry } from '../telemetry/telemetry';
 import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
 import type { ErrorHandler } from '../utils/errorHandling';
-import type { Localizer } from '../utils/localization';
-import { formatDuration } from '../utils/localization';
 import type { PerformanceMonitor } from '../utils/performance';
 
 export function registerAnalyzeCommand(
@@ -19,7 +17,6 @@ export function registerAnalyzeCommand(
 		telemetry: Telemetry;
 		notifier: Notifier;
 		statusBar: StatusBar;
-		localizer: Localizer;
 		performanceMonitor: PerformanceMonitor;
 		errorHandler: ErrorHandler;
 	}>,
@@ -51,7 +48,6 @@ async function performAnalysis(
 	deps: Readonly<{
 		telemetry: Telemetry;
 		notifier: Notifier;
-		localizer: Localizer;
 	}>,
 ): Promise<void> {
 	await vscode.window.withProgress(
@@ -87,7 +83,7 @@ async function performAnalysis(
 
 			progress.report({ increment: 100, message: 'Generating report...' });
 
-			const report = generateAnalysisReport(analysis, deps.localizer);
+			const report = generateAnalysisReport(analysis);
 			await openAnalysisResults(report, deps.notifier);
 
 			deps.telemetry.event('command-analyze-success', {
@@ -112,10 +108,7 @@ function handleAnalysisError(error: unknown, errorHandler: ErrorHandler): void {
 	});
 }
 
-function generateAnalysisReport(
-	analysis: DateAnalysis,
-	_localizer: Localizer,
-): string {
+function generateAnalysisReport(analysis: DateAnalysis): string {
 	const { statistics, anomalies, patterns, clusters, gaps } = analysis;
 
 	const report = [
@@ -312,4 +305,23 @@ function getPatternTypeTitle(type: string): string {
 		trend: 'Trend Pattern',
 	};
 	return titles[type] || type.charAt(0).toUpperCase() + type.slice(1);
+}
+
+function formatDuration(milliseconds: number): string {
+	if (milliseconds < 1000) {
+		return `${milliseconds}ms`;
+	}
+
+	const seconds = milliseconds / 1000;
+	if (seconds < 60) {
+		return `${seconds.toFixed(2)}s`;
+	}
+
+	const minutes = seconds / 60;
+	if (minutes < 60) {
+		return `${minutes.toFixed(2)}m`;
+	}
+
+	const hours = minutes / 60;
+	return `${hours.toFixed(2)}h`;
 }

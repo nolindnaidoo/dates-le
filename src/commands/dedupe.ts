@@ -1,7 +1,4 @@
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
-
-const localize = nls.config({ messageFormat: nls.MessageFormat.file })();
 
 export function registerDedupeCommand(context: vscode.ExtensionContext): void {
 	const command = vscode.commands.registerCommand(
@@ -9,9 +6,7 @@ export function registerDedupeCommand(context: vscode.ExtensionContext): void {
 		async () => {
 			const editor = vscode.window.activeTextEditor;
 			if (!editor) {
-				vscode.window.showWarningMessage(
-					localize('runtime.dedupe.no-editor', 'No active editor found'),
-				);
+				vscode.window.showWarningMessage('No active editor found');
 				return;
 			}
 
@@ -26,28 +21,12 @@ export function registerDedupeCommand(context: vscode.ExtensionContext): void {
 				await replaceDocumentContent(document, deduped);
 
 				vscode.window.showInformationMessage(
-					localize(
-						'runtime.dedupe.success',
-						'Removed {0} duplicate dates ({1} remaining)',
-						removedCount,
-						deduped.length,
-					),
+					`Removed ${removedCount} duplicate dates (${deduped.length} remaining)`,
 				);
 			} catch (error) {
 				const message =
-					error instanceof Error
-						? error.message
-						: localize(
-								'runtime.error.unknown-fallback',
-								'Unknown error occurred',
-							);
-				vscode.window.showErrorMessage(
-					localize(
-						'runtime.dedupe.error',
-						'Deduplication failed: {0}',
-						message,
-					),
-				);
+					error instanceof Error ? error.message : 'Unknown error occurred';
+				vscode.window.showErrorMessage(`Deduplication failed: ${message}`);
 			}
 		},
 	);

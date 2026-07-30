@@ -118,7 +118,6 @@ export type {
 	ErrorLogger,
 	ErrorNotifier,
 } from './utils/errorHandling';
-export type { Localizer } from './utils/localization';
 export type {
 	PerformanceMetrics,
 	PerformanceMonitor,

@@ -51,7 +51,6 @@
 	],
 	"icon": "src/assets/images/icon.png",
 	"main": "./dist/extension.js",
-	"l10n": "./package.nls.json",
 	"activationEvents": [
 		"onLanguage:json",
 		"onLanguage:yaml",
@@ -225,7 +224,7 @@
 				},
 				"dates-le.safety.fileSizeWarnBytes": {
 					"type": "number",
-					"default": 1e6,
+					"default": 1000000,
 					"minimum": 1000,
 					"description": "%manifest.settings.safety.warn.file-size.desc%"
 				},
@@ -295,8 +294,8 @@
 				},
 				"dates-le.performance.maxCpuUsage": {
 					"type": "number",
-					"default": 1e6,
-					"minimum": 1e5,
+					"default": 1000000,
+					"minimum": 100000,
 					"description": "%manifest.settings.performance.max-cpu.desc%"
 				},
 				"dates-le.performance.minThroughput": {
@@ -389,8 +388,5 @@
 		"tsx": "^4.20.6",
 		"typescript": "^5.9.3",
 		"vitest": "^3.2.4"
-	},
-	"dependencies": {
-		"vscode-nls": "^5.2.0"
 	}
 }

@@ -12,7 +12,6 @@ export function activate(context: vscode.ExtensionContext): void {
 		telemetry: services.telemetry,
 		notifier: services.notifier,
 		statusBar: services.statusBar,
-		localizer: services.localizer,
 		performanceMonitor: services.performanceMonitor,
 		errorHandler: services.errorHandler,
 	});
