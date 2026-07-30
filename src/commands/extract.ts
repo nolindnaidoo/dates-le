@@ -5,6 +5,7 @@ import type { Telemetry } from '../telemetry/telemetry';
 import type { Configuration } from '../types';
 import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
+import { sanitizeErrorMessage } from '../utils/errors';
 import { handleSafetyChecks } from '../utils/safety';
 
 export function registerExtractCommand(
@@ -76,7 +77,9 @@ export function registerExtractCommand(
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Unknown error occurred';
-				deps.notifier.showError(`Extraction failed: ${message}`);
+				deps.notifier.showError(
+					`Extraction failed: ${sanitizeErrorMessage(message)}`,
+				);
 				deps.telemetry.event('extract-error', { error: message });
 			} finally {
 				deps.statusBar.hideProgress();

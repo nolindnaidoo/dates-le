@@ -23,7 +23,7 @@ export type RecoveryAction =
 	| 'skip'
 	| 'abort';
 
-export interface UrlsLeError {
+export interface DatesLeError {
 	readonly category: ErrorCategory;
 	readonly severity: ErrorSeverity;
 	readonly message: string;
@@ -35,7 +35,7 @@ export interface UrlsLeError {
 	readonly metadata?: Readonly<Record<string, unknown>>;
 }
 
-export interface ParseError extends UrlsLeError {
+export interface ParseError extends DatesLeError {
 	readonly category: 'parsing';
 	readonly filepath?: string;
 	readonly position?: {
@@ -85,10 +85,3 @@ export interface Configuration {
 	readonly statusBarEnabled: boolean;
 	readonly telemetryEnabled: boolean;
 }
-
-// Re-export utility types for easier access
-export type {
-	ErrorHandler,
-	ErrorLogger,
-	ErrorNotifier,
-} from './utils/errorHandling';

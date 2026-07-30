@@ -8,7 +8,7 @@ import { extractDates } from '../extraction/extract';
 import type { Telemetry } from '../telemetry/telemetry';
 import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
-import type { ErrorHandler } from '../utils/errorHandling';
+import { sanitizeErrorMessage } from '../utils/errors';
 
 export function registerAnalyzeCommand(
 	context: vscode.ExtensionContext,
@@ -16,7 +16,6 @@ export function registerAnalyzeCommand(
 		telemetry: Telemetry;
 		notifier: Notifier;
 		statusBar: StatusBar;
-		errorHandler: ErrorHandler;
 	}>,
 ): void {
 	const command = vscode.commands.registerCommand(
@@ -33,7 +32,10 @@ export function registerAnalyzeCommand(
 			try {
 				await performAnalysis(editor.document, deps);
 			} catch (error) {
-				handleAnalysisError(error, deps.errorHandler);
+				const message = error instanceof Error ? error.message : String(error);
+				deps.notifier.showError(
+					`Failed to analyze dates: ${sanitizeErrorMessage(message)}`,
+				);
 			}
 		},
 	);
@@ -91,19 +93,6 @@ async function performAnalysis(
 			});
 		},
 	);
-}
-
-function handleAnalysisError(error: unknown, errorHandler: ErrorHandler): void {
-	errorHandler.handle({
-		category: 'operational',
-		originalError: error instanceof Error ? error : new Error(String(error)),
-		message: 'Failed to analyze dates',
-		userFriendlyMessage:
-			'Analysis failed. Please check the file format and try again.',
-		suggestion: 'Ensure the file contains valid date formats',
-		recoverable: true,
-		timestamp: new Date(),
-	});
 }
 
 function generateAnalysisReport(analysis: DateAnalysis): string {

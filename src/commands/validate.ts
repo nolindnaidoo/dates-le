@@ -4,7 +4,7 @@ import type { Telemetry } from '../telemetry/telemetry';
 import type { DateValue } from '../types';
 import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
-import type { ErrorHandler } from '../utils/errorHandling';
+import { sanitizeErrorMessage } from '../utils/errors';
 
 export interface DateValidationRule {
 	readonly name: string;
@@ -31,7 +31,6 @@ export function registerValidateCommand(
 		telemetry: Telemetry;
 		notifier: Notifier;
 		statusBar: StatusBar;
-		errorHandler: ErrorHandler;
 	}>,
 ): void {
 	const command = vscode.commands.registerCommand(
@@ -118,17 +117,10 @@ export function registerValidateCommand(
 					},
 				);
 			} catch (error) {
-				deps.errorHandler.handle({
-					category: 'operational',
-					originalError:
-						error instanceof Error ? error : new Error(String(error)),
-					message: 'Failed to validate dates',
-					userFriendlyMessage:
-						'Date validation failed. Please check the file format and try again.',
-					suggestion: 'Ensure the file contains valid date formats',
-					recoverable: true,
-					timestamp: new Date(),
-				});
+				const message = error instanceof Error ? error.message : String(error);
+				deps.notifier.showError(
+					`Failed to validate dates: ${sanitizeErrorMessage(message)}`,
+				);
 			}
 		},
 	);

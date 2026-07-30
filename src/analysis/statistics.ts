@@ -62,9 +62,7 @@ export interface DateGap {
 /**
  * Calculate comprehensive statistics for a collection of dates
  */
-export function calculateDateStatistics(
-	dates: readonly DateValue[],
-): DateStatistics {
+function calculateDateStatistics(dates: readonly DateValue[]): DateStatistics {
 	if (dates.length === 0) {
 		return {
 			total: 0,
@@ -183,9 +181,7 @@ export function calculateDateStatistics(
 /**
  * Detect anomalies in date data
  */
-export function detectDateAnomalies(
-	dates: readonly DateValue[],
-): DateAnomaly[] {
+function detectDateAnomalies(dates: readonly DateValue[]): DateAnomaly[] {
 	const anomalies: DateAnomaly[] = [];
 	const now = new Date();
 	const validDates = dates.filter(
@@ -280,7 +276,7 @@ export function detectDateAnomalies(
 /**
  * Detect patterns in date data
  */
-export function detectDatePatterns(dates: readonly DateValue[]): DatePattern[] {
+function detectDatePatterns(dates: readonly DateValue[]): DatePattern[] {
 	const patterns: DatePattern[] = [];
 	const validDates = dates
 		.filter(
@@ -322,7 +318,7 @@ export function detectDatePatterns(dates: readonly DateValue[]): DatePattern[] {
 /**
  * Cluster dates by temporal proximity
  */
-export function clusterDates(dates: readonly DateValue[]): DateCluster[] {
+function clusterDates(dates: readonly DateValue[]): DateCluster[] {
 	const validDates = dates
 		.filter(
 			(d) => d.timestamp && !Number.isNaN(new Date(d.timestamp).getTime()),
@@ -378,7 +374,7 @@ export function clusterDates(dates: readonly DateValue[]): DateCluster[] {
 /**
  * Detect gaps in date sequences
  */
-export function detectDateGaps(dates: readonly DateValue[]): DateGap[] {
+function detectDateGaps(dates: readonly DateValue[]): DateGap[] {
 	const validDates = dates
 		.filter(
 			(d) => d.timestamp && !Number.isNaN(new Date(d.timestamp).getTime()),
