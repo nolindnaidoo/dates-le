@@ -1,130 +1,96 @@
 import * as vscode from 'vscode';
 import type { Configuration } from '../types';
 
-export type NotificationLevel = 'all' | 'important' | 'silent';
-
-export type Preset =
-	| 'minimal'
-	| 'balanced'
-	| 'comprehensive'
-	| 'performance'
-	| 'dates';
+/**
+ * Fallback values, kept identical to the defaults declared in
+ * package.json contributes.configuration. A unit test asserts parity so
+ * the two can never drift again.
+ */
+export const CONFIG_DEFAULTS = Object.freeze({
+	copyToClipboardEnabled: false,
+	notificationsLevel: 'silent' as const,
+	openResultsSideBySide: true,
+	safetyEnabled: true,
+	safetyFileSizeWarnBytes: 1_000_000,
+	statusBarEnabled: true,
+	telemetryEnabled: false,
+});
 
 export function getConfiguration(): Configuration {
 	const config = vscode.workspace.getConfiguration('dates-le');
 
 	return Object.freeze({
-		copyToClipboardEnabled: Boolean(
-			config.get('copyToClipboardEnabled', false),
+		copyToClipboardEnabled: readBoolean(
+			config,
+			'copyToClipboardEnabled',
+			CONFIG_DEFAULTS.copyToClipboardEnabled,
 		),
-		dedupeEnabled: Boolean(config.get('dedupeEnabled', false)),
-		notificationsLevel: getNotificationLevel(config),
-		openResultsSideBySide: Boolean(config.get('openResultsSideBySide', false)),
-		safetyEnabled: Boolean(config.get('safety.enabled', true)),
-		safetyFileSizeWarnBytes: getMinValue(
-			config.get('safety.fileSizeWarnBytes', 1000000),
+		notificationsLevel: readNotificationLevel(config),
+		openResultsSideBySide: readBoolean(
+			config,
+			'openResultsSideBySide',
+			CONFIG_DEFAULTS.openResultsSideBySide,
+		),
+		safetyEnabled: readBoolean(
+			config,
+			'safety.enabled',
+			CONFIG_DEFAULTS.safetyEnabled,
+		),
+		safetyFileSizeWarnBytes: readNumber(
+			config,
+			'safety.fileSizeWarnBytes',
+			CONFIG_DEFAULTS.safetyFileSizeWarnBytes,
 			1000,
 		),
-		safetyLargeOutputLinesThreshold: getMinValue(
-			config.get('safety.largeOutputLinesThreshold', 50000),
-			100,
+		statusBarEnabled: readBoolean(
+			config,
+			'statusBar.enabled',
+			CONFIG_DEFAULTS.statusBarEnabled,
 		),
-		safetyManyDocumentsThreshold: getMinValue(
-			config.get('safety.manyDocumentsThreshold', 8),
-			1,
+		telemetryEnabled: readBoolean(
+			config,
+			'telemetryEnabled',
+			CONFIG_DEFAULTS.telemetryEnabled,
 		),
-		showParseErrors: Boolean(config.get('showParseErrors', false)),
-		statusBarEnabled: Boolean(config.get('statusBar.enabled', true)),
-		telemetryEnabled: Boolean(config.get('telemetryEnabled', false)),
-		csvStreamingEnabled: Boolean(config.get('csv.streamingEnabled', false)),
-		postProcessOpenInNewFile: Boolean(
-			config.get('postProcess.openInNewFile', true),
-		),
-		analysisEnabled: Boolean(config.get('analysis.enabled', true)),
-		analysisIncludeStats: Boolean(config.get('analysis.includeStats', true)),
-		performanceEnabled: Boolean(config.get('performance.enabled', true)),
-		performanceMaxDuration: getMinValue(
-			config.get('performance.maxDuration', 5000),
-			1000,
-		),
-		performanceMaxMemoryUsage: getMinValue(
-			config.get('performance.maxMemoryUsage', 104857600),
-			1048576,
-		),
-		performanceMaxCpuUsage: getMinValue(
-			config.get('performance.maxCpuUsage', 1000000),
-			100000,
-		),
-		performanceMinThroughput: getMinValue(
-			config.get('performance.minThroughput', 1000),
-			100,
-		),
-		performanceMaxCacheSize: getMinValue(
-			config.get('performance.maxCacheSize', 1000),
-			100,
-		),
-		keyboardShortcutsEnabled: Boolean(
-			config.get('keyboard.shortcuts.enabled', true),
-		),
-		keyboardExtractShortcut: String(
-			config.get('keyboard.extractShortcut', 'ctrl+alt+d'),
-		),
-		keyboardDedupeShortcut: String(
-			config.get('keyboard.dedupeShortcut', 'ctrl+alt+e'),
-		),
-		keyboardSortShortcut: String(
-			config.get('keyboard.sortShortcut', 'ctrl+alt+s'),
-		),
-		presetsEnabled: Boolean(config.get('presets.enabled', true)),
-		presetsDefaultPreset: getPreset(config),
 	});
 }
 
-function getNotificationLevel(
+function readBoolean(
 	config: vscode.WorkspaceConfiguration,
-): NotificationLevel {
-	const notifRaw = config.get(
-		'notificationLevel',
-		config.get('notificationsLevel', 'silent'),
-	) as unknown;
-
-	if (isValidNotificationLevel(notifRaw)) {
-		return notifRaw;
-	}
-
-	return 'silent';
+	key: string,
+	defaultValue: boolean,
+): boolean {
+	const value = config.get(key, defaultValue);
+	return typeof value === 'boolean' ? value : defaultValue;
 }
 
-function getPreset(config: vscode.WorkspaceConfiguration): Preset {
-	const presetRaw = config.get('presets.defaultPreset', 'balanced');
-
-	if (isValidPreset(presetRaw)) {
-		return presetRaw;
+function readNumber(
+	config: vscode.WorkspaceConfiguration,
+	key: string,
+	defaultValue: number,
+	minValue: number,
+): number {
+	const value = Number(config.get(key, defaultValue));
+	if (!Number.isFinite(value)) {
+		return defaultValue;
 	}
-
-	return 'balanced';
+	return Math.max(minValue, value);
 }
 
-function getMinValue(value: unknown, minValue: number): number {
-	const numValue = Number(value);
+export type NotificationLevel = 'all' | 'important' | 'silent';
 
-	if (Number.isNaN(numValue)) {
-		return minValue;
-	}
-
-	return Math.max(minValue, numValue);
-}
-
-function isValidNotificationLevel(v: unknown): v is NotificationLevel {
+export function isValidNotificationLevel(v: unknown): v is NotificationLevel {
 	return v === 'all' || v === 'important' || v === 'silent';
 }
 
-function isValidPreset(v: unknown): v is Preset {
-	return (
-		v === 'minimal' ||
-		v === 'balanced' ||
-		v === 'comprehensive' ||
-		v === 'performance' ||
-		v === 'dates'
+function readNotificationLevel(
+	config: vscode.WorkspaceConfiguration,
+): NotificationLevel {
+	const raw = config.get<string>(
+		'notificationsLevel',
+		CONFIG_DEFAULTS.notificationsLevel,
 	);
+	return isValidNotificationLevel(raw)
+		? raw
+		: CONFIG_DEFAULTS.notificationsLevel;
 }
