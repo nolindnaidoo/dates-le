@@ -18,7 +18,7 @@
 	},
 	"homepage": "https://github.com/OffensiveEdge/dates-le#readme",
 	"engines": {
-		"vscode": "^1.70.0",
+		"vscode": "^1.90.0",
 		"node": ">=20.0.0"
 	},
 	"categories": [
@@ -61,16 +61,7 @@
 		"onLanguage:typescript",
 		"onLanguage:html",
 		"onLanguage:log",
-		"onLanguage:plaintext",
-		"onCommand:dates-le.extractDates",
-		"onCommand:dates-le.postProcess.dedupe",
-		"onCommand:dates-le.postProcess.sort",
-		"onCommand:dates-le.analyze",
-		"onCommand:dates-le.convert",
-		"onCommand:dates-le.filter",
-		"onCommand:dates-le.validate",
-		"onCommand:dates-le.openSettings",
-		"onCommand:dates-le.help"
+		"onLanguage:plaintext"
 	],
 	"capabilities": {
 		"virtualWorkspaces": {
@@ -142,7 +133,7 @@
 			"editor/context": [
 				{
 					"command": "dates-le.extractDates",
-					"when": "resourceExtname == .json || resourceExtname == .yaml || resourceExtname == .yml || resourceExtname == .csv || resourceExtname == .xml || resourceExtname == .js || resourceExtname == .ts || resourceExtname == .jsx || resourceExtname == .tsx || resourceExtname == .html || resourceExtname == .log || resourceExtname == .txt",
+					"when": "editorLangId =~ /^(json|yaml|yml|csv|xml|javascript|typescript|html|log|plaintext)$/",
 					"group": "1_modification@1"
 				}
 			],
@@ -184,11 +175,6 @@
 					"default": false,
 					"description": "%manifest.settings.copy.clipboard.desc%"
 				},
-				"dates-le.dedupeEnabled": {
-					"type": "boolean",
-					"default": false,
-					"description": "%manifest.settings.dedupe.desc%"
-				},
 				"dates-le.notificationsLevel": {
 					"type": "string",
 					"default": "silent",
@@ -220,23 +206,6 @@
 					"minimum": 1000,
 					"description": "%manifest.settings.safety.warn.file-size.desc%"
 				},
-				"dates-le.safety.largeOutputLinesThreshold": {
-					"type": "number",
-					"default": 50000,
-					"minimum": 100,
-					"description": "%manifest.settings.safety.warn.large-output.desc%"
-				},
-				"dates-le.safety.manyDocumentsThreshold": {
-					"type": "number",
-					"default": 8,
-					"minimum": 1,
-					"description": "%manifest.settings.safety.warn.many-documents.desc%"
-				},
-				"dates-le.showParseErrors": {
-					"type": "boolean",
-					"default": false,
-					"description": "%manifest.settings.parse-errors.desc%"
-				},
 				"dates-le.statusBar.enabled": {
 					"type": "boolean",
 					"default": true,
@@ -246,105 +215,6 @@
 					"type": "boolean",
 					"default": false,
 					"description": "%manifest.settings.telemetry.desc%"
-				},
-				"dates-le.csv.streamingEnabled": {
-					"type": "boolean",
-					"default": false,
-					"description": "%manifest.settings.csv.streaming.desc%"
-				},
-				"dates-le.postProcess.openInNewFile": {
-					"type": "boolean",
-					"default": true,
-					"description": "%manifest.settings.open.new-file.desc%"
-				},
-				"dates-le.analysis.enabled": {
-					"type": "boolean",
-					"default": true,
-					"description": "%manifest.settings.analysis.enabled.desc%"
-				},
-				"dates-le.analysis.includeStats": {
-					"type": "boolean",
-					"default": true,
-					"description": "%manifest.settings.analysis.stats.desc%"
-				},
-				"dates-le.performance.enabled": {
-					"type": "boolean",
-					"default": true,
-					"description": "%manifest.settings.performance.enabled.desc%"
-				},
-				"dates-le.performance.maxDuration": {
-					"type": "number",
-					"default": 5000,
-					"minimum": 1000,
-					"description": "%manifest.settings.performance.max-duration.desc%"
-				},
-				"dates-le.performance.maxMemoryUsage": {
-					"type": "number",
-					"default": 104857600,
-					"minimum": 1048576,
-					"description": "%manifest.settings.performance.max-memory.desc%"
-				},
-				"dates-le.performance.maxCpuUsage": {
-					"type": "number",
-					"default": 1000000,
-					"minimum": 100000,
-					"description": "%manifest.settings.performance.max-cpu.desc%"
-				},
-				"dates-le.performance.minThroughput": {
-					"type": "number",
-					"default": 1000,
-					"minimum": 100,
-					"description": "%manifest.settings.performance.min-throughput.desc%"
-				},
-				"dates-le.performance.maxCacheSize": {
-					"type": "number",
-					"default": 1000,
-					"minimum": 100,
-					"description": "%manifest.settings.performance.max-cache.desc%"
-				},
-				"dates-le.keyboard.shortcuts.enabled": {
-					"type": "boolean",
-					"default": true,
-					"description": "%manifest.settings.keyboard.shortcuts.enabled.desc%"
-				},
-				"dates-le.keyboard.extractShortcut": {
-					"type": "string",
-					"default": "ctrl+alt+d",
-					"description": "%manifest.settings.keyboard.extract.shortcut.desc%"
-				},
-				"dates-le.keyboard.dedupeShortcut": {
-					"type": "string",
-					"default": "ctrl+alt+e",
-					"description": "%manifest.settings.keyboard.dedupe.shortcut.desc%"
-				},
-				"dates-le.keyboard.sortShortcut": {
-					"type": "string",
-					"default": "ctrl+alt+s",
-					"description": "%manifest.settings.keyboard.sort.shortcut.desc%"
-				},
-				"dates-le.presets.enabled": {
-					"type": "boolean",
-					"default": true,
-					"description": "%manifest.settings.presets.enabled.desc%"
-				},
-				"dates-le.presets.defaultPreset": {
-					"type": "string",
-					"default": "balanced",
-					"enum": [
-						"minimal",
-						"balanced",
-						"comprehensive",
-						"performance",
-						"dates"
-					],
-					"enumDescriptions": [
-						"%manifest.settings.presets.default.option.minimal%",
-						"%manifest.settings.presets.default.option.balanced%",
-						"%manifest.settings.presets.default.option.comprehensive%",
-						"%manifest.settings.presets.default.option.performance%",
-						"%manifest.settings.presets.default.option.dates%"
-					],
-					"description": "%manifest.settings.presets.default.desc%"
 				}
 			}
 		}
@@ -370,7 +240,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.2.5",
 		"@types/node": "^24.7.1",
-		"@types/vscode": "^1.70.0",
+		"@types/vscode": "^1.90.0",
 		"@vitest/coverage-v8": "^3.2.4",
 		"@vitest/ui": "^3.2.4",
 		"@vscode/test-electron": "^2.5.2",
