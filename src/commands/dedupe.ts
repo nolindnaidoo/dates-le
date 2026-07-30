@@ -1,12 +1,16 @@
 import * as vscode from 'vscode';
+import type { Notifier } from '../ui/notifier';
 
-export function registerDedupeCommand(context: vscode.ExtensionContext): void {
+export function registerDedupeCommand(
+	context: vscode.ExtensionContext,
+	notifier: Notifier,
+): void {
 	const command = vscode.commands.registerCommand(
 		'dates-le.postProcess.dedupe',
 		async () => {
 			const editor = vscode.window.activeTextEditor;
 			if (!editor) {
-				vscode.window.showWarningMessage('No active editor found');
+				notifier.showWarning('No active editor found');
 				return;
 			}
 
@@ -23,13 +27,13 @@ export function registerDedupeCommand(context: vscode.ExtensionContext): void {
 
 				await replaceDocumentContent(document, deduped);
 
-				vscode.window.showInformationMessage(
+				notifier.showInfo(
 					`Removed ${removedCount} duplicate dates (${deduped.length} remaining)`,
 				);
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Unknown error occurred';
-				vscode.window.showErrorMessage(`Deduplication failed: ${message}`);
+				notifier.showError(`Deduplication failed: ${message}`);
 			}
 		},
 	);

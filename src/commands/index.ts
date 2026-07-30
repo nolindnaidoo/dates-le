@@ -26,8 +26,8 @@ export function registerCommands(
 		notifier: deps.notifier,
 		statusBar: deps.statusBar,
 	});
-	registerDedupeCommand(context);
-	registerSortCommand(context);
+	registerDedupeCommand(context, deps.notifier);
+	registerSortCommand(context, deps.notifier);
 	registerAnalyzeCommand(context, deps);
 	registerConvertCommand(context, deps);
 	registerFilterCommand(context, deps);
