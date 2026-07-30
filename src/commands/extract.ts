@@ -46,7 +46,9 @@ export function registerExtractCommand(
 
 				if (!result.success) {
 					const errorMessage = result.errors[0]?.message || 'Unknown error';
-					deps.notifier.showError(`Failed to extract dates: ${errorMessage}`);
+					deps.notifier.showError(
+						`Failed to extract dates: ${sanitizeErrorMessage(errorMessage)}`,
+					);
 					return;
 				}
 

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import type { Notifier } from '../ui/notifier';
+import { sanitizeErrorMessage } from '../utils/errors';
 
 type SortOrder = 'asc' | 'desc' | 'alpha-asc' | 'alpha-desc';
 
@@ -37,7 +38,7 @@ export function registerSortCommand(
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Unknown error occurred';
-				notifier.showError(`Sorting failed: ${message}`);
+				notifier.showError(`Sorting failed: ${sanitizeErrorMessage(message)}`);
 			}
 		},
 	);

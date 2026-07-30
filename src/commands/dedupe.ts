@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import type { Notifier } from '../ui/notifier';
+import { sanitizeErrorMessage } from '../utils/errors';
 
 export function registerDedupeCommand(
 	context: vscode.ExtensionContext,
@@ -33,7 +34,9 @@ export function registerDedupeCommand(
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Unknown error occurred';
-				notifier.showError(`Deduplication failed: ${message}`);
+				notifier.showError(
+					`Deduplication failed: ${sanitizeErrorMessage(message)}`,
+				);
 			}
 		},
 	);
