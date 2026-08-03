@@ -73,6 +73,9 @@ Key settings:
 ## Support
 - GitHub Issues: https://github.com/nolindnaidoo/dates-le/issues
 - Documentation: https://github.com/nolindnaidoo/dates-le#readme
+- LE Tools: https://letools.dev
+
+Built by nolindnaidoo (https://github.com/nolindnaidoo) — MIT licensed.
 		`.trim();
 
 		const doc = await vscode.workspace.openTextDocument({
