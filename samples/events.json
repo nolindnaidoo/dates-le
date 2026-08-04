@@ -1,0 +1,11 @@
+{
+  "release": "2026-08-01T12:00:00Z",
+  "deprecations": [
+    { "api": "v1/search", "sunset": "2026-11-30" },
+    { "api": "v1/export", "sunset": "2027-01-15" }
+  ],
+  "incidents": [
+    { "opened": "2026-07-14T08:21:00Z", "resolved": "2026-07-14T09:05:00Z" },
+    { "opened": "2026-07-29T16:40:00Z", "resolved": "2026-07-29T17:12:00Z" }
+  ]
+}
