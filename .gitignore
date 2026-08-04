@@ -113,3 +113,4 @@ dist/
 release/
 out-test/
 .vscode-test/
+benchmark-results.json
