@@ -114,3 +114,9 @@ release/
 out-test/
 .vscode-test/
 benchmark-results.json
+
+# samples/ is the demo-recording workspace. Log timestamps are this
+# extension's headline case, so the *.log rule above would exclude the very
+# file the demo opens. Named explicitly, so a stray real log dropped into
+# samples/ while recording stays ignored.
+!samples/server.log

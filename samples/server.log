@@ -1,0 +1,8 @@
+2026-08-01T09:14:22Z INFO  boot        starting api v2.4.1
+2026-08-01T09:14:23Z INFO  db          migrations applied at 2026-07-28T22:10:00Z
+2026-08-01T09:15:07Z WARN  cache       stale entry from 2026-07-31T18:45:11Z
+2026-08-01T11:02:44Z ERROR payments    retry window opened 2026-08-01T11:00:00Z
+2026-08-02T00:00:01Z INFO  scheduler   nightly job, previous run 2026-08-01T00:00:03Z
+2026-08-02T06:30:19Z INFO  auth        token issued, expires 2026-08-02T07:30:19Z
+2026-08-02T14:51:38Z WARN  queue       backlog since 2026-08-02T14:20:00Z
+2026-08-03T03:12:55Z INFO  backup      snapshot 2026-08-03T03:00:00Z complete
