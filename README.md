@@ -22,6 +22,11 @@
   <img src="src/assets/images/demo.gif" alt="Dates-LE Demo" style="max-width: 100%; height: auto;" />
 </p>
 
+> **Useful?** A star or rating is how other developers find it —
+> [★ GitHub](https://github.com/nolindnaidoo/dates-le) ·
+> [★ Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le&ssr=false#review-details) ·
+> [★ Open VSX](https://open-vsx.org/extension/OffensiveEdge/dates-le/reviews)
+
 ## What it does
 
 Open a file, press `Ctrl+Alt+D` (`Cmd+Alt+D` on Mac), and every date in the document lands in a new editor — deduplicate, sort, analyze, convert, filter, or validate it from there. Works in VS Code and in VS Code–based editors like Cursor and VSCodium (installable from Open VSX).
@@ -142,6 +147,16 @@ Every tool in the family, one page: **[letools.dev](https://letools.dev)**
 - **[Scrape-LE](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.scrape-le)** - Check whether a page is scrapeable before you write the scraper
 - **[Colors-LE](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.colors-le)** - Extract and analyze colors from CSS, SCSS, LESS, Stylus, HTML, JS/TS, and SVG
 - **[URLs-LE](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.urls-le)** - Extract URLs from documentation, configs, and code
+
+## Also by nolindnaidoo
+
+**Rust** — [pixelcoords](https://github.com/nolindnaidoo/pixelcoords) marks pixel-exact
+coordinates machines can use · [pixelactions](https://github.com/nolindnaidoo/pixelactions)
+performs and verifies the interaction ·
+[pixelcoords.dev](https://pixelcoords.dev) · [pixelactions.dev](https://pixelactions.dev)
+
+**Elsewhere** — [GitHub](https://github.com/nolindnaidoo) ·
+[LinkedIn](https://www.linkedin.com/in/nolindnaidoo/)
 
 ## License
 
