@@ -15,12 +15,18 @@ export function fullDocumentRange(document: vscode.TextDocument): vscode.Range {
 	);
 }
 
-/** Replace the document's entire contents with `lines`. */
+/**
+ * Replace the document's entire contents with `lines`.
+ *
+ * Returns false when the workspace rejected the edit — a read-only document,
+ * or one that changed underneath the command. Callers must not announce a
+ * result without checking it: the document still holds its original text.
+ */
 export async function replaceDocumentContent(
 	document: vscode.TextDocument,
 	lines: string[],
-): Promise<void> {
+): Promise<boolean> {
 	const edit = new vscode.WorkspaceEdit();
 	edit.replace(document.uri, fullDocumentRange(document), lines.join('\n'));
-	await vscode.workspace.applyEdit(edit);
+	return await vscode.workspace.applyEdit(edit);
 }

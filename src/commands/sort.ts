@@ -33,7 +33,13 @@ export function registerSortCommand(
 				const lines = extractNonEmptyLines(document.getText());
 				const sorted = sortLines(lines, sortOrder.value);
 
-				await replaceDocumentContent(document, sorted);
+				const replaced = await replaceDocumentContent(document, sorted);
+				if (!replaced) {
+					notifier.showError(
+						vscode.l10n.t('Could not sort: the edit was rejected.'),
+					);
+					return;
+				}
 
 				notifier.showInfo(
 					vscode.l10n.t(

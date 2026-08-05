@@ -27,7 +27,13 @@ export function registerDedupeCommand(
 				const deduped = deduplicateLines(lines);
 				const removedCount = lines.length - deduped.length;
 
-				await replaceDocumentContent(document, deduped);
+				const replaced = await replaceDocumentContent(document, deduped);
+				if (!replaced) {
+					notifier.showError(
+						vscode.l10n.t('Could not deduplicate: the edit was rejected.'),
+					);
+					return;
+				}
 
 				notifier.showInfo(
 					`Removed ${removedCount} duplicate dates (${deduped.length} remaining)`,

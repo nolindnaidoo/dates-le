@@ -5,6 +5,7 @@ import {
 	_resetMockState,
 	_respondToQuickPick,
 	_setActiveEditor,
+	_setApplyEditResult,
 	_setConfig,
 	_shownMessages,
 	appliedEdits,
@@ -345,5 +346,40 @@ describe('dates-le.help', () => {
 		registerHelpCommand(makeContext(), deps);
 		await runCommand('dates-le.help');
 		expect(events).toContain('command-help');
+	});
+});
+
+describe('post-process: rejected edits', () => {
+	// applyEdit resolves false for a read-only document, or one that changed
+	// underneath the command. The shared replaceDocumentContent helper swallowed
+	// that value, so both commands announced a result over unchanged text.
+
+	it('dedupe reports a failure instead of a count', async () => {
+		_setConfig('dates-le.notificationsLevel', 'all');
+		registerDedupeCommand(makeContext(), createNotifier());
+		_setApplyEditResult(false);
+		_setActiveEditor(
+			_createDocument({ content: '2024-01-15\n2024-01-15\n2024-01-16\n' }),
+		);
+		await runCommand('dates-le.postProcess.dedupe');
+		expect(_shownMessages().some((m) => m.kind === 'error')).toBe(true);
+		expect(
+			_shownMessages().some((m) => String(m.message).startsWith('Removed')),
+		).toBe(false);
+	});
+
+	it('sort reports a failure instead of a count', async () => {
+		_setConfig('dates-le.notificationsLevel', 'all');
+		registerSortCommand(makeContext(), createNotifier());
+		_setApplyEditResult(false);
+		_respondToQuickPick((items) => items[0]);
+		_setActiveEditor(
+			_createDocument({ content: '2024-01-16\n2024-01-15\n2024-01-17\n' }),
+		);
+		await runCommand('dates-le.postProcess.sort');
+		expect(_shownMessages().some((m) => m.kind === 'error')).toBe(true);
+		expect(
+			_shownMessages().some((m) => String(m.message).startsWith('Sorted')),
+		).toBe(false);
 	});
 });

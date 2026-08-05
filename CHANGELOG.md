@@ -32,6 +32,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   — and `openResults` discarded that and returned `true` regardless, so the
   caller's failure branch could not fire. The result is now propagated, with a
   test that drives a rejected edit.
+- Dedupe and sort had the same defect one layer down. The shared
+  `replaceDocumentContent` helper returned `void`, swallowing the rejection, so
+  both announced "Removed 3 duplicate dates" or "Sorted 12 dates" over a
+  document that still held its original text. The helper now returns whether
+  the edit landed and both callers report a failure instead.
 - The oversized-clipboard warning was never localized.
 - The `vscode` test mock honours `validateInput`. VS Code will not hand a
   command a value its own validator rejected; the mock ignored it and returned
