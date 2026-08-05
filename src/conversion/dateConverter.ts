@@ -53,12 +53,14 @@ function convertDate(
 			converted = date.toISOString().split('T')[0]!;
 			break;
 		case 'custom':
-			if (options.customFormat) {
-				converted = formatCustomDate(date, options.customFormat);
-			} else {
+			// Without a custom format there is nothing to apply, so this falls
+			// back to ISO and says so in the reported format.
+			if (!options.customFormat) {
 				converted = date.toISOString();
 				format = 'iso';
+				break;
 			}
+			converted = formatCustomDate(date, options.customFormat);
 			break;
 		default:
 			converted = date.toISOString();

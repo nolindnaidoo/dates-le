@@ -61,6 +61,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Every `else` block is gone (4 of them), replaced by guard clauses and early
+  returns.
+- Filter and Validate each held registration, the prompts, the run and the
+  report in one file (453 and 413 lines). The reports moved to
+  `commands/filterReport.ts` and `commands/validateReport.ts`, leaving 374 and
+  256.
+
 - Test coverage raised from 61.70% to 79.36% of branches (79.65% to 87.48% of
   statements), moving the repo from 1.70 points above the branch floor — the
   narrowest margin in the family — to 19.36, with no file left below any of
