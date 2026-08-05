@@ -214,7 +214,7 @@
 				},
 				"dates-le.safety.fileSizeWarnBytes": {
 					"type": "number",
-					"default": 1e6,
+					"default": 1000000.0,
 					"minimum": 1000,
 					"description": "%manifest.settings.safety.warn.file-size.desc%"
 				},
@@ -253,7 +253,10 @@
 		"package": "node -e \"require('fs').mkdirSync('release',{recursive:true})\" && vsce package --no-dependencies --out release/ && npm run clean:i18n",
 		"publish": "vsce publish",
 		"test:integration": "npm run build && tsc -p tsconfig.it.json && vscode-test",
-		"test:e2e-vsix": "node scripts/e2e-vsix.js"
+		"test:e2e-vsix": "node scripts/e2e-vsix.js",
+		"hooks:install": "git rev-parse --git-dir >/dev/null 2>&1 && git config core.hooksPath .githooks || true",
+		"lint:commits": "node scripts/commit-lint.js --range origin/main..HEAD",
+		"prepare": "bun run hooks:install"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.7",
