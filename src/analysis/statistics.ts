@@ -1,4 +1,5 @@
 import type { DateValue } from '../types';
+import { formatDateSpan } from '../utils/duration';
 
 export interface DateStatistics {
 	readonly total: number;
@@ -397,7 +398,7 @@ function detectDateGaps(dates: readonly DateValue[]): DateGap[] {
 				start: prev,
 				end: curr,
 				duration,
-				description: `Gap of ${formatDuration(
+				description: `Gap of ${formatDateSpan(
 					duration,
 				)} between ${prev.toISOString()} and ${curr.toISOString()}`,
 			});
@@ -568,14 +569,4 @@ function detectTrendPattern(
 	}
 
 	return null;
-}
-
-function formatDuration(milliseconds: number): string {
-	const days = Math.floor(milliseconds / (24 * 60 * 60 * 1000));
-	const hours = Math.floor(
-		(milliseconds % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000),
-	);
-
-	if (days > 0) return `${days} day${days > 1 ? 's' : ''}`;
-	return `${hours} hour${hours > 1 ? 's' : ''}`;
 }

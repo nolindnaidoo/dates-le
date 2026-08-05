@@ -5,6 +5,7 @@ import type { Telemetry } from '../telemetry/telemetry';
 import type { Configuration } from '../types';
 import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
+import { fullDocumentRange } from '../utils/document';
 import { sanitizeErrorMessage } from '../utils/errors';
 import { handleSafetyChecks } from '../utils/safety';
 
@@ -23,7 +24,7 @@ export function registerExtractCommand(
 
 			const editor = vscode.window.activeTextEditor;
 			if (!editor) {
-				deps.notifier.showWarning('No active editor found');
+				deps.notifier.showWarning(vscode.l10n.t('No active editor found'));
 				return;
 			}
 
@@ -53,7 +54,9 @@ export function registerExtractCommand(
 				}
 
 				if (result.dates.length === 0) {
-					deps.notifier.showInfo('No dates found in the current document');
+					deps.notifier.showInfo(
+						vscode.l10n.t('No dates found in the current document'),
+					);
 					return;
 				}
 
@@ -61,7 +64,7 @@ export function registerExtractCommand(
 
 				const opened = await openResults(document, dateValues, config);
 				if (!opened) {
-					deps.notifier.showError('Failed to open results');
+					deps.notifier.showError(vscode.l10n.t('Failed to open results'));
 					return;
 				}
 
@@ -113,8 +116,10 @@ async function openResults(
 			fullDocumentRange(document),
 			dateValues.join('\n'),
 		);
-		await vscode.workspace.applyEdit(edit);
-		return true;
+		// applyEdit returns false for a rejected edit — a read-only document, or
+		// one that changed underneath the command. Returning true regardless made
+		// the caller report success over a document it had not touched.
+		return await vscode.workspace.applyEdit(edit);
 	} catch {
 		return false;
 	}
@@ -134,7 +139,10 @@ async function handleClipboard(
 
 	if (clipboardText.length > maxClipboardSize) {
 		notifier.showWarning(
-			`Results too large for clipboard (${clipboardText.length} characters), skipping clipboard copy`,
+			vscode.l10n.t(
+				'Results too large for clipboard ({0} characters), skipping clipboard copy',
+				clipboardText.length,
+			),
 		);
 		return;
 	}
@@ -146,11 +154,4 @@ async function handleClipboard(
 			`Failed to copy to clipboard: ${error instanceof Error ? error.message : 'Unknown error'}`,
 		);
 	}
-}
-
-function fullDocumentRange(document: vscode.TextDocument): vscode.Range {
-	return new vscode.Range(
-		document.positionAt(0),
-		document.lineAt(document.lineCount - 1).range.end,
-	);
 }

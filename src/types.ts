@@ -85,3 +85,15 @@ export interface Configuration {
 	readonly statusBarEnabled: boolean;
 	readonly telemetryEnabled: boolean;
 }
+
+/**
+ * A mutable working copy of a readonly options interface.
+ *
+ * Prompt functions build their result field by field, which a `readonly`
+ * interface forbids. Declaring a hand-written mutable mirror and casting back
+ * with `as` on return means two copies of every option shape, free to drift,
+ * and a cast sitting exactly where user input becomes configuration.
+ * TypeScript assigns `Draft<T>` back to `T` without a cast because
+ * assignability ignores `readonly` property modifiers.
+ */
+export type Draft<T> = { -readonly [K in keyof T]: T[K] };

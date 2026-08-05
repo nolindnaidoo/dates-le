@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import {
-	convertDates,
+	convertDatesWithSkipped,
 	type DateConversionOptions,
 	getAvailableFormats,
 } from '../conversion/dateConverter';
@@ -25,7 +25,7 @@ export function registerConvertCommand(
 
 			const editor = vscode.window.activeTextEditor;
 			if (!editor) {
-				deps.notifier.showWarning('No active editor found');
+				deps.notifier.showWarning(vscode.l10n.t('No active editor found'));
 				return;
 			}
 
@@ -38,11 +38,14 @@ export function registerConvertCommand(
 				await vscode.window.withProgress(
 					{
 						location: vscode.ProgressLocation.Notification,
-						title: 'Converting dates...',
+						title: vscode.l10n.t('Converting dates...'),
 						cancellable: true,
 					},
 					async (progress, token) => {
-						progress.report({ increment: 0, message: 'Extracting dates...' });
+						progress.report({
+							increment: 0,
+							message: vscode.l10n.t('Extracting dates...'),
+						});
 
 						// Extract dates first
 						const extractionResult = await extractDates(content, languageId);
@@ -53,13 +56,15 @@ export function registerConvertCommand(
 							!extractionResult.success ||
 							extractionResult.dates.length === 0
 						) {
-							deps.notifier.showInfo('No dates found to convert');
+							deps.notifier.showInfo(
+								vscode.l10n.t('No dates found to convert'),
+							);
 							return;
 						}
 
 						progress.report({
 							increment: 30,
-							message: 'Selecting target format...',
+							message: vscode.l10n.t('Selecting target format...'),
 						});
 
 						// Let user select target format
@@ -72,39 +77,47 @@ export function registerConvertCommand(
 								format: format.format,
 							})),
 							{
-								placeHolder: 'Select target date format',
-								title: 'Convert Dates - Select Format',
+								placeHolder: vscode.l10n.t('Select target date format'),
+								title: vscode.l10n.t('Convert Dates - Select Format'),
 							},
 						);
 
 						if (token.isCancellationRequested || !formatChoice) return;
 
-						progress.report({ increment: 50, message: 'Converting dates...' });
+						progress.report({
+							increment: 50,
+							message: vscode.l10n.t('Converting dates...'),
+						});
 
 						// Convert dates
 						const conversionOptions: DateConversionOptions = {
 							targetFormat: formatChoice.format,
 						};
 
-						const conversionResults = convertDates(
-							extractionResult.dates,
-							conversionOptions,
-						);
+						const { results: conversionResults, skipped } =
+							convertDatesWithSkipped(
+								extractionResult.dates,
+								conversionOptions,
+							);
 
 						if (token.isCancellationRequested) return;
 
 						progress.report({
 							increment: 80,
-							message: 'Generating results...',
+							message: vscode.l10n.t('Generating results...'),
 						});
 
 						// Generate conversion report
 						const report = generateConversionReport(
 							conversionResults,
 							formatChoice.label,
+							skipped.length,
 						);
 
-						progress.report({ increment: 100, message: 'Opening results...' });
+						progress.report({
+							increment: 100,
+							message: vscode.l10n.t('Opening results...'),
+						});
 
 						// Open results
 						await openConversionResults(report, deps.notifier);
@@ -135,12 +148,18 @@ function generateConversionReport(
 		format: string;
 	}>,
 	targetFormat: string,
+	skippedCount = 0,
 ): string {
 	const report = [
 		`# Date Conversion Report`,
 		'',
 		`**Target Format**: ${targetFormat}`,
 		`**Total Dates Converted**: ${results.length}`,
+		// Without this line the count simply came up short and the only record
+		// of the failures was a console.warn nobody sees.
+		...(skippedCount > 0
+			? [`**Skipped (could not be converted)**: ${skippedCount}`]
+			: []),
 		'',
 		'## Converted Dates',
 		'',
@@ -184,5 +203,7 @@ async function openConversionResults(
 		preserveFocus: true,
 	});
 
-	notifier.showInfo('Date conversion complete. Results opened in new editor.');
+	notifier.showInfo(
+		vscode.l10n.t('Date conversion complete. Results opened in new editor.'),
+	);
 }

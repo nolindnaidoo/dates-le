@@ -8,6 +8,7 @@ import { extractDates } from '../extraction/extract';
 import type { Telemetry } from '../telemetry/telemetry';
 import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
+import { formatDateSpan } from '../utils/duration';
 import { sanitizeErrorMessage } from '../utils/errors';
 
 export function registerAnalyzeCommand(
@@ -25,7 +26,7 @@ export function registerAnalyzeCommand(
 
 			const editor = vscode.window.activeTextEditor;
 			if (!editor) {
-				deps.notifier.showWarning('No active editor found');
+				deps.notifier.showWarning(vscode.l10n.t('No active editor found'));
 				return;
 			}
 
@@ -53,11 +54,14 @@ async function performAnalysis(
 	await vscode.window.withProgress(
 		{
 			location: vscode.ProgressLocation.Notification,
-			title: 'Analyzing dates...',
+			title: vscode.l10n.t('Analyzing dates...'),
 			cancellable: true,
 		},
 		async (progress, token) => {
-			progress.report({ increment: 0, message: 'Extracting dates...' });
+			progress.report({
+				increment: 0,
+				message: vscode.l10n.t('Extracting dates...'),
+			});
 
 			const extractionResult = await extractDates(
 				document.getText(),
@@ -69,11 +73,14 @@ async function performAnalysis(
 			}
 
 			if (!extractionResult.success || extractionResult.dates.length === 0) {
-				deps.notifier.showInfo('No dates found to analyze');
+				deps.notifier.showInfo(vscode.l10n.t('No dates found to analyze'));
 				return;
 			}
 
-			progress.report({ increment: 50, message: 'Performing analysis...' });
+			progress.report({
+				increment: 50,
+				message: vscode.l10n.t('Performing analysis...'),
+			});
 
 			const analysis = analyzeDates(extractionResult.dates);
 
@@ -81,7 +88,10 @@ async function performAnalysis(
 				return;
 			}
 
-			progress.report({ increment: 100, message: 'Generating report...' });
+			progress.report({
+				increment: 100,
+				message: vscode.l10n.t('Generating report...'),
+			});
 
 			const report = generateAnalysisReport(analysis);
 			await openAnalysisResults(report, deps.notifier);
@@ -118,7 +128,7 @@ function generateAnalysisReport(analysis: DateAnalysis): string {
 	) {
 		report.push(
 			`**Date Range**: ${statistics.earliest.toISOString()} to ${statistics.latest.toISOString()}`,
-			`**Duration**: ${formatDuration(statistics.range)}`,
+			`**Duration**: ${formatDateSpan(statistics.range)}`,
 			`**Average Date**: ${statistics.average.toISOString()}`,
 			`**Median Date**: ${statistics.median.toISOString()}`,
 			'',
@@ -212,7 +222,7 @@ function generateAnalysisReport(analysis: DateAnalysis): string {
 			.slice(0, 5)
 			.forEach((gap, index) => {
 				report.push(`### Gap ${index + 1}`);
-				report.push(`- **Duration**: ${formatDuration(gap.duration)}`);
+				report.push(`- **Duration**: ${formatDateSpan(gap.duration)}`);
 				report.push(`- **From**: ${gap.start.toISOString()}`);
 				report.push(`- **To**: ${gap.end.toISOString()}`);
 				report.push('');
@@ -257,7 +267,9 @@ async function openAnalysisResults(
 		preserveFocus: true,
 	});
 
-	notifier.showInfo('Date analysis complete. Results opened in new editor.');
+	notifier.showInfo(
+		vscode.l10n.t('Date analysis complete. Results opened in new editor.'),
+	);
 }
 
 function groupAnomaliesByType(
@@ -292,23 +304,4 @@ function getPatternTypeTitle(type: string): string {
 		trend: 'Trend Pattern',
 	};
 	return titles[type] || type.charAt(0).toUpperCase() + type.slice(1);
-}
-
-function formatDuration(milliseconds: number): string {
-	if (milliseconds < 1000) {
-		return `${milliseconds}ms`;
-	}
-
-	const seconds = milliseconds / 1000;
-	if (seconds < 60) {
-		return `${seconds.toFixed(2)}s`;
-	}
-
-	const minutes = seconds / 60;
-	if (minutes < 60) {
-		return `${minutes.toFixed(2)}m`;
-	}
-
-	const hours = minutes / 60;
-	return `${hours.toFixed(2)}h`;
 }

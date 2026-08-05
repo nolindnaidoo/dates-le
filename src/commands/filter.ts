@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { extractDates } from '../extraction/extract';
 import type { Telemetry } from '../telemetry/telemetry';
-import type { DateValue } from '../types';
+import type { DateValue, Draft } from '../types';
 import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
 import { sanitizeErrorMessage } from '../utils/errors';
@@ -35,7 +35,7 @@ export function registerFilterCommand(
 
 			const editor = vscode.window.activeTextEditor;
 			if (!editor) {
-				deps.notifier.showWarning('No active editor found');
+				deps.notifier.showWarning(vscode.l10n.t('No active editor found'));
 				return;
 			}
 
@@ -48,11 +48,14 @@ export function registerFilterCommand(
 				await vscode.window.withProgress(
 					{
 						location: vscode.ProgressLocation.Notification,
-						title: 'Filtering dates...',
+						title: vscode.l10n.t('Filtering dates...'),
 						cancellable: true,
 					},
 					async (progress, token) => {
-						progress.report({ increment: 0, message: 'Extracting dates...' });
+						progress.report({
+							increment: 0,
+							message: vscode.l10n.t('Extracting dates...'),
+						});
 
 						// Extract dates first
 						const extractionResult = await extractDates(content, languageId);
@@ -63,13 +66,13 @@ export function registerFilterCommand(
 							!extractionResult.success ||
 							extractionResult.dates.length === 0
 						) {
-							deps.notifier.showInfo('No dates found to filter');
+							deps.notifier.showInfo(vscode.l10n.t('No dates found to filter'));
 							return;
 						}
 
 						progress.report({
 							increment: 30,
-							message: 'Configuring filters...',
+							message: vscode.l10n.t('Configuring filters...'),
 						});
 
 						// Let user configure filters
@@ -79,7 +82,10 @@ export function registerFilterCommand(
 
 						if (token.isCancellationRequested || !filterOptions) return;
 
-						progress.report({ increment: 50, message: 'Applying filters...' });
+						progress.report({
+							increment: 50,
+							message: vscode.l10n.t('Applying filters...'),
+						});
 
 						// Apply filters
 						const filteredDates = applyFilters(
@@ -91,7 +97,7 @@ export function registerFilterCommand(
 
 						progress.report({
 							increment: 80,
-							message: 'Generating results...',
+							message: vscode.l10n.t('Generating results...'),
 						});
 
 						// Generate filter report
@@ -101,7 +107,10 @@ export function registerFilterCommand(
 							filterOptions,
 						);
 
-						progress.report({ increment: 100, message: 'Opening results...' });
+						progress.report({
+							increment: 100,
+							message: vscode.l10n.t('Opening results...'),
+						});
 
 						// Open results
 						await openFilterResults(report, deps.notifier);
@@ -128,16 +137,7 @@ export function registerFilterCommand(
 async function configureFilters(
 	dates: readonly DateValue[],
 ): Promise<DateFilterOptions | null> {
-	const options: {
-		dateRange?: { start: Date; end: Date };
-		formats?: string[];
-		excludeFormats?: string[];
-		excludeDuplicates?: boolean;
-		excludeInvalid?: boolean;
-		excludeFuture?: boolean;
-		excludePast?: boolean;
-		customFilter?: (date: DateValue) => boolean;
-	} = {};
+	const options: Draft<DateFilterOptions> = {};
 
 	// Get unique formats for filtering
 	const uniqueFormats = Array.from(new Set(dates.map((d) => d.format)));
@@ -146,44 +146,46 @@ async function configureFilters(
 	const filterChoices = await vscode.window.showQuickPick(
 		[
 			{
-				label: 'Date Range',
-				description: 'Filter by date range (from/to)',
+				label: vscode.l10n.t('Date Range'),
+				description: vscode.l10n.t('Filter by date range (from/to)'),
 				id: 'dateRange',
 			},
 			{
-				label: 'Include Formats',
-				description: 'Only include specific date formats',
+				label: vscode.l10n.t('Include Formats'),
+				description: vscode.l10n.t('Only include specific date formats'),
 				id: 'includeFormats',
 			},
 			{
-				label: 'Exclude Formats',
-				description: 'Exclude specific date formats',
+				label: vscode.l10n.t('Exclude Formats'),
+				description: vscode.l10n.t('Exclude specific date formats'),
 				id: 'excludeFormats',
 			},
 			{
-				label: 'Remove Duplicates',
-				description: 'Remove duplicate dates',
+				label: vscode.l10n.t('Remove Duplicates'),
+				description: vscode.l10n.t('Remove duplicate dates'),
 				id: 'excludeDuplicates',
 			},
 			{
-				label: 'Remove Invalid',
-				description: 'Remove invalid dates',
+				label: vscode.l10n.t('Remove Invalid'),
+				description: vscode.l10n.t('Remove invalid dates'),
 				id: 'excludeInvalid',
 			},
 			{
-				label: 'Remove Future Dates',
-				description: 'Remove future dates',
+				label: vscode.l10n.t('Remove Future Dates'),
+				description: vscode.l10n.t('Remove future dates'),
 				id: 'excludeFuture',
 			},
 			{
-				label: 'Remove Past Dates',
-				description: 'Remove past dates',
+				label: vscode.l10n.t('Remove Past Dates'),
+				description: vscode.l10n.t('Remove past dates'),
 				id: 'excludePast',
 			},
 		],
 		{
-			placeHolder: 'Select filters to apply (multiple selection)',
-			title: 'Filter Dates - Select Filters',
+			placeHolder: vscode.l10n.t(
+				'Select filters to apply (multiple selection)',
+			),
+			title: vscode.l10n.t('Filter Dates - Select Filters'),
 			canPickMany: true,
 		},
 	);
@@ -204,12 +206,15 @@ async function configureFilters(
 				const includeFormats = await vscode.window.showQuickPick(
 					uniqueFormats.map((format) => ({
 						label: format.toUpperCase(),
-						description: `${dates.filter((d) => d.format === format).length} dates`,
+						description: vscode.l10n.t(
+							'{0} dates',
+							dates.filter((d) => d.format === format).length,
+						),
 						format,
 					})),
 					{
-						placeHolder: 'Select formats to include',
-						title: 'Include Date Formats',
+						placeHolder: vscode.l10n.t('Select formats to include'),
+						title: vscode.l10n.t('Include Date Formats'),
 						canPickMany: true,
 					},
 				);
@@ -222,12 +227,15 @@ async function configureFilters(
 				const excludeFormats = await vscode.window.showQuickPick(
 					uniqueFormats.map((format) => ({
 						label: format.toUpperCase(),
-						description: `${dates.filter((d) => d.format === format).length} dates`,
+						description: vscode.l10n.t(
+							'{0} dates',
+							dates.filter((d) => d.format === format).length,
+						),
 						format,
 					})),
 					{
-						placeHolder: 'Select formats to exclude',
-						title: 'Exclude Date Formats',
+						placeHolder: vscode.l10n.t('Select formats to exclude'),
+						title: vscode.l10n.t('Exclude Date Formats'),
 						canPickMany: true,
 					},
 				);
@@ -251,7 +259,7 @@ async function configureFilters(
 		}
 	}
 
-	return options as DateFilterOptions;
+	return options;
 }
 
 async function configureDateRange(): Promise<{
@@ -261,17 +269,17 @@ async function configureDateRange(): Promise<{
 	// For now, we'll use a simple input box
 	// In a real implementation, you might want to use a date picker
 	const startDateStr = await vscode.window.showInputBox({
-		placeHolder: 'YYYY-MM-DD',
-		prompt: 'Enter start date (YYYY-MM-DD)',
-		title: 'Date Range Filter - Start Date',
+		placeHolder: vscode.l10n.t('YYYY-MM-DD'),
+		prompt: vscode.l10n.t('Enter start date (YYYY-MM-DD)'),
+		title: vscode.l10n.t('Date Range Filter - Start Date'),
 	});
 
 	if (!startDateStr) return null;
 
 	const endDateStr = await vscode.window.showInputBox({
-		placeHolder: 'YYYY-MM-DD',
-		prompt: 'Enter end date (YYYY-MM-DD)',
-		title: 'Date Range Filter - End Date',
+		placeHolder: vscode.l10n.t('YYYY-MM-DD'),
+		prompt: vscode.l10n.t('Enter end date (YYYY-MM-DD)'),
+		title: vscode.l10n.t('Date Range Filter - End Date'),
 	});
 
 	if (!endDateStr) return null;
@@ -437,5 +445,7 @@ async function openFilterResults(
 		preserveFocus: true,
 	});
 
-	notifier.showInfo('Date filtering complete. Results opened in new editor.');
+	notifier.showInfo(
+		vscode.l10n.t('Date filtering complete. Results opened in new editor.'),
+	);
 }

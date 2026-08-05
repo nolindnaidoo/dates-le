@@ -5,15 +5,77 @@ All notable changes to Dates-LE will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.2] - 2026-08-04
+## [2.1.0] - 2026-08-04
 
 ### Added
+
+- Runtime strings are localized, and this time they render. All 56 of them —
+  notifications, status bar, quick-picks and prompts — go through
+  `vscode.l10n` and ship as twelve translated bundles in `l10n/`. The v1.x
+  line carried manifest catalogues that worked and runtime catalogues that
+  never reached the screen: `vscode-nls` was configured without
+  `__filename`, so every runtime string fell back to English while the VSIX
+  looked correct.
+- An integration test covering both localization mechanisms — manifest
+  substitution, key parity across all thirteen catalogues, and placeholder
+  integrity in every translation. A translation that silently drops `{0}`
+  now fails the build instead of shipping a message with the value missing.
 
 - Dependency review on pull requests, failing on a high-severity addition
   before Dependabot's auto-merge can act.
 
+### Fixed
+
+- Extraction reported success for an in-place replacement that was never
+  applied. `vscode.workspace.applyEdit` returns `false` when an edit is
+  rejected — a read-only document, or one that changed underneath the command
+  — and `openResults` discarded that and returned `true` regardless, so the
+  caller's failure branch could not fire. The result is now propagated, with a
+  test that drives a rejected edit.
+- The oversized-clipboard warning was never localized.
+- The `vscode` test mock honours `validateInput`. VS Code will not hand a
+  command a value its own validator rejected; the mock ignored it and returned
+  whatever the test supplied, which let tests drive commands with input the
+  real UI could never deliver.
+
+- Date spans in the analysis report were formatted by an elapsed-time
+  formatter, so a year of dates read "8760.00h" instead of "365 days". A
+  second formatter of the same name and signature lived in the statistics
+  module and only emitted days or hours, rendering a 45-minute gap as
+  "0 hour" — wrong unit and mispluralised. Both fed the same report, so one
+  gap could appear as "Gap of 3 days" on one line and "Duration: 72.00h" on
+  the next. There is now one `formatDateSpan` covering milliseconds through
+  days, with tests on every unit boundary.
+- Dates that failed to convert were dropped silently. The only record was a
+  `console.warn` written to the extension host log, which users do not open,
+  while the report's "Total Dates Converted" simply came up short of the
+  number of dates found. The report now states how many were skipped.
+- Safety warnings, quick-pick details and format counts were never localized,
+  along with all 18 progress messages — progress text goes through
+  `progress.report()` rather than a property the localization pass inspected.
+
 ### Changed
 
+- Test coverage raised from 61.70% to 79.36% of branches (79.65% to 87.48% of
+  statements), moving the repo from 1.70 points above the branch floor — the
+  narrowest margin in the family — to 19.36, with no file left below any of
+  the repo's own floors. The gap was in the three
+  quick-pick-driven commands: `filter.ts` (36.78% to 63.21%), `validate.ts`
+  and `analyze.ts`. Every branch past the first in those files is reachable
+  only by answering a multi-select, and the existing suite covered the
+  no-editor and no-dates cases only, so the filter kinds, the validation
+  rule predicates and each conditional section of the analysis report were
+  never exercised. The same was true of extract's output routing, all four
+  sort modes and the comparator's unparseable-line handling.
+
+
+- Seven redundant `as DateFormat` casts removed — the enclosing return type
+  already provided the contextual type — and the filter command's options
+  builder no longer hand-maintains a mutable mirror of its interface, so the
+  last type assertion in the codebase is gone.
+- `fullDocumentRange` (three copies) and `replaceDocumentContent` (two) are
+  defined once in `utils/document.ts`. Three copies of the edit that replaces
+  the user's entire document is three places to get it wrong.
 - CI gains fleet-wide checks that no single repo can perform: shared config is
   compared across all ten extensions, and every README link is verified —
   including Open VSX links, which are checked against the API because

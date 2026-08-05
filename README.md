@@ -77,7 +77,18 @@ Known limitations: `M/D/YYYY` assumes US ordering; syslog lines carry no year, s
 | `dates-le.statusBar.enabled` | `true` | Show the status bar item |
 | `dates-le.telemetryEnabled` | `false` | Local-only event log (see Privacy) |
 
-The settings UI is translated into 12 languages besides English.
+## Languages
+
+Twelve languages besides English:
+
+German · Spanish · French · Indonesian · Italian · Japanese · Korean ·
+Portuguese (Brazil) · Russian · Ukrainian · Vietnamese · Chinese (Simplified)
+
+Both halves are covered — the manifest (command titles, setting names and
+descriptions) and everything shown while the extension runs (notifications,
+the status bar, quick-picks and prompts). The extension follows VS Code's
+display language, so it matches whatever the editor is already set to; no
+setting of its own.
 
 ## Privacy & security
 
@@ -120,12 +131,12 @@ a build only tells you how busy the runner was.
 <!-- coverage:start -->
 | Metric | Coverage |
 | --- | --- |
-| Statements | 79.23% |
-| Branches | 60.34% |
-| Functions | 85.77% |
-| Lines | 80.24% |
+| Statements | 91.49% |
+| Branches | 79.36% |
+| Functions | 96.95% |
+| Lines | 92.75% |
 
-107 test cases across 13 files, plus an integration suite that runs
+154 test cases across 16 files, plus an integration suite that runs
 in a real VS Code extension host and an end-to-end test that installs the
 built `.vsix` into a clean profile.
 

@@ -76,25 +76,41 @@ function convertDate(
 }
 
 /**
- * Convert multiple dates to a target format
+ * Convert multiple dates to a target format, discarding any that fail.
+ *
+ * Callers that show a count to the user should use `convertDatesWithSkipped`
+ * instead — see the note there.
  */
 export function convertDates(
 	dates: readonly DateValue[],
 	options: DateConversionOptions,
 ): DateConversionResult[] {
+	const { results } = convertDatesWithSkipped(dates, options);
+	return results;
+}
+
+/**
+ * Convert multiple dates, reporting which ones could not be converted.
+ *
+ * Prefer this over `convertDates` where the count is shown to the user: a
+ * silently shorter list reads as data loss.
+ */
+export function convertDatesWithSkipped(
+	dates: readonly DateValue[],
+	options: DateConversionOptions,
+): { readonly results: DateConversionResult[]; readonly skipped: DateValue[] } {
+	const skipped: DateValue[] = [];
 	const results: DateConversionResult[] = [];
 
 	for (const date of dates) {
 		try {
-			const result = convertDate(date, options);
-			results.push(result);
-		} catch (error) {
-			// Skip dates that can't be converted
-			console.warn(`Failed to convert date ${date.value}:`, error);
+			results.push(convertDate(date, options));
+		} catch {
+			skipped.push(date);
 		}
 	}
 
-	return results;
+	return { results, skipped };
 }
 
 /**
@@ -138,43 +154,43 @@ export function getAvailableFormats(): Array<{
 
 	return [
 		{
-			format: 'iso' as DateFormat,
+			format: 'iso',
 			name: 'ISO 8601',
 			description: 'International standard format',
 			example: now.toISOString(),
 		},
 		{
-			format: 'rfc2822' as DateFormat,
+			format: 'rfc2822',
 			name: 'RFC 2822',
 			description: 'Email and HTTP standard',
 			example: now.toUTCString(),
 		},
 		{
-			format: 'unix' as DateFormat,
+			format: 'unix',
 			name: 'Unix Timestamp',
 			description: 'Seconds since epoch',
 			example: Math.floor(now.getTime() / 1000).toString(),
 		},
 		{
-			format: 'utc' as DateFormat,
+			format: 'utc',
 			name: 'UTC String',
 			description: 'UTC format string',
 			example: now.toUTCString(),
 		},
 		{
-			format: 'local' as DateFormat,
+			format: 'local',
 			name: 'Local String',
 			description: 'Local timezone format',
 			example: now.toString(),
 		},
 		{
-			format: 'simple' as DateFormat,
+			format: 'simple',
 			name: 'Simple Date',
 			description: 'Date only (YYYY-MM-DD)',
 			example: now.toISOString().split('T')[0]!,
 		},
 		{
-			format: 'custom' as DateFormat,
+			format: 'custom',
 			name: 'Custom Format',
 			description: 'User-defined format',
 			example: formatCustomDate(now, 'YYYY-MM-DD HH:mm:ss'),

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import type { Notifier } from '../ui/notifier';
+import { replaceDocumentContent } from '../utils/document';
 import { sanitizeErrorMessage } from '../utils/errors';
 
 type SortOrder = 'asc' | 'desc' | 'alpha-asc' | 'alpha-desc';
@@ -18,7 +19,7 @@ export function registerSortCommand(
 		async () => {
 			const editor = vscode.window.activeTextEditor;
 			if (!editor) {
-				notifier.showWarning('No active editor found');
+				notifier.showWarning(vscode.l10n.t('No active editor found'));
 				return;
 			}
 
@@ -34,11 +35,19 @@ export function registerSortCommand(
 
 				await replaceDocumentContent(document, sorted);
 
-				notifier.showInfo(`Sorted ${sorted.length} dates (${sortOrder.label})`);
+				notifier.showInfo(
+					vscode.l10n.t(
+						'Sorted {0} dates ({1})',
+						sorted.length,
+						sortOrder.label,
+					),
+				);
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Unknown error occurred';
-				notifier.showError(`Sorting failed: ${sanitizeErrorMessage(message)}`);
+				notifier.showError(
+					vscode.l10n.t('Sorting failed: {0}', sanitizeErrorMessage(message)),
+				);
 			}
 		},
 	);
@@ -50,24 +59,24 @@ async function promptSortOrder(): Promise<SortOption | undefined> {
 	return vscode.window.showQuickPick<SortOption>(
 		[
 			{
-				label: 'Chronological (Oldest First)',
+				label: vscode.l10n.t('Chronological (Oldest First)'),
 				value: 'asc',
 			},
 			{
-				label: 'Reverse Chronological (Newest First)',
+				label: vscode.l10n.t('Reverse Chronological (Newest First)'),
 				value: 'desc',
 			},
 			{
-				label: 'Alphabetical (A → Z)',
+				label: vscode.l10n.t('Alphabetical (A → Z)'),
 				value: 'alpha-asc',
 			},
 			{
-				label: 'Alphabetical (Z → A)',
+				label: vscode.l10n.t('Alphabetical (Z → A)'),
 				value: 'alpha-desc',
 			},
 		],
 		{
-			placeHolder: 'Select sort order',
+			placeHolder: vscode.l10n.t('Select sort order'),
 		},
 	);
 }
@@ -119,20 +128,4 @@ function sortAlphabetically(lines: string[], sortOrder: SortOrder): string[] {
 	return [...lines].sort((a, b) => {
 		return sortOrder === 'alpha-asc' ? a.localeCompare(b) : b.localeCompare(a);
 	});
-}
-
-async function replaceDocumentContent(
-	document: vscode.TextDocument,
-	lines: string[],
-): Promise<void> {
-	const edit = new vscode.WorkspaceEdit();
-	edit.replace(document.uri, fullDocumentRange(document), lines.join('\n'));
-	await vscode.workspace.applyEdit(edit);
-}
-
-function fullDocumentRange(document: vscode.TextDocument): vscode.Range {
-	return new vscode.Range(
-		document.positionAt(0),
-		document.lineAt(document.lineCount - 1).range.end,
-	);
 }

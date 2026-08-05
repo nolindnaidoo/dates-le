@@ -40,7 +40,7 @@ export function registerValidateCommand(
 
 			const editor = vscode.window.activeTextEditor;
 			if (!editor) {
-				deps.notifier.showWarning('No active editor found');
+				deps.notifier.showWarning(vscode.l10n.t('No active editor found'));
 				return;
 			}
 
@@ -53,11 +53,14 @@ export function registerValidateCommand(
 				await vscode.window.withProgress(
 					{
 						location: vscode.ProgressLocation.Notification,
-						title: 'Validating dates...',
+						title: vscode.l10n.t('Validating dates...'),
 						cancellable: true,
 					},
 					async (progress, token) => {
-						progress.report({ increment: 0, message: 'Extracting dates...' });
+						progress.report({
+							increment: 0,
+							message: vscode.l10n.t('Extracting dates...'),
+						});
 
 						// Extract dates first
 						const extractionResult = await extractDates(content, languageId);
@@ -68,13 +71,15 @@ export function registerValidateCommand(
 							!extractionResult.success ||
 							extractionResult.dates.length === 0
 						) {
-							deps.notifier.showInfo('No dates found to validate');
+							deps.notifier.showInfo(
+								vscode.l10n.t('No dates found to validate'),
+							);
 							return;
 						}
 
 						progress.report({
 							increment: 30,
-							message: 'Selecting validation rules...',
+							message: vscode.l10n.t('Selecting validation rules...'),
 						});
 
 						// Let user select validation rules
@@ -84,7 +89,7 @@ export function registerValidateCommand(
 
 						progress.report({
 							increment: 50,
-							message: 'Running validation...',
+							message: vscode.l10n.t('Running validation...'),
 						});
 
 						// Run validation
@@ -95,7 +100,10 @@ export function registerValidateCommand(
 
 						if (token.isCancellationRequested) return;
 
-						progress.report({ increment: 80, message: 'Generating report...' });
+						progress.report({
+							increment: 80,
+							message: vscode.l10n.t('Generating report...'),
+						});
 
 						// Generate validation report
 						const report = generateValidationReport(
@@ -103,7 +111,10 @@ export function registerValidateCommand(
 							validationRules,
 						);
 
-						progress.report({ increment: 100, message: 'Opening results...' });
+						progress.report({
+							increment: 100,
+							message: vscode.l10n.t('Opening results...'),
+						});
 
 						// Open results
 						await openValidationResults(report, deps.notifier);
@@ -132,7 +143,9 @@ async function selectValidationRules(): Promise<DateValidationRule[] | null> {
 	const availableRules: DateValidationRule[] = [
 		{
 			name: 'Valid Date Format',
-			description: 'Ensure dates are in valid format and can be parsed',
+			description: vscode.l10n.t(
+				'Ensure dates are in valid format and can be parsed',
+			),
 			validate: (date) => {
 				if (!date.timestamp) return false;
 				return !Number.isNaN(new Date(date.timestamp).getTime());
@@ -142,7 +155,7 @@ async function selectValidationRules(): Promise<DateValidationRule[] | null> {
 		},
 		{
 			name: 'Not Future Date',
-			description: 'Ensure dates are not in the future',
+			description: vscode.l10n.t('Ensure dates are not in the future'),
 			validate: (date) => {
 				if (!date.timestamp) return false;
 				return new Date(date.timestamp) <= new Date();
@@ -152,7 +165,9 @@ async function selectValidationRules(): Promise<DateValidationRule[] | null> {
 		},
 		{
 			name: 'Reasonable Date Range',
-			description: 'Ensure dates are within reasonable range (1900-2100)',
+			description: vscode.l10n.t(
+				'Ensure dates are within reasonable range (1900-2100)',
+			),
 			validate: (date) => {
 				if (!date.timestamp) return false;
 				const year = new Date(date.timestamp).getFullYear();
@@ -163,7 +178,7 @@ async function selectValidationRules(): Promise<DateValidationRule[] | null> {
 		},
 		{
 			name: 'ISO 8601 Compliance',
-			description: 'Ensure dates follow ISO 8601 standard',
+			description: vscode.l10n.t('Ensure dates follow ISO 8601 standard'),
 			validate: (date) => {
 				if (date.format !== 'iso') return true; // Only validate ISO format
 				return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})$/.test(
@@ -175,7 +190,7 @@ async function selectValidationRules(): Promise<DateValidationRule[] | null> {
 		},
 		{
 			name: 'Timezone Consistency',
-			description: 'Ensure timezone information is consistent',
+			description: vscode.l10n.t('Ensure timezone information is consistent'),
 			validate: (date) => {
 				if (date.format !== 'iso') return true; // Only validate ISO format
 				return (
@@ -193,12 +208,12 @@ async function selectValidationRules(): Promise<DateValidationRule[] | null> {
 		availableRules.map((rule) => ({
 			label: rule.name,
 			description: rule.description,
-			detail: `Severity: ${rule.severity}`,
+			detail: vscode.l10n.t('Severity: {0}', rule.severity),
 			rule,
 		})),
 		{
-			placeHolder: 'Select validation rules to apply',
-			title: 'Date Validation - Select Rules',
+			placeHolder: vscode.l10n.t('Select validation rules to apply'),
+			title: vscode.l10n.t('Date Validation - Select Rules'),
 			canPickMany: true,
 		},
 	);
@@ -391,5 +406,7 @@ async function openValidationResults(
 		preserveFocus: true,
 	});
 
-	notifier.showInfo('Date validation complete. Results opened in new editor.');
+	notifier.showInfo(
+		vscode.l10n.t('Date validation complete. Results opened in new editor.'),
+	);
 }

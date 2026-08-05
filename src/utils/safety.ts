@@ -1,4 +1,4 @@
-import type * as vscode from 'vscode';
+import * as vscode from 'vscode';
 import type { Configuration } from '../types';
 
 export interface SafetyResult {
@@ -18,9 +18,11 @@ export function handleSafetyChecks(
 	if (document.getText().length > config.safetyFileSizeWarnBytes) {
 		return {
 			proceed: false,
-			message: `File size (${document.getText().length} bytes) exceeds safety threshold (${
-				config.safetyFileSizeWarnBytes
-			} bytes)`,
+			message: vscode.l10n.t(
+				'File size ({0} bytes) exceeds safety threshold ({1} bytes)',
+				document.getText().length,
+				config.safetyFileSizeWarnBytes,
+			),
 		};
 	}
 

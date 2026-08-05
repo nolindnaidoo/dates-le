@@ -225,11 +225,19 @@ export const workspace = {
 		}),
 	applyEdit: async (edit: WorkspaceEdit) => {
 		appliedEdits.push(edit);
-		return true;
+		return applyEditResult;
 	},
 };
 
 export const appliedEdits: WorkspaceEdit[] = [];
+
+// VS Code returns false when an edit is rejected — a read-only document, or one
+// that changed underneath the command. Tests need to reach that path.
+let applyEditResult = true;
+
+export function _setApplyEditResult(value: boolean): void {
+	applyEditResult = value;
+}
 
 // ------------------------------------------------------------ window
 
@@ -243,6 +251,12 @@ const shownMessages: ShownMessage[] = [];
 let activeTextEditor: { document: MockDocument } | undefined;
 let quickPickResponder: ((items: unknown[]) => unknown) | undefined;
 let warningResponder: ((items: unknown[]) => unknown) | undefined;
+
+const shownDocumentOptions: Array<{ viewColumn?: number }> = [];
+
+export function _shownDocumentOptions(): readonly { viewColumn?: number }[] {
+	return shownDocumentOptions;
+}
 
 export function _shownMessages(): readonly ShownMessage[] {
 	return shownMessages;
@@ -270,6 +284,16 @@ export const ProgressLocation = { Notification: 15, Window: 10 };
 
 let inputBoxResponder: ((options?: unknown) => string | undefined) | undefined;
 
+/** Values an input-box validator refused, in order. */
+const inputBoxRejections: Array<{ value: string; message: string }> = [];
+
+export function _inputBoxRejections(): readonly {
+	value: string;
+	message: string;
+}[] {
+	return inputBoxRejections;
+}
+
 export function _respondToInputBox(
 	responder: ((options?: unknown) => string | undefined) | undefined,
 ): void {
@@ -294,7 +318,30 @@ export const window = {
 	},
 	showQuickPick: async (items: unknown[], _options?: unknown) =>
 		quickPickResponder ? quickPickResponder(items) : undefined,
-	showInputBox: async (options?: unknown) => inputBoxResponder?.(options),
+	showInputBox: async (options?: unknown) => {
+		const value = inputBoxResponder?.(options);
+
+		// VS Code runs validateInput against what the user types and refuses to
+		// accept a value the validator rejects — the box stays open until the
+		// input is valid or the user escapes. Ignoring validateInput leaves the
+		// validators uncovered AND lets a test hand a command a value the real UI
+		// would never deliver.
+		//
+		// A rejected value resolves to undefined, which is what the caller
+		// observes when the user gives up. The rejection is recorded so a test
+		// can assert a validator fired rather than inferring it from a
+		// cancellation.
+		const validate = (options as { validateInput?: (v: string) => unknown })
+			?.validateInput;
+		if (typeof validate === 'function' && typeof value === 'string') {
+			const message = validate(value);
+			if (message !== undefined && message !== null && message !== '') {
+				inputBoxRejections.push({ value, message: String(message) });
+				return undefined;
+			}
+		}
+		return value;
+	},
 	withProgress: async <T>(
 		_options: unknown,
 		task: (
@@ -303,7 +350,14 @@ export const window = {
 		) => Thenable<T>,
 	): Promise<T> =>
 		task({ report: () => {} }, { isCancellationRequested: false }),
-	showTextDocument: async (_document: unknown, _column?: unknown) => undefined,
+	showTextDocument: async (_document: unknown, options?: unknown) => {
+		// Recorded so tests can assert placement — openResultsSideBySide sets
+		// viewColumn, which is otherwise unobservable.
+		shownDocumentOptions.push(
+			(options as { viewColumn?: number } | undefined) ?? {},
+		);
+		return undefined;
+	},
 	createOutputChannel: (_name: string) => {
 		const linesOut: string[] = [];
 		return {
@@ -417,11 +471,14 @@ export const FileType = {
 
 /** Reset all mutable mock state between tests. */
 export function _resetMockState(): void {
+	inputBoxRejections.length = 0;
+	shownDocumentOptions.length = 0;
 	configStore.clear();
 	configUpdates.length = 0;
 	configListeners.length = 0;
 	shownMessages.length = 0;
 	appliedEdits.length = 0;
+	applyEditResult = true;
 	executedBuiltins.length = 0;
 	registeredCommands.clear();
 	activeTextEditor = undefined;
@@ -431,3 +488,18 @@ export function _resetMockState(): void {
 	clipboard.value = '';
 	workspace.workspaceFolders = undefined;
 }
+
+export const l10n = {
+	t(message: string, ...args: unknown[]): string {
+		if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+			const named = args[0] as Record<string, unknown>;
+			return message.replace(/\{(\w+)\}/g, (whole, key) =>
+				key in named ? String(named[key]) : whole,
+			);
+		}
+		return message.replace(/\{(\d+)\}/g, (whole, index) => {
+			const value = args[Number(index)];
+			return value === undefined ? whole : String(value);
+		});
+	},
+};

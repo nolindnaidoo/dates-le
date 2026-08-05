@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import type { Notifier } from '../ui/notifier';
+import { replaceDocumentContent } from '../utils/document';
 import { sanitizeErrorMessage } from '../utils/errors';
 
 export function registerDedupeCommand(
@@ -11,7 +12,7 @@ export function registerDedupeCommand(
 		async () => {
 			const editor = vscode.window.activeTextEditor;
 			if (!editor) {
-				notifier.showWarning('No active editor found');
+				notifier.showWarning(vscode.l10n.t('No active editor found'));
 				return;
 			}
 
@@ -58,20 +59,4 @@ function deduplicateLines(lines: readonly string[]): string[] {
 	}
 
 	return deduped;
-}
-
-async function replaceDocumentContent(
-	document: vscode.TextDocument,
-	lines: string[],
-): Promise<void> {
-	const edit = new vscode.WorkspaceEdit();
-	edit.replace(document.uri, fullDocumentRange(document), lines.join('\n'));
-	await vscode.workspace.applyEdit(edit);
-}
-
-function fullDocumentRange(document: vscode.TextDocument): vscode.Range {
-	return new vscode.Range(
-		document.positionAt(0),
-		document.lineAt(document.lineCount - 1).range.end,
-	);
 }
