@@ -305,28 +305,25 @@ function applyFilters(
 	let filtered = [...dates];
 
 	// Apply date range filter
-	if (options.dateRange) {
+	const dateRange = options.dateRange;
+	if (dateRange) {
 		filtered = filtered.filter((date) => {
 			if (!date.timestamp) return false;
 			const dateObj = new Date(date.timestamp);
-			return (
-				dateObj >= options.dateRange!.start && dateObj <= options.dateRange!.end
-			);
+			return dateObj >= dateRange.start && dateObj <= dateRange.end;
 		});
 	}
 
 	// Apply format include filter
-	if (options.formats && options.formats.length > 0) {
-		filtered = filtered.filter((date) =>
-			options.formats!.includes(date.format),
-		);
+	const formats = options.formats;
+	if (formats && formats.length > 0) {
+		filtered = filtered.filter((date) => formats.includes(date.format));
 	}
 
 	// Apply format exclude filter
-	if (options.excludeFormats && options.excludeFormats.length > 0) {
-		filtered = filtered.filter(
-			(date) => !options.excludeFormats!.includes(date.format),
-		);
+	const excludeFormats = options.excludeFormats;
+	if (excludeFormats && excludeFormats.length > 0) {
+		filtered = filtered.filter((date) => !excludeFormats.includes(date.format));
 	}
 
 	// Remove duplicates
