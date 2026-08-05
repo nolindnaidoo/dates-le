@@ -1,0 +1,38 @@
+{
+	"name": "dates-le-mcp",
+	"version": "2.2.1",
+	"mcpName": "io.github.nolindnaidoo/dates-le",
+	"description": "Extract dates and timestamps from logs, data files and code, with their format and position.",
+	"keywords": [
+		"mcp",
+		"modelcontextprotocol",
+		"model-context-protocol",
+		"dates-le"
+	],
+	"license": "MIT",
+	"author": {
+		"name": "nolindnaidoo",
+		"url": "https://github.com/nolindnaidoo"
+	},
+	"homepage": "https://letools.dev",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/nolindnaidoo/dates-le.git",
+		"directory": "mcp"
+	},
+	"bugs": {
+		"url": "https://github.com/nolindnaidoo/dates-le/issues"
+	},
+	"type": "commonjs",
+	"bin": {
+		"dates-le-mcp": "server.js"
+	},
+	"files": [
+		"server.js",
+		"README.md",
+		"LICENSE"
+	],
+	"engines": {
+		"node": ">=20"
+	}
+}

@@ -119,3 +119,8 @@ benchmark-results.json
 # file the demo opens. Named explicitly, so a stray real log dropped into
 # samples/ while recording stays ignored.
 !samples/server.log
+
+# Zed extension build output (Cargo.lock IS committed — it pins the wasm build)
+zed/target/
+mcp/server.js
+mcp/LICENSE

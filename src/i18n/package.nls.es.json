@@ -20,5 +20,6 @@
 	"manifest.settings.safety.warn.file-size.desc": "Advertir cuando el tamaño del archivo de entrada supere este umbral en bytes",
 	"manifest.settings.statusbar.enabled.desc": "Mostrar la entrada de la barra de estado de Dates-LE para un acceso rápido",
 	"manifest.settings.telemetry.desc": "Habilitar registros de telemetría solo locales en el panel de salida.",
-	"manifest.settings.title": "Configuración de Dates-LE"
+	"manifest.settings.title": "Configuración de Dates-LE",
+	"manifest.mcp.label": "Herramientas de extracción de fechas de Dates-LE para el modo de agente"
 }

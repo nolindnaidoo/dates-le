@@ -20,5 +20,6 @@
 	"manifest.settings.safety.warn.file-size.desc": "Cảnh báo khi kích thước tệp đầu vào vượt quá ngưỡng này (bytes)",
 	"manifest.settings.statusbar.enabled.desc": "Hiển thị mục thanh trạng thái Dates-LE để truy cập nhanh",
 	"manifest.settings.telemetry.desc": "Bật nhật ký telemetry chỉ cục bộ vào bảng điều khiển Output",
-	"manifest.settings.title": "Cài đặt Dates-LE"
+	"manifest.settings.title": "Cài đặt Dates-LE",
+	"manifest.mcp.label": "Dates-LE – Công cụ trích xuất ngày tháng cho chế độ đại lý"
 }
