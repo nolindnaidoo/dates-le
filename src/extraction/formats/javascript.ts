@@ -35,6 +35,6 @@ const JS_SPECS: readonly DatePatternSpec[] = [
 	},
 ];
 
-export function extractFromJavaScript(content: string): DateValue[] {
+export function extractFromJavaScript(content: string): readonly DateValue[] {
 	return scanDates(content, JS_SPECS);
 }

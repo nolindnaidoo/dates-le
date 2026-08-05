@@ -29,7 +29,7 @@ const LOG_SPECS: readonly DatePatternSpec[] = [
 	},
 ];
 
-export function extractFromLog(content: string): DateValue[] {
+export function extractFromLog(content: string): readonly DateValue[] {
 	return scanDates(content, LOG_SPECS);
 }
 

@@ -50,7 +50,7 @@ function convertDate(
 			converted = date.toString();
 			break;
 		case 'simple':
-			converted = date.toISOString().split('T')[0]!;
+			converted = date.toISOString().split('T')[0] ?? '';
 			break;
 		case 'custom':
 			// Without a custom format there is nothing to apply, so this falls
@@ -86,7 +86,7 @@ function convertDate(
 export function convertDates(
 	dates: readonly DateValue[],
 	options: DateConversionOptions,
-): DateConversionResult[] {
+): readonly DateConversionResult[] {
 	const { results } = convertDatesWithSkipped(dates, options);
 	return results;
 }
@@ -189,7 +189,7 @@ export function getAvailableFormats(): Array<{
 			format: 'simple',
 			name: 'Simple Date',
 			description: 'Date only (YYYY-MM-DD)',
-			example: now.toISOString().split('T')[0]!,
+			example: now.toISOString().split('T')[0] ?? '',
 		},
 		{
 			format: 'custom',

@@ -277,10 +277,9 @@ function groupAnomaliesByType(
 ): Record<string, DateAnomaly[]> {
 	const grouped: Record<string, DateAnomaly[]> = {};
 	anomalies.forEach((anomaly) => {
-		if (!grouped[anomaly.type]) {
-			grouped[anomaly.type] = [];
-		}
-		grouped[anomaly.type]!.push(anomaly);
+		const bucket = grouped[anomaly.type] ?? [];
+		bucket.push(anomaly);
+		grouped[anomaly.type] = bucket;
 	});
 	return grouped;
 }

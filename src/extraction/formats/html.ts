@@ -27,6 +27,6 @@ const HTML_SPECS: readonly DatePatternSpec[] = [
 	},
 ];
 
-export function extractFromHtml(content: string): DateValue[] {
+export function extractFromHtml(content: string): readonly DateValue[] {
 	return scanDates(content, HTML_SPECS);
 }

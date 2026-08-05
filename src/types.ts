@@ -1,7 +1,7 @@
 export interface ExtractionResult {
-	success: boolean;
-	dates: readonly DateValue[];
-	errors: readonly ParseError[];
+	readonly success: boolean;
+	readonly dates: readonly DateValue[];
+	readonly errors: readonly ParseError[];
 }
 
 export type ErrorCategory =

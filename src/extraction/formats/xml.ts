@@ -9,7 +9,7 @@ import { scanDates } from '../heuristics';
  * and misreported every subsequent line number by the number of comment
  * lines above it.
  */
-export function extractFromXml(content: string): DateValue[] {
+export function extractFromXml(content: string): readonly DateValue[] {
 	return scanDates(maskXmlComments(content));
 }
 

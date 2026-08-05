@@ -60,6 +60,26 @@ export interface DateGap {
 	readonly description: string;
 }
 
+/** The result when there is nothing to measure. */
+function emptyStatistics(total: number): DateStatistics {
+	return {
+		total: total,
+		unique: 0,
+		duplicates: total,
+		earliest: null,
+		latest: null,
+		range: null,
+		average: null,
+		median: null,
+		formats: {},
+		timezones: {},
+		years: {},
+		months: {},
+		daysOfWeek: {},
+		hours: {},
+	};
+}
+
 /**
  * Calculate comprehensive statistics for a collection of dates
  */
@@ -89,22 +109,7 @@ function calculateDateStatistics(dates: readonly DateValue[]): DateStatistics {
 		.filter((d): d is Date => d !== null && !Number.isNaN(d.getTime()));
 
 	if (validDates.length === 0) {
-		return {
-			total: dates.length,
-			unique: 0,
-			duplicates: dates.length,
-			earliest: null,
-			latest: null,
-			range: null,
-			average: null,
-			median: null,
-			formats: {},
-			timezones: {},
-			years: {},
-			months: {},
-			daysOfWeek: {},
-			hours: {},
-		};
+		return emptyStatistics(dates.length);
 	}
 
 	// Sort dates for calculations
@@ -115,8 +120,10 @@ function calculateDateStatistics(dates: readonly DateValue[]): DateStatistics {
 	const unique = new Set(validDates.map((d) => d.getTime())).size;
 	const duplicates = total - unique;
 
-	const earliest = sortedDates[0]!;
-	const latest = sortedDates[sortedDates.length - 1]!;
+	// One guard instead of an assertion at every index below.
+	const earliest = sortedDates.at(0);
+	const latest = sortedDates.at(-1);
+	if (!earliest || !latest) return emptyStatistics(dates.length);
 	const range = latest.getTime() - earliest.getTime();
 
 	// Calculate average (mean)
@@ -126,14 +133,12 @@ function calculateDateStatistics(dates: readonly DateValue[]): DateStatistics {
 
 	// Calculate median
 	const medianIndex = Math.floor(sortedDates.length / 2);
+	const midpoint = sortedDates.at(medianIndex) ?? earliest;
+	const beforeMidpoint = sortedDates.at(medianIndex - 1) ?? midpoint;
 	const median =
 		sortedDates.length % 2 === 0
-			? new Date(
-					(sortedDates[medianIndex - 1]!.getTime() +
-						sortedDates[medianIndex]!.getTime()) /
-						2,
-				)
-			: sortedDates[medianIndex]!;
+			? new Date((beforeMidpoint.getTime() + midpoint.getTime()) / 2)
+			: midpoint;
 
 	// Analyze formats
 	const formats: Record<string, number> = {};
@@ -225,8 +230,8 @@ function detectDateAnomalies(dates: readonly DateValue[]): DateAnomaly[] {
 			.sort((a, b) => a - b);
 		const q1Index = Math.floor(timestamps.length * 0.25);
 		const q3Index = Math.floor(timestamps.length * 0.75);
-		const q1 = timestamps[q1Index]!;
-		const q3 = timestamps[q3Index]!;
+		const q1 = timestamps.at(q1Index) ?? 0;
+		const q3 = timestamps.at(q3Index) ?? 0;
 		const iqr = q3 - q1;
 		const lowerBound = q1 - 1.5 * iqr;
 		const upperBound = q3 + 1.5 * iqr;
@@ -254,9 +259,11 @@ function detectDateAnomalies(dates: readonly DateValue[]): DateAnomaly[] {
 	});
 
 	if (formatGroups.size > 1) {
-		const dominantFormat = Array.from(formatGroups.entries()).sort(
-			([, a], [, b]) => b.length - a.length,
-		)[0]![0];
+		// formatGroups.size > 1 above, so there is always a first entry.
+		const dominantFormat =
+			Array.from(formatGroups.entries()).sort(
+				([, a], [, b]) => b.length - a.length,
+			)[0]?.[0] ?? '';
 
 		dates.forEach((date) => {
 			if (date.format !== dominantFormat) {
@@ -389,8 +396,9 @@ function detectDateGaps(dates: readonly DateValue[]): DateGap[] {
 	const gapThreshold = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 	for (let i = 1; i < validDates.length; i++) {
-		const prev = validDates[i - 1]!;
-		const curr = validDates[i]!;
+		const prev = validDates.at(i - 1);
+		const curr = validDates.at(i);
+		if (!prev || !curr) continue;
 		const duration = curr.getTime() - prev.getTime();
 
 		if (duration > gapThreshold) {
@@ -432,7 +440,10 @@ export function analyzeDates(dates: readonly DateValue[]): DateAnalysis {
 function calculateIntervals(dates: Array<{ date: Date }>): number[] {
 	const intervals: number[] = [];
 	for (let i = 1; i < dates.length; i++) {
-		intervals.push(dates[i]!.date.getTime() - dates[i - 1]!.date.getTime());
+		const curr = dates.at(i);
+		const prev = dates.at(i - 1);
+		if (!curr || !prev) continue;
+		intervals.push(curr.date.getTime() - prev.date.getTime());
 	}
 	return intervals;
 }

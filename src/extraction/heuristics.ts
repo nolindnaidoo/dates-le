@@ -84,7 +84,7 @@ interface Candidate {
 export function scanDates(
 	content: string,
 	extraSpecs: readonly DatePatternSpec[] = [],
-): DateValue[] {
+): readonly DateValue[] {
 	const candidates: Candidate[] = [];
 	const specs = [...BASE_PATTERNS, ...extraSpecs];
 

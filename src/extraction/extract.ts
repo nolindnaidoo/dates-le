@@ -30,7 +30,10 @@ export async function extractDates(
 	}
 }
 
-function extractByFileType(content: string, fileType: FileType): DateValue[] {
+function extractByFileType(
+	content: string,
+	fileType: FileType,
+): readonly DateValue[] {
 	switch (fileType) {
 		case 'json':
 			return extractFromJson(content);
@@ -85,7 +88,7 @@ function createEmptyResult(): ExtractionResult {
 	});
 }
 
-function createSuccessResult(dates: DateValue[]): ExtractionResult {
+function createSuccessResult(dates: readonly DateValue[]): ExtractionResult {
 	return Object.freeze({
 		success: true,
 		dates: Object.freeze(dates),
