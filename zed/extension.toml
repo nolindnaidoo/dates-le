@@ -1,7 +1,7 @@
 id = "dates-le"
 name = "Dates-LE"
 description = "Extract dates and timestamps from logs, data files and code, with their format and position."
-version = "2.2.3"
+version = "2.2.4"
 schema_version = 1
 authors = ["nolindnaidoo"]
 repository = "https://github.com/nolindnaidoo/dates-le"
