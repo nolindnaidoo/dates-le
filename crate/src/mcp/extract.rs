@@ -157,10 +157,15 @@ mod tests {
         expected_error: Option<String>,
     }
 
+    /// The zone is named rather than read from `TZ`, which Windows does
+    /// not honour. Same reason as the oracle test in `parse.rs`.
+    const TIMEZONE: &str = "America/New_York";
+
     #[test]
     fn every_shared_case_answers_identically() {
         let cases: Vec<Case> = serde_json::from_str(CASES).expect("the corpus is valid JSON");
         assert!(!cases.is_empty(), "the corpus is empty");
+        let zone: chrono_tz::Tz = TIMEZONE.parse().expect("a real timezone");
 
         for case in cases {
             let mut arguments = case.arguments.clone();
@@ -174,22 +179,13 @@ mod tests {
                 arguments["content"] = json!(content);
             }
 
+            let answer = time::with_zone(zone, || run(&arguments));
             match (case.expected, case.expected_error) {
                 (_, Some(expected)) => {
-                    assert_eq!(
-                        run(&arguments).expect_err(&case.name),
-                        expected,
-                        "{}",
-                        case.name
-                    );
+                    assert_eq!(answer.expect_err(&case.name), expected, "{}", case.name);
                 }
                 (Some(expected), None) => {
-                    assert_eq!(
-                        run(&arguments).expect(&case.name),
-                        expected,
-                        "{}",
-                        case.name
-                    );
+                    assert_eq!(answer.expect(&case.name), expected, "{}", case.name);
                 }
                 (None, None) => panic!("{} pins neither a result nor an error", case.name),
             }

@@ -92,6 +92,41 @@ fn days_from_civil(year: i64, month: i64, day: i64) -> Option<i64> {
     first_of_month.checked_add(day.checked_sub(1)?)
 }
 
+// The zone zone-less dates resolve in, when one has been named. `None`
+// means the machine's, which is the default and the honest one. Set
+// from `--tz`, and by the corpus tests — which need it, because `TZ` is
+// honoured by the operating system on Unix and ignored on Windows, so a
+// corpus that depended on it could only be checked on two of the three
+// platforms this ships to.
+//
+// Thread-local rather than threaded through every signature: it is
+// process configuration read once at startup, like a locale, and the
+// scan is sequential.
+thread_local! {
+    static ZONE: std::cell::Cell<Option<chrono_tz::Tz>> =
+        const { std::cell::Cell::new(None) };
+}
+
+/// Resolve zone-less dates in `zone` from here on.
+pub(crate) fn set_zone(zone: Option<chrono_tz::Tz>) {
+    ZONE.with(|current| current.set(zone));
+}
+
+/// Read a zone by name, for `--tz`.
+pub(crate) fn zone_by_name(name: &str) -> Option<chrono_tz::Tz> {
+    name.parse().ok()
+}
+
+/// Run `body` with zone-less dates resolving in `zone`, then restore.
+#[cfg(test)]
+pub(crate) fn with_zone<T>(zone: chrono_tz::Tz, body: impl FnOnce() -> T) -> T {
+    let previous = ZONE.with(std::cell::Cell::get);
+    set_zone(Some(zone));
+    let result = body();
+    set_zone(previous);
+    result
+}
+
 /// A local-time value to a UTC instant, matching V8 at a daylight-saving
 /// transition.
 ///
@@ -106,20 +141,28 @@ fn days_from_civil(year: i64, month: i64, day: i64) -> Option<i64> {
 /// hour, so a day is far enough to be outside one and close enough to
 /// be inside the same rule.
 fn local_to_utc(naive_millis: i64) -> Option<i64> {
+    match ZONE.with(std::cell::Cell::get) {
+        Some(zone) => resolve_in(&zone, naive_millis),
+        None => resolve_in(&Local, naive_millis),
+    }
+}
+
+fn resolve_in<Zone: TimeZone>(zone: &Zone, naive_millis: i64) -> Option<i64> {
     let naive = chrono::DateTime::from_timestamp_millis(naive_millis)?.naive_utc();
 
-    match Local.from_local_datetime(&naive) {
+    match zone.from_local_datetime(&naive) {
         MappedLocalTime::Single(resolved) => Some(resolved.timestamp_millis()),
         // Ambiguous or nonexistent: fall back to the offset that was in
         // force a day earlier, which is the pre-transition one.
         MappedLocalTime::Ambiguous(..) | MappedLocalTime::None => {
             let day_before = naive.checked_sub_signed(chrono::Duration::days(1))?;
-            let offset = Local
-                .from_local_datetime(&day_before)
-                .earliest()?
-                .offset()
-                .local_minus_utc();
-            naive_millis.checked_sub(i64::from(offset) * 1_000)
+            let settled = zone.from_local_datetime(&day_before).earliest()?;
+            // The offset that was in force, as the gap between the local
+            // reading and the instant it named. Taken this way rather
+            // than from `Offset::fix()` so it works for any TimeZone.
+            let offset =
+                settled.naive_local().and_utc().timestamp_millis() - settled.timestamp_millis();
+            naive_millis.checked_sub(offset)
         }
     }
 }

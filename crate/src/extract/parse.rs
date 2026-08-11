@@ -761,23 +761,25 @@ mod tests {
     /// The whole of this module's contract, taken from V8 itself.
     ///
     /// Four of the shapes carry no timezone, so their instant is a
-    /// property of the machine; the corpus records which one it was
-    /// taken on and this refuses to pretend otherwise.
+    /// property of the machine. The corpus records which machine, and
+    /// this resolves in exactly that zone rather than hoping the one
+    /// running the test agrees.
     #[test]
     fn every_case_answers_what_v8_answers() {
         let oracle: Oracle = serde_json::from_str(include_str!("../../fixtures/date-parse.json"))
             .expect("the oracle is valid JSON");
 
-        let zone = std::env::var("TZ").unwrap_or_default();
-        assert_eq!(
-            zone, oracle.timezone,
-            "run with TZ={} — this corpus is not meaningful in another zone",
-            oracle.timezone
-        );
+        // The zone is named, not read from the environment. `TZ` is
+        // honoured on Unix and ignored on Windows, and this has to hold
+        // on every platform the binary ships to.
+        let zone: chrono_tz::Tz = oracle
+            .timezone
+            .parse()
+            .expect("the corpus names a real timezone");
 
         let mut wrong = Vec::new();
         for case in &oracle.cases {
-            let actual = date_parse(&case.input);
+            let actual = crate::extract::time::with_zone(zone, || date_parse(&case.input));
             if actual != case.timestamp {
                 wrong.push(format!(
                     "  {:?} ({}): V8 says {:?}, this says {:?}",

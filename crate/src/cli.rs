@@ -31,6 +31,9 @@ Options:
   --sort               order by instant rather than by position
   --dedupe             collapse repeated dates to their first occurrence
   --iso                add each instant as a UTC ISO 8601 string
+  --tz <zone>          resolve dates that carry no timezone in this
+                       IANA zone, e.g. UTC or America/New_York, instead
+                       of this machine's
   --format <format>    force a format instead of inferring it from the
                        file name
   --year <year>        the year a syslog line is assumed to be in,
@@ -44,9 +47,9 @@ Options:
 --after and --before accept anything this tool can read, so
 `--after 2024-01-15` and `--after 'March 5, 2024'` both work.
 
-A date with no timezone resolves against this machine's. Set TZ to make
-that reproducible; the answer genuinely differs by machine, exactly as
-it does for the code being read.
+A date with no timezone resolves against this machine's. Use --tz to
+name one instead; the answer genuinely differs by zone, exactly as it
+does for the code being read.
 
 Exit codes follow grep: 0 dates found · 1 none found · 2 malformed
 question. Finding none is an answer, not an error.";
@@ -54,7 +57,8 @@ question. Finding none is an answer, not an error.";
 /// Every flag the parser accepts. Held equal to the flags named in
 /// USAGE by a test, and consulted at runtime so the list is what the
 /// parser actually honours.
-const FLAGS: [&str; 12] = [
+const FLAGS: [&str; 13] = [
+    "--tz",
     "--after",
     "--before",
     "--sort",
@@ -111,7 +115,22 @@ fn refuse(message: &str) -> ExitCode {
     ExitCode::from(2)
 }
 
+/// `--tz` is honoured before anything else is read, because `--after`
+/// and `--before` parse dates too and must land in the same zone as the
+/// documents. Order on the command line should not change an answer.
+fn apply_zone_first(arguments: &[String]) -> Result<(), String> {
+    let Some(index) = arguments.iter().position(|argument| argument == "--tz") else {
+        return Ok(());
+    };
+    let raw = arguments.get(index + 1).ok_or("--tz needs a value")?;
+    let zone = crate::extract::time::zone_by_name(raw)
+        .ok_or_else(|| format!("{raw:?} is not an IANA timezone name"))?;
+    crate::extract::time::set_zone(Some(zone));
+    Ok(())
+}
+
 fn parse_arguments(arguments: &[String]) -> Result<Invocation, String> {
+    apply_zone_first(arguments)?;
     let mut invocation = Invocation {
         scan: ScanOptions::default(),
         walk: WalkOptions::default(),
@@ -152,6 +171,8 @@ fn parse_arguments(arguments: &[String]) -> Result<Invocation, String> {
                 invocation.scan.format = Some(raw);
                 index += 1;
             }
+            // Already applied by `apply_zone_first`; skip its value.
+            "--tz" => index += 1,
             "--year" => {
                 let raw = value("--year")?;
                 invocation.scan.year = raw
@@ -365,6 +386,54 @@ mod tests {
     fn a_year_that_is_not_a_number_is_refused() {
         let error = parse(&["--year", "soon", "."]).expect_err("refuses");
         assert!(error.contains("--year"), "{error}");
+    }
+
+    #[test]
+    fn a_named_zone_is_accepted_and_a_made_up_one_is_not() {
+        assert!(parse(&["--tz", "UTC", "."]).is_ok());
+        assert!(parse(&["--tz", "America/New_York", "."]).is_ok());
+        let error = parse(&["--tz", "Mars/Olympus", "."]).expect_err("refuses");
+        assert!(error.contains("IANA"), "{error}");
+        crate::extract::time::set_zone(None);
+    }
+
+    /// The zone has to apply to the boundaries too, or `--after` would
+    /// mean something different depending on where it was typed.
+    #[test]
+    fn the_zone_applies_before_a_boundary_is_read() {
+        let utc = parse(&["--tz", "UTC", "--after", "2024-01-15 00:00:00", "."])
+            .expect("parses")
+            .scan
+            .after;
+        let east = parse(&[
+            "--tz",
+            "America/New_York",
+            "--after",
+            "2024-01-15 00:00:00",
+            ".",
+        ])
+        .expect("parses")
+        .scan
+        .after;
+        crate::extract::time::set_zone(None);
+        assert_ne!(utc, east, "a zone-less boundary is not zone-independent");
+        assert_eq!(east.unwrap() - utc.unwrap(), 5 * 3_600_000);
+    }
+
+    /// Written after `--tz` was read in argument order and quietly gave
+    /// a different answer depending on which flag came first.
+    #[test]
+    fn the_zone_applies_wherever_it_appears() {
+        let first = parse(&["--tz", "UTC", "--after", "2024-01-15 00:00:00", "."])
+            .expect("parses")
+            .scan
+            .after;
+        let last = parse(&["--after", "2024-01-15 00:00:00", "--tz", "UTC", "."])
+            .expect("parses")
+            .scan
+            .after;
+        crate::extract::time::set_zone(None);
+        assert_eq!(first, last);
     }
 
     #[test]

@@ -51,6 +51,14 @@ ignore = "0.4"
 # date library is bug-compatible with it; see src/extract/parse.rs.
 chrono = { version = "0.4", default-features = false, features = ["std", "clock"] }
 
+# The timezone database, for `--tz`. A zone-less timestamp read on a
+# laptop in Chicago and on a server in UTC are different instants, and
+# for the reviews this tool is for, that difference is the finding. `TZ`
+# alone cannot express it: the operating system honours it on Unix and
+# ignores it on Windows, so a zone has to be nameable by the tool
+# itself.
+chrono-tz = "0.10"
+
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
 # Epoch milliseconds are i64 and every component that builds one is

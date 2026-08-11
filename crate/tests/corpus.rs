@@ -30,9 +30,19 @@ const CORPUS: &str = include_str!("../fixtures/extraction.json");
 /// The binary, run over one document from stdin.
 fn run(document: &str, format: &str, year: i64, timezone: &str) -> Value {
     let mut command = Command::new(env!("CARGO_BIN_EXE_dates-le"));
+    // The zone is named with `--tz` rather than set with `TZ`, because
+    // Windows does not honour `TZ` and this test has to mean the same
+    // thing on every platform the binary ships to.
     command
-        .env("TZ", timezone)
-        .args(["--stdin", "--format", format, "--year", &year.to_string()])
+        .args([
+            "--stdin",
+            "--format",
+            format,
+            "--year",
+            &year.to_string(),
+            "--tz",
+            timezone,
+        ])
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped());
 

@@ -64,16 +64,20 @@ different set of findings. No general date library is bug-compatible
 with V8's legacy parser, so this crate implements it directly.
 
 `fixtures/date-parse.json` holds V8's own answers to 140 cases and is
-the authority. Regenerate it only with the generator, under `TZ`, never
-by hand. **A disagreement means the parser is wrong**, because the
+the authority. Regenerate it only with the generator, under `TZ` — the
+generator runs in V8, which does honour it — never by hand. **A disagreement means the parser is wrong**, because the
 extension is V8.
 
 ### Local time is a real dependency, and is not hidden
 
 Four of the six shapes carry no timezone. Their instant is a property of
 the machine, and that is the honest answer rather than a defect to
-paper over — it is equally true of the code being read. `TZ` is
-honoured; the corpus pins `America/New_York` because a zone with
+paper over — it is equally true of the code being read.
+
+`--tz` names a zone and `TZ` is honoured where the operating system
+honours it, which is not everywhere: Windows ignores it. The corpus
+therefore pins `America/New_York` with `--tz` and the unit tests name it
+directly, so the contract holds on all three platforms. A zone with
 daylight saving is the only kind that can catch a wrong conversion.
 
 At a transition the offset in force **before** it wins, at both edges.
@@ -157,7 +161,7 @@ Every bug fix ships with the test that would have caught it.
 ```bash
 cargo fmt --all --check
 cargo clippy --all-targets -- -D warnings
-TZ=America/New_York cargo test --locked
+cargo test --locked
 TZ=America/New_York bun ../scripts/check-extraction-parity.ts   # if extraction changed
 ```
 

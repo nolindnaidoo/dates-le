@@ -7,20 +7,23 @@ of done. [SPEC.md](SPEC.md) defines the product behavior. AGENTS.md wins
 on any conflict. The extension at the repo root is a separate product
 with its own `CLAUDE.md`.
 
-- Before declaring any change complete, run exactly what CI runs, **with
-  `TZ` set**:
+- Before declaring any change complete, run exactly what CI runs:
   `cargo fmt --all --check`,
   `cargo clippy --all-targets -- -D warnings`,
-  `TZ=America/New_York cargo test --locked`, and
+  `cargo test --locked`, and
   `TZ=America/New_York bun ../scripts/check-extraction-parity.ts` when
-  extraction changed. Without `TZ` the oracle test refuses rather than
-  quietly comparing against the wrong zone.
+  extraction changed. The crate's own tests need no `TZ` — they name
+  their zone. The parity script runs against V8 and still does.
 - Never add inline `#[allow(...)]` — CI fails the build on it. Fix the
   lint, or add a commented relaxation to `[lints.clippy]` in
   `Cargo.toml`. Three are there already, with their reason.
 - New logic goes in `extract/` when it is pure (it must then be
   unit-tested, 90% module coverage floor), and in `walk.rs` / `scan.rs`
   only when it needs the filesystem.
+- **The tests name their zone; they do not read `TZ`.** Windows ignores
+  `TZ`, so a corpus that depended on it could only be checked on two of
+  the three platforms this ships to. `time::with_zone` is how, and
+  `--tz` is the same mechanism on the command line.
 - **`fixtures/date-parse.json` is V8's answers, not ours.** It is the
   authority for `src/extract/parse.rs`. Regenerate it only with
   `TZ=America/New_York bun ../scripts/generate-date-parse-corpus.ts`,

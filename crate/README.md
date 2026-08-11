@@ -63,10 +63,11 @@ replays.
 
 **A date with no timezone resolves against this machine's.** Four of the
 six shapes carry no zone, so their instant genuinely differs by machine
-— exactly as it does for the code being audited. Set `TZ` to make it
-reproducible. At a daylight-saving transition the offset in force
-*before* the transition wins, for both the hour that does not exist and
-the hour that happens twice.
+— exactly as it does for the code being audited. `--tz UTC` names one
+instead, and applies to `--after` and `--before` too, so where the
+command was typed cannot change the answer. At a daylight-saving
+transition the offset in force *before* the transition wins, for both
+the hour that does not exist and the hour that happens twice.
 
 ## As an MCP server
 

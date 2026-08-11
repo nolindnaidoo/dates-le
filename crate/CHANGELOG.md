@@ -36,6 +36,12 @@ against a shared corpus, over a tree instead of one open document.
   corpus pins a zone with daylight saving, because no other kind can
   catch a wrong conversion. At a transition the offset in force before
   it wins, at both edges.
+- **`--tz <zone>`**, naming the zone that dates without one resolve in.
+  A timestamp read on a laptop in Chicago and on a server in UTC are
+  different instants, and for the reviews this is built for that
+  difference is the finding rather than a detail. It applies to
+  `--after` and `--before` as well, so where on the command line it
+  appears cannot change an answer.
 - **`--after` / `--before` / `--sort`**, which spend the instant
   extraction already resolved, and read their own boundaries with the
   same parser they read documents with.

@@ -57,8 +57,6 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test --locked
-        env:
-          TZ: America/New_York
       - run: cargo build --locked
 
   msrv:
@@ -113,8 +111,6 @@ jobs:
         with:
           tool: cargo-llvm-cov
       - name: Measure coverage
-        env:
-          TZ: America/New_York
         run: |
           cargo llvm-cov --no-report
           cargo llvm-cov report --json --output-path coverage.json
@@ -169,7 +165,6 @@ jobs:
       - name: Scenarios against an oversized document
         env:
           DATES_LE_SCENARIOS: "1"
-          TZ: America/New_York
         run: cargo test --test scenarios -- --test-threads=1
 
   audit:

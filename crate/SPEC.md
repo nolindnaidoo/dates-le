@@ -126,9 +126,12 @@ the machine's. That is not a defect to hide — it is the answer, and the
 answer genuinely differs by machine, exactly as it does for the code
 being audited.
 
-`TZ` is honoured. Set it to get reproducible output; the corpus pins
+`--tz` names a zone; without it the machine's is used, and `TZ` is
+honoured where the operating system honours it. The corpus pins
 `America/New_York` precisely because a zone with DST is the only kind
-that can catch a wrong conversion.
+that can catch a wrong conversion — and pins it with `--tz`, because
+Windows ignores `TZ` and a contract that only holds on two of three
+platforms is not one.
 
 At a DST transition the offset in force **before** the transition wins,
 for both the hour that does not exist and the hour that happens twice.
@@ -158,8 +161,8 @@ question. Finding none is an answer, not an error.
 Everything here is a place the two frontends differ on purpose. Anything
 else is a regression.
 
-- **`--after` / `--before` / `--sort` / `--iso` / `--values`** are CLI
-  only. The MCP tool is byte-identical across the two servers.
+- **`--after` / `--before` / `--sort` / `--iso` / `--values` / `--tz`**
+  are CLI only. The MCP tool is byte-identical across the two servers.
 - **Syslog lines carry no year**, so the extension assumes the current
   one — extraction that depends on a clock. The crate does the same, and
   `--year` overrides it so a corpus can pin it. Without the override
