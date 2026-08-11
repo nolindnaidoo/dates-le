@@ -1,0 +1,6 @@
+2024-01-15 10:30:45.123 INFO  boot complete
+2024-01-15 10:30:46 WARN  retrying
+Jan 15 10:30:47 host sshd[1234]: accepted
+127.0.0.1 - - [15/Jan/2024:10:30:48 +0000] "GET / HTTP/1.1" 200 512
+2024-01-15T10:30:49Z DEBUG the T form on a log line
+epoch=1705314650 request_id=9876543210987

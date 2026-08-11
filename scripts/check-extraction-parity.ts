@@ -27,7 +27,8 @@
  *
  * Run: TZ=America/New_York bun scripts/check-extraction-parity.ts
  */
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 
 const ROOT = join(import.meta.dir, '..');
@@ -199,8 +200,42 @@ function checkDateParseCorpus(): void {
 	}
 }
 
+/**
+ * Every corpus file must be tracked by git, not merely present.
+ *
+ * These two are not the same thing and the difference is invisible on
+ * the machine that wrote them: `.gitignore` carries a `*.log` rule, the
+ * corpus needs a `.log` document because log timestamps are this tool's
+ * headline case, and the result was a corpus that passed every local
+ * gate and failed CI on a file nobody could see was missing.
+ */
+function checkTheCorpusIsInTheRepository(): void {
+	const tracked = new Set(
+		spawnSync('git', ['ls-files', 'crate/fixtures'], {
+			cwd: ROOT,
+			encoding: 'utf8',
+		})
+			.stdout.split('\n')
+			.filter(Boolean),
+	);
+	if (tracked.size === 0) {
+		fail('git tracks no corpus files at all, which cannot be right');
+		return;
+	}
+	for (const entry of readdirSync(join(CORPUS, 'documents'))) {
+		const path = `crate/fixtures/documents/${entry}`;
+		if (!tracked.has(path)) {
+			fail(
+				`${path} is on disk and not in the repository — check .gitignore, ` +
+					'because CI will check out a corpus without it',
+			);
+		}
+	}
+}
+
 // Order matters: the clock stub must be installed before the extraction
 // module is imported, and the V8 oracle must be read before it.
+checkTheCorpusIsInTheRepository();
 checkDateParseCorpus();
 await checkDocuments();
 await checkMcpExtractDates();

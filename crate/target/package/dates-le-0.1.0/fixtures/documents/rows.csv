@@ -1,6 +1,0 @@
-id,opened,closed,note
-1,2024-01-15T10:30:45Z,2024-01-15,both forms on one row
-2,2024-01-15,2024-01-15,the same date twice is two occurrences
-3,2024-02-29,2023-02-29,a real leap day and one that rolls over
-4,1705314645,555-1234567,an epoch second and something that is not one
-5,12/31/2024 23:59:59,2024-13-01,US ordering and a month that does not exist
