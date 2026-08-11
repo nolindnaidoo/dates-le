@@ -1,0 +1,11 @@
+# Scanned, not parsed — so 2019-05-04 in this comment is found too.
+season:
+  opens: 2024-01-15
+  closes: 2024-12-31T23:59:59+05:30
+  announced: Mon, 15 Jan 2024 10:30:45 GMT
+  generated: Mon Jan 15 2024 10:30:45 GMT+0000
+  cutoff: 1705314645
+  version: 20240115
+  port: 8080
+  # 🗓 an emoji is two UTF-16 units and four bytes: 2024-03-05
+  café: 2024-04-01

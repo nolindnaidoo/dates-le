@@ -1,0 +1,66 @@
+[package]
+name = "dates-le"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+license = "MIT"
+readme = "README.md"
+description = "Find every date and timestamp in a codebase, and the instant each one resolves to"
+authors = ["Nolin D Naidoo"]
+homepage = "https://letools.dev/tools/dates-le"
+repository = "https://github.com/nolindnaidoo/dates-le"
+keywords = ["dates", "timestamp", "iso8601", "audit", "cli"]
+categories = ["command-line-utilities", "development-tools", "text-processing"]
+# What a consumer gets, and why.
+#
+# Ships: src/, Cargo.toml, Cargo.lock, LICENSE, README.md — needed to
+# build the binary. SPEC.md and CHANGELOG.md — the behavioural contract
+# someone scripting against the exit codes needs. tests/ and fixtures/ —
+# not needed to *build*, but needed to *verify*: `cargo test` on the
+# unpacked tarball replays V8's own answers and the shared corpus, so
+# the parity claims in the README are checkable by whoever installed it
+# rather than taken on trust.
+#
+# Excluded: AGENTS.md and CLAUDE.md are how this repo is worked on, not
+# how the tool is used. rust-toolchain.toml is a convenience for
+# contributors to *this* checkout; shipped, it would pin the toolchain
+# of anyone who unpacks or vendors the crate.
+exclude = ["AGENTS.md", "CLAUDE.md", "rust-toolchain.toml"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# The patterns use lookbehind — `(?<!\d)` is what stops a ten-digit
+# epoch matching inside a sixteen-digit card number — which the `regex`
+# crate cannot express. `fancy-regex` can, and its backtracking
+# semantics are JavaScript's, which is the point: these patterns are
+# ported from a JavaScript implementation and must match the same text.
+# None of them nests a quantifier, so there is nothing here to backtrack
+# catastrophically over.
+fancy-regex = "0.14"
+# The walker. `ignore` is ripgrep's, so "what this tool walks" and "what
+# ripgrep walks" are the same answer — which is the answer a person
+# auditing a repository already has in their head.
+ignore = "0.4"
+# Local time, and only local time. Four of the six shapes carry no
+# timezone, so resolving them needs the machine's zone rules including
+# its daylight-saving history — a tzdb lookup, not arithmetic. `chrono`
+# honours `TZ`, which is what makes the corpus reproducible.
+#
+# It is NOT used to parse anything. `Date.parse` is V8's, and no general
+# date library is bug-compatible with it; see src/extract/parse.rs.
+chrono = { version = "0.4", default-features = false, features = ["std", "clock"] }
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+# Epoch milliseconds are i64 and every component that builds one is
+# bounded by a parser that already rejected out-of-range values, so the
+# casts between them are checked by construction rather than by type.
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+cast_possible_wrap = "allow"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

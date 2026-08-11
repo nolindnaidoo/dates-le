@@ -5,6 +5,24 @@ All notable changes to Dates-LE will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+This file covers the **VS Code extension**. The Rust CLI in `crate/` is a
+separate product on its own cadence and keeps its own
+[CHANGELOG](crate/CHANGELOG.md).
+
+## [Unreleased]
+
+### Added
+
+- A **Rust CLI and MCP server** in [`crate/`](crate/README.md), to be
+  published to crates.io as `dates-le`. It runs the same extraction over
+  a whole tree, resolves every value to the instant it actually means,
+  and can filter and sort by that instant — so "what dates in here have
+  already passed" becomes one command.
+
+  Only extraction is ported; analyze, convert, filter and validate are
+  interactive and stay here. The extension remains the reference
+  implementation and `crate/fixtures/` is the contract between the two.
+
 ## [2.2.4] - 2026-08-07
 
 ### Changed

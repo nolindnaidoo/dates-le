@@ -213,11 +213,34 @@ Generated from `coverage/coverage-summary.json` by
 run. Reproduce with `bun run test:coverage`.
 <!-- coverage:end -->
 
+## The CLI
+
+The same extraction runs from a terminal or a CI step: a Rust CLI in
+[`crate/`](crate/README.md), sharing one corpus with the extension —
+[`crate/fixtures/`](crate/fixtures/) — so the two can never read a
+document differently.
+
+```bash
+dates-le .                          # every date in the tree, as JSON
+dates-le --before 2026-01-01 .      # everything already in the past
+dates-le --sort --iso config/       # ordered by instant, in readable form
+dates-le mcp                        # the same extraction over MCP on stdio
+```
+
+**The instant is the point.** `2024-01-15`, `1705276800` and
+`Mon, 15 Jan 2024` are one moment written three ways, and resolving each
+to a number is what makes them sortable and comparable rather than three
+strings to read. Resolution matches `Date.parse` in V8 exactly — legacy
+parser included — against 140 cases taken from V8 itself.
+
+A date with no timezone resolves against the machine's, because that is
+the true answer and it genuinely differs by machine. `TZ` is honoured.
+
 ## More from the LE Family
 
 Every tool in the family, one page: **[letools.dev](https://letools.dev)**
 
-All ten also ship as MCP servers — `npx <name>-mcp` gives any agent the same engine. Nine go further and ship a Rust CLI: **Paths-LE**, **Secrets-LE**, **URLs-LE**, **Regex-LE**, **String-LE**, **Numbers-LE**, **EnvSync-LE**, **Colors-LE** and **Scrape-LE**, each installed with `cargo install <that-name>`.
+All ten also ship as MCP servers — `npx <name>-mcp` gives any agent the same engine. All ten now go further and ship a Rust CLI too, each installed with `cargo install <that-name>`.
 
 - **[Paths-LE](https://letools.dev/tools/paths-le)** - Extract file paths from JS/TS imports, JSON, HTML, CSS, TOML, CSV, and .env
 - **[String-LE](https://letools.dev/tools/string-le)** - Extract string values for i18n from JSON, YAML, CSV, TOML, INI, and .env
