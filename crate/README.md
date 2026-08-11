@@ -25,6 +25,10 @@ dates-le --values . | sort -u       # just the strings, for piping
 Exit codes follow grep: `0` dates found, `1` none found, `2` a malformed
 question. Finding none is an answer, not an error.
 
+A file that is not text, or that cannot be opened, is named on stderr
+and carried in the report rather than failing the run — every repository
+has a PNG in it. `--strict` turns those back into a failure.
+
 ## What it reads
 
 JSON, YAML, CSV, XML, log and plaintext, JavaScript, TypeScript and

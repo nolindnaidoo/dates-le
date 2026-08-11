@@ -40,6 +40,8 @@ Options:
                        since the line does not carry one. Defaults to
                        this one, which makes that answer move
   --values             print only the dates, one per line, for piping
+  --strict             exit 2 if any file could not be read, rather than
+                       reporting it and carrying on
   --stdin              read one document from stdin
   --hidden             walk hidden files and directories too
   --no-ignore          walk files that .gitignore excludes
@@ -51,13 +53,18 @@ A date with no timezone resolves against this machine's. Use --tz to
 name one instead; the answer genuinely differs by zone, exactly as it
 does for the code being read.
 
+Files that are not text, or that cannot be opened, are named on stderr
+and carried in the report, and do not by themselves fail the run — every
+repository has a PNG in it. --strict turns them back into a failure.
+
 Exit codes follow grep: 0 dates found · 1 none found · 2 malformed
 question. Finding none is an answer, not an error.";
 
 /// Every flag the parser accepts. Held equal to the flags named in
 /// USAGE by a test, and consulted at runtime so the list is what the
 /// parser actually honours.
-const FLAGS: [&str; 13] = [
+const FLAGS: [&str; 14] = [
+    "--strict",
     "--tz",
     "--after",
     "--before",
@@ -78,6 +85,7 @@ struct Invocation {
     scan: ScanOptions,
     walk: WalkOptions,
     values: bool,
+    strict: bool,
     stdin: bool,
     roots: Vec<PathBuf>,
 }
@@ -106,7 +114,7 @@ pub fn run(arguments: &[String]) -> ExitCode {
     };
 
     report(&reports, invocation.values);
-    scan::exit_code(&reports)
+    scan::exit_code(&reports, invocation.strict)
 }
 
 fn refuse(message: &str) -> ExitCode {
@@ -135,6 +143,7 @@ fn parse_arguments(arguments: &[String]) -> Result<Invocation, String> {
         scan: ScanOptions::default(),
         walk: WalkOptions::default(),
         values: false,
+        strict: false,
         stdin: false,
         roots: Vec::new(),
     };
@@ -184,6 +193,7 @@ fn parse_arguments(arguments: &[String]) -> Result<Invocation, String> {
             "--dedupe" => invocation.scan.dedupe = true,
             "--iso" => invocation.scan.iso = true,
             "--values" => invocation.values = true,
+            "--strict" => invocation.strict = true,
             "--stdin" => invocation.stdin = true,
             "--hidden" => invocation.walk.hidden = true,
             "--no-ignore" => invocation.walk.respect_ignore = false,
@@ -228,7 +238,7 @@ fn gather(invocation: &Invocation) -> Result<Vec<FileReport>, String> {
             .map_err(|error| format!("could not read stdin: {error}"))?;
         return Ok(vec![scan::scan_text(
             "<stdin>",
-            &content,
+            scan::without_bom(&content),
             language,
             &invocation.scan,
         )]);
@@ -266,26 +276,28 @@ fn report(reports: &[FileReport], values_only: bool) {
     }
 
     let total: usize = reports.iter().map(|report| report.dates.len()).sum();
-    let failed = reports
+    let skipped = reports
         .iter()
-        .filter(|report| report.error.is_some())
+        .filter(|report| report.skipped.is_some())
         .count();
-    let files = reports.len() - failed;
+    let files = reports.len() - skipped;
     eprintln!(
         "{total} date{} in {files} file{}{}",
         plural(total),
         plural(files),
-        if failed == 0 {
+        if skipped == 0 {
             String::new()
         } else {
-            format!(", {failed} unreadable")
+            format!(", {skipped} skipped")
         }
     );
-    for report in reports.iter().filter(|report| report.error.is_some()) {
+    // Named, every one of them. A tool that quietly reads fewer files
+    // than it was pointed at is worse than one that fails.
+    for report in reports.iter().filter(|report| report.skipped.is_some()) {
         eprintln!(
-            "  {}: {}",
+            "  skipped {}: {}",
             report.file,
-            report.error.as_deref().unwrap_or_default()
+            report.skipped.as_deref().unwrap_or_default()
         );
     }
 }

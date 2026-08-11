@@ -228,12 +228,12 @@ fn scan_tool(arguments: &Value) -> Result<Value, String> {
     let dates: usize = reports.iter().map(|report| report.dates.len()).sum();
     let diagnostics: Vec<Value> = reports
         .iter()
-        .filter(|report| report.error.is_some())
+        .filter(|report| report.skipped.is_some())
         .map(|report| {
             warning(
-                "unreadable",
+                "skipped",
                 &format!(
-                    "{} could not be read, so this scan does not cover it",
+                    "{} was not read, so this scan does not cover it",
                     report.file
                 ),
             )
