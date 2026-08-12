@@ -1,8 +1,9 @@
 # dates-le — behavioural specification
 
-The CLI and MCP server in `crate/`. The VS Code extension at the repo
-root is the reference implementation; `fixtures/` is the contract
-between them, and CI fails when they disagree.
+The CLI and MCP server in `crate/`. `fixtures/` is the contract with the
+VS Code extension at the repo root, and CI fails when they disagree —
+but what it holds equal is the shared `extract_dates` MCP tool, not the
+two surfaces. See "Deliberate divergences".
 
 ## What this is
 
@@ -298,8 +299,11 @@ belongs to the text.
 
 ## Deliberate divergences
 
-Everything here is a place the two frontends differ on purpose. Anything
-else is a regression.
+One thing is held equal: the shared `extract_dates` MCP tool, which must
+answer identically from either server. The surfaces are not — the
+extension is IDE-first, one open buffer read by a person, and this is
+terminal-first: trees, exit codes, pipes, automation. Everything below is
+a place they differ on purpose; a difference in the shared tool is a bug.
 
 - **`--after` / `--before` / `--sort` / `--iso` / `--values` / `--tz`**
   are CLI only. The MCP tool is byte-identical across the two servers.
