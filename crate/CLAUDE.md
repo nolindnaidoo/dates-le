@@ -37,6 +37,20 @@ with its own `CLAUDE.md`.
   two-byte `é` becomes two spaces. That is why positions are located
   against the **original** document and not the mask. A `debug_assert`
   guards the byte length; do not remove it.
+- **Whitespace goes through `extract/js.rs`.** JavaScript's set includes
+  U+FEFF and Rust's does not; Rust's includes U+0085 and JavaScript's
+  does not. `js::trim` and `JS_SPACE_CLASS` define it once — a bare
+  `str::trim` or `\s` anywhere in `extract/` is a bug, and was one twice.
+  `parse.rs` is the exception, and only because V8's date parser has its
+  own narrower rule, pinned by the oracle: there a word runs while the
+  character is `A` or above, so a non-breaking space is *inside* a word.
+- **Lowercase with `to_ascii_lowercase` wherever an index follows.**
+  Rust's full `to_lowercase` changes the byte length of some characters
+  — `İ` grows, `K` (U+212A) shrinks — so a span taken from the copy
+  describes a different span of the original, and one landing
+  mid-character aborts the process. V8 folds with `c | 0x20`, so ASCII
+  folding is also the faithful one. `format.rs` may keep the full
+  `to_lowercase` because it only ever compares.
 - **Columns are UTF-16 units**, which is what an editor reports. Bytes
   are wrong for anything accented and characters are wrong for anything
   astral; `fixtures/documents/schedule.yaml` has an emoji on a line for

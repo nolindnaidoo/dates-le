@@ -29,7 +29,14 @@ exclude = ["AGENTS.md", "CLAUDE.md", "rust-toolchain.toml"]
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+# `preserve_order` because the MCP envelope is a wire format shared with
+# the npm server, and `serde_json`'s default map is sorted. An agent
+# reading `content[0].text` from this server got its keys alphabetised
+# and the same call to the npm server got them in the order the schema
+# describes — the same answer, spelled two ways, from what is meant to be
+# one tool. The cost is `indexmap`; the alternative is a claim of
+# byte-identical output that is not true.
+serde_json = { version = "1", features = ["preserve_order"] }
 # The patterns use lookbehind — `(?<!\d)` is what stops a ten-digit
 # epoch matching inside a sixteen-digit card number — which the `regex`
 # crate cannot express. `fancy-regex` can, and its backtracking

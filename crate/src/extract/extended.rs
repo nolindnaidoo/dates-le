@@ -82,6 +82,23 @@ fn with_numeric_zone(value: &str) -> Option<String> {
     None
 }
 
+/// A run of exactly `width` ASCII digits, as a number.
+///
+/// **The width is the validation.** The extension's equivalents are
+/// anchored regexes — `^(\d{4})-W(\d{2})(?:-(\d))?$` and friends — so
+/// they cannot be handed a numeral of another shape at all. These
+/// functions took whatever `parse` would swallow, which is a wider
+/// contract than the extension's for no reason and, at a year of
+/// nineteen digits, wide enough to overflow the weekday arithmetic. The
+/// patterns that feed these cannot produce one; a caller reaching the
+/// function directly can, and did.
+fn digits(text: &str, width: usize) -> Option<i64> {
+    if text.len() != width || !text.bytes().all(|byte| byte.is_ascii_digit()) {
+        return None;
+    }
+    text.parse().ok()
+}
+
 /// `2024-W03` or `2024-W03-1` → the calendar date it names.
 ///
 /// ISO 8601 defines week 1 as the one containing 4 January, so the whole
@@ -94,10 +111,10 @@ pub(crate) fn week_date(value: &str) -> Option<i64> {
         Some((week, day)) => (week, Some(day)),
         None => (rest, None),
     };
-    let year: i64 = year_text.parse().ok()?;
-    let week: i64 = week_text.parse().ok()?;
-    let day: i64 = match day_text {
-        Some(text) => text.parse().ok()?,
+    let year = digits(year_text, 4)?;
+    let week = digits(week_text, 2)?;
+    let day = match day_text {
+        Some(text) => digits(text, 1)?,
         None => 1,
     };
 
@@ -115,8 +132,8 @@ pub(crate) fn week_date(value: &str) -> Option<i64> {
 /// `2024-015` → the fifteenth day of 2024.
 pub(crate) fn ordinal_date(value: &str) -> Option<i64> {
     let (year_text, ordinal_text) = value.split_once('-')?;
-    let year: i64 = year_text.parse().ok()?;
-    let ordinal: i64 = ordinal_text.parse().ok()?;
+    let year = digits(year_text, 4)?;
+    let ordinal = digits(ordinal_text, 3)?;
     let (month, day) = month_and_day(year, ordinal)?;
     date_parse(&format!("{year:04}-{month:02}-{day:02}"))
 }
@@ -130,9 +147,9 @@ pub(crate) fn ordinal_date(value: &str) -> Option<i64> {
 /// plausible range. The date-time form needs no such window — a `T`
 /// between six digits and eight is evidence of its own.
 pub(crate) fn basic_format(value: &str) -> Option<i64> {
-    let year: i64 = value.get(0..4)?.parse().ok()?;
-    let month: i64 = value.get(4..6)?.parse().ok()?;
-    let day: i64 = value.get(6..8)?.parse().ok()?;
+    let year = digits(value.get(0..4)?, 4)?;
+    let month = digits(value.get(4..6)?, 2)?;
+    let day = digits(value.get(6..8)?, 2)?;
     if !(1..=12).contains(&month) || !(1..=31).contains(&day) {
         return None;
     }
@@ -397,6 +414,28 @@ mod tests {
         for value in ["20245601", "20240132", "20240100", "20241301"] {
             assert_eq!(in_new_york(|| basic_format(value)), None, "{value}");
         }
+    }
+
+    /// Found by the fuzz target, which reaches these functions directly
+    /// where the patterns can only hand them a fixed shape. A nineteen
+    /// digit year overflowed the weekday arithmetic; the width check is
+    /// what the extension's anchored regex was already doing.
+    #[test]
+    fn a_numeral_of_the_wrong_width_is_a_refusal() {
+        for value in [
+            "-7531464512345672024-W03-1",
+            "99999-W03-1",
+            "999-W03-1",
+            "2024-W3-1",
+            "2024-W003-1",
+            "+024-W03-1",
+        ] {
+            assert_eq!(in_new_york(|| week_date(value)), None, "{value}");
+        }
+        for value in ["99999-015", "2024-15", "2024-0015", "-999-015"] {
+            assert_eq!(in_new_york(|| ordinal_date(value)), None, "{value}");
+        }
+        assert_eq!(in_new_york(|| basic_format("+0240115")), None);
     }
 
     #[test]

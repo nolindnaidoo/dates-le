@@ -22,6 +22,7 @@ on:
       - 'src/extraction/**'
       - 'src/mcp/**'
       - 'scripts/check-extraction-parity.ts'
+      - 'scripts/check-extraction-differential.ts'
       - '.github/workflows/ci-crate.yml'
   pull_request:
     paths:
@@ -29,6 +30,7 @@ on:
       - 'src/extraction/**'
       - 'src/mcp/**'
       - 'scripts/check-extraction-parity.ts'
+      - 'scripts/check-extraction-differential.ts'
       - '.github/workflows/ci-crate.yml'
 
 permissions:
@@ -201,3 +203,157 @@ jobs:
           # conversion, so that is the one pinned.
           TZ: America/New_York
         run: bun scripts/check-extraction-parity.ts
+
+  # Inputs that break tools, run against the built binary over a tree
+  # the test constructs. Not a fixture directory: Windows cannot check in
+  # a FIFO, a symlink loop or a file nobody may read, so the tree is
+  # built at runtime and every case a platform cannot express is named
+  # rather than passed quietly.
+  #
+  # Three platforms on every push, so it stays under two minutes: one
+  # scan each of a megabyte-long line and a hundred thousand lines, and
+  # nothing bigger.
+  hazards:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, windows-2025, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: stable
+      - name: Hazardous inputs, against the binary
+        run: cargo test --locked --test hazards -- --nocapture
+
+  # Behaviour that differs by operating system, asserted rather than
+  # hoped. The report's path separator shipped wrong in this family for a
+  # release because the only runner that produced `\` was the one nobody
+  # read the JSON from.
+  platform:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, windows-2025, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: stable
+      - run: cargo test --locked --test platform -- --nocapture
+      # This crate resolves zone-less dates against the machine, its
+      # tests name their own zone with `time::with_zone`, and Windows
+      # ignores `TZ` entirely. So the suite must not depend on the
+      # variable at all — proved by running it three times and diffing
+      # the outcomes rather than by asserting it in prose.
+      #
+      # Asia/Kolkata is a half-hour offset on purpose: an arithmetic
+      # mistake that survives UTC often does not survive +05:30.
+      - name: Build the test binaries once
+        run: cargo test --locked --no-run
+      - name: The suite is independent of TZ
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_suite() {
+            cargo test --locked --no-fail-fast 2>&1 \
+              | grep -E '^test .* \.\.\. (ok|FAILED|ignored)$' \
+              | LC_ALL=C sort
+          }
+          TZ=UTC run_suite > /tmp/tz-utc.txt
+          TZ=Asia/Kolkata run_suite > /tmp/tz-kolkata.txt
+          (unset TZ; run_suite > /tmp/tz-unset.txt)
+          test -s /tmp/tz-utc.txt || { echo 'no test results were captured'; exit 1; }
+          diff -u /tmp/tz-utc.txt /tmp/tz-kolkata.txt
+          diff -u /tmp/tz-utc.txt /tmp/tz-unset.txt
+
+  # The corpus pins cases somebody wrote down. This generates them: a
+  # format, a value and a wrapper, combined from a printed seed, fed to
+  # BOTH servers' `extract_dates` — the one tool they share — and
+  # required to come back byte-identical.
+  #
+  # Scoped to that tool on purpose. The two surfaces are allowed to
+  # differ and do: the extension is IDE-first and the CLI is
+  # terminal-first, so the walk, --strict, --sort, --tz and the exit
+  # codes are capabilities rather than drift. What may never differ is
+  # the answer an agent gets from the same call.
+  differential:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: stable
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.13
+      - name: Install dependencies
+        working-directory: .
+        run: bun install --frozen-lockfile
+      - run: cargo build --release --locked
+      - name: Generated differential, both servers
+        working-directory: .
+        env:
+          TZ: America/New_York
+          # Fixed so a failure replays exactly. The script prints it on
+          # every run, and prints the failing document with it.
+          DIFFERENTIAL_SEED: "20240115"
+        run: bun scripts/check-extraction-differential.ts
+
+  # A standing net over the pure layer, not a proof. `parse.rs` is a
+  # hand-written reimplementation of both of V8's date parsers driven by
+  # a 178-case oracle — exactly the shape where an input nobody wrote
+  # down panics or spins. Seeded from that oracle, because a mutation of
+  # something that nearly parses reaches far more of the parser than a
+  # random string does.
+  #
+  # Sixty seconds a target, ubuntu only: it is a budget of seconds
+  # rather than a set of cases, and three copies of it would buy nothing.
+  fuzz:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: stable
+      - name: Fuzz the parsers and the scan
+        env:
+          DATES_LE_FUZZ: "1"
+          DATES_LE_FUZZ_SECONDS: "60"
+          # Printed on every run and on every failure, so a red build
+          # replays with one environment variable.
+          DATES_LE_FUZZ_SEED: "539230485"
+        run: cargo test --locked --lib fuzz -- --test-threads=1 --nocapture
+
+  # A wall-clock ceiling and a linearity check on a generated tree.
+  # Release, because a debug binary is several times slower and the
+  # number recorded in the test would mean nothing against it. Ubuntu
+  # only: a timing assertion on three operating systems is three chances
+  # to flake for one piece of information.
+  budget:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: stable
+      - name: Scan a 500-file tree inside its budget
+        env:
+          DATES_LE_BUDGET: "1"
+        run: cargo test --release --locked --test budget -- --test-threads=1 --nocapture
+
+  # Does the crate open what it claims to open? One file per name in the
+  # alias table plus a dozen it has never heard of, and a report line
+  # required for every one — plus the other half of the same question: a
+  # format the schema advertises with no corpus document is a format the
+  # two frontends have never been compared on.
+  coverage-matrix:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: stable
+      - run: cargo test --locked --test coverage_matrix -- --nocapture

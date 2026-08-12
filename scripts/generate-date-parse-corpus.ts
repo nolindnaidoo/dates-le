@@ -140,6 +140,63 @@ const LEGACY: Case[] = [
 	{ input: 'Foo Jan 15 2024', why: 'a garbage word before the first number is skipped' },
 	{ input: 'Foo Bar Jan 15 2024', why: 'two of them' },
 	{ input: 'Jan 15 2024 Foo', why: 'a garbage word after a number is fatal' },
+	// V8 scans a word while the character is `A` or above, so anything
+	// outside ASCII is INSIDE the word rather than beside it — and the
+	// keyword still matches on the first three characters of it. The
+	// crate read words with Rust's `is_alphabetic` and matched on the
+	// first three BYTES, which disagreed with every case below and
+	// aborted the process on two of them.
+	{ input: 'Jané 15 2024', why: 'an accent joins the word, and jan still matches' },
+	{ input: 'Jané15 2024', why: 'and it does not separate the word from the number' },
+	{ input: 'Jaé 15 2024', why: 'two letters and an accent is not a month' },
+	{ input: 'JANUARYé 15 2024', why: 'the accent is past the prefix' },
+	{ input: 'café 15 2024', why: 'a word of letters and an accent is garbage' },
+	{ input: 'é 15 2024', why: 'a lone accent is a word, so 15 and 2024 have no month' },
+	{ input: 'é Jan 15 2024', why: 'and before a month it is garbage that is skipped' },
+	{ input: 'Jan 15 2024 é', why: 'after the first number it is fatal like any word' },
+	{
+		input: 'Jan\u{a0}15 2024',
+		why: 'a non-breaking space is a word character, not a space',
+	},
+	{
+		input: 'Jan 15 2024\u{a0}',
+		why: 'so a trailing one is a garbage word, and fatal',
+	},
+	{ input: 'Jan 15 2024\u{3000}', why: 'an ideographic space is the same' },
+	{ input: 'Jan 15 2024\u{feff}', why: 'and so is a byte-order mark' },
+	{
+		input: '\u{feff}Jan 15 2024',
+		why: 'a leading one joins the month and breaks it',
+	},
+	{
+		input: 'Jan 15 2024\u{01}',
+		why: 'a control character is below A, so it is neither a word nor fatal',
+	},
+	{ input: 'Jan 15 2024@', why: 'nor is a symbol below A' },
+	{
+		input: 'Jan 15 2024_',
+		why: 'an underscore is above A, so it is a word and is fatal',
+	},
+	{ input: '\u{1f5d3} Jan 15 2024', why: 'an astral character is a word, and garbage' },
+	// Two characters whose lowercase is a different LENGTH: U+0130 grows
+	// to two code points and U+212A shrinks to one byte. V8 lowercases
+	// with `c | 0x20`, which changes neither, so the keyword prefix is
+	// still three characters of the word as written. Taking them from a
+	// `to_lowercase` copy would slide, and a slide that lands mid
+	// character aborts the process — the shape that crashed a sibling.
+	{
+		input: '\u{130}Jan 15 2024',
+		why: 'a dotted capital I joins the month and breaks the prefix',
+	},
+	{ input: 'Jan\u{130} 15 2024', why: 'past the prefix it changes nothing' },
+	{ input: '\u{130} Jan 15 2024', why: 'and alone it is a garbage word' },
+	{
+		input: '\u{212a}Jan 15 2024',
+		why: 'a kelvin sign is the same, and lowercases shorter',
+	},
+	{ input: '\u{212a}an 15 2024', why: 'and is not the letter k for this' },
+	{ input: 'Jan 15 2024\u{212a}', why: 'trailing, it is a word and is fatal' },
+	{ input: 'Ja\u{1f5d3} 15 2024', why: 'joined to two letters it is still not a month' },
 	{ input: 'Jan 15 2024 (a comment)', why: 'parenthesised text is a comment' },
 	{ input: 'Jan 15 2024 (unclosed', why: 'an unclosed comment is still a comment' },
 	{ input: 'Jan 32 2024', why: 'day 32 is a refusal' },

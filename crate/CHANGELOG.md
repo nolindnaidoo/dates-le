@@ -22,7 +22,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `properties`, `markdown` and `md` are named formats rather than
   unknowns; `toml` and `markdown` join the tool schema's enum.
 - **Four notations `Date.parse` refuses**, in a new `extract/extended.rs`
-  that sits *above* the V8 parser and leaves the 140-case oracle
+  that sits *above* the V8 parser and leaves the oracle
   untouched: ISO 8601 week dates (`2024-W03`, `2024-W03-1`), ordinal
   dates (`2024-015`), the basic format (`20240115`, `20240115T103045Z`),
   and the abbreviations `CEST CET BST JST AEST IST` as fixed offsets.
@@ -36,8 +36,81 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   double and a division would round in JavaScript and not in Rust.
 - Corpus documents `settings.py`, `handler.go`, `release-notes.md`,
   `pyproject.toml` and `notations.txt`, and MCP cases for each.
+- Corpus document `calendar.js`, so `javascript` is a format the two
+  frontends have actually been compared on. The tool schema had
+  advertised it since 0.1.0 with nothing behind it — `dates.ts` covers
+  `typescript`, and the two are separate keys on purpose.
+- **Six CI jobs, and every one of them found something.** `hazards` and
+  `platform` run the built binary on all three operating systems over
+  trees built at run time — byte-order marks, CRLF, lone carriage
+  returns, NUL bytes, undecodable text, a megabyte-long line, a hundred
+  thousand lines, symlink loops, FIFOs, unreadable files, reserved
+  Windows names and paths past 260 characters — and assert the process
+  never panics, never hangs and never leaves by a signal. `differential`
+  generates over twelve hundred documents from a printed seed and
+  requires both servers' `extract_dates` to answer byte-identically.
+  `fuzz` mutates the V8 oracle's own inputs against the parsers and the
+  scan for sixty seconds a target. `budget` puts a wall-clock ceiling
+  and a linearity check on a generated 500-file tree. `coverage-matrix`
+  requires a report line for every extension in the alias table and a
+  corpus document for every advertised format. Each job names the input,
+  the platform and the seed that broke it.
+
+### Fixed
+
+- **A date after a megabyte of anything else was silently dropped.**
+  `fancy-regex` stops after a million backtracking steps by default and
+  an unanchored search spends one per starting position, so past about a
+  megabyte every pattern stopped matching — and the scan read the
+  engine's error as "no more matches" and reported the file as clean. The
+  patterns are built with no backtrack limit now (none of them nests a
+  quantifier; `tests/scenarios.rs` holds the megabyte-scale documents
+  that would show it if one did), and the error is no longer swallowed.
+  Found by `hazards`.
+- **The process aborted on a word with an accent in it.** `Date.parse`'s
+  keyword table matches on a word's first three *characters* and the
+  crate sliced three *bytes*, so `new Date('Jaé…')` or
+  `datetime="Café day"` killed the run — both of those hand the parser
+  arbitrary text. Found by `fuzz`.
+- **Words were read with Rust's notion of a letter rather than V8's.**
+  V8 scans a word while the character is `A` or above, so an accent, a
+  non-breaking space, an ideographic space and a byte-order mark are all
+  *inside* a word: `Jané 15 2024` is January and `Jan 15 2024\u{a0}` is a
+  refusal. Cases added to the oracle for all of it, which now holds 178.
+- **The two servers disagreed about an unclosed XML comment.** The
+  extension masks with a regex that requires the closing marker, so
+  `<a>1</a><!-- 2024-01-15` still yields that date; this swallowed the
+  rest of the document. The opening `<!--` can no longer close itself
+  either — `<!-->` is not an empty comment. Found by `differential`.
+- **The two servers disagreed about whitespace.** JavaScript's
+  whitespace set includes U+FEFF and excludes U+0085; Rust's Unicode
+  `White_Space` does the opposite. `extract_dates` with
+  `format: "\u{feff}json"` resolved to `json` in the editor and
+  `unknown` here, and `datetime\u{feff}="March 5, 2024"` was a date in
+  one frontend and not the other. A new `extract/js.rs` defines
+  JavaScript's set once, in two forms held equal by a test, and the
+  format normaliser and every `\s` in the patterns go through it. The
+  normaliser also strips one leading dot rather than all of them, which
+  is what `replace(/^\./, '')` does. Found by `differential`.
+- **A nineteen-digit year overflowed the calendar arithmetic.**
+  `week_date`, `ordinal_date` and `basic_format` accepted any numeral
+  `parse` would swallow, where the extension's anchored regexes accept
+  exactly four digits and three. The widths are checked now. Found by
+  `fuzz`.
+- **Report paths used the platform separator.** `file` in every report
+  line — stdout is protocol — was spelled with `\` on Windows and `/`
+  everywhere else, so the same tree produced JSON only one consumer
+  could read. One spelling now, on every platform.
 
 ### Changed
+
+- **The MCP envelope keeps the schema's field order.** `serde_json`
+  sorts object keys by default, so an agent reading `content[0].text`
+  from this server got them alphabetised where the npm server gave them
+  in the documented order — the same answer, spelled two ways, from what
+  is meant to be one tool. `serde_json` gains the `preserve_order`
+  feature (and with it `indexmap`) so the claim of byte-identical output
+  is true rather than nearly true.
 
 - **`--format` no longer refuses a name it does not recognise**, and
   `--stdin` no longer requires one: both fall back to the shared

@@ -7,6 +7,11 @@
 
 pub(crate) mod cli;
 pub(crate) mod extract;
+/// A time-boxed generative net over `extract/`. Test-only, and outside
+/// `extract/` on purpose: that directory is pure and its coverage floor
+/// measures the behaviour, not the harness.
+#[cfg(test)]
+mod fuzz;
 pub(crate) mod mcp;
 pub(crate) mod scan;
 pub(crate) mod walk;

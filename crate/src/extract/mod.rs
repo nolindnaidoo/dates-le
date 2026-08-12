@@ -6,6 +6,9 @@
 pub(crate) mod extended;
 pub(crate) mod format;
 pub(crate) mod heuristics;
+/// JavaScript's whitespace, which is not Rust's. Everything in this
+/// directory that trims or matches `\s` goes through it.
+mod js;
 pub(crate) mod parse;
 pub(crate) mod position;
 pub(crate) mod time;
@@ -45,15 +48,25 @@ pub(crate) fn extract(content: &str, language: &str, year: i64) -> Vec<Found> {
 /// extension gets this for free because JavaScript replaces a character
 /// with a character; here it has to be done on purpose, padding by the
 /// character's own byte length.
+///
+/// **A comment nobody closed is not a comment.** The extension masks
+/// with `/<!--[\s\S]*?-->/`, which needs the closing marker, so
+/// `<a>1</a><!-- 2024-01-15` still yields that date there. This used to
+/// swallow the rest of the document instead — a divergence between the
+/// two servers on the one tool they are meant to share, and not one
+/// SPEC.md listed. The closing marker is also searched for *after* the
+/// four characters that open the comment, for the same reason the
+/// extension's `*?` starts there: `<!-->` is not an empty comment.
 fn mask_xml_comments(content: &str) -> String {
     let mut out = String::with_capacity(content.len());
-    let bytes = content.as_bytes();
     let mut index = 0;
 
     while index < content.len() {
-        if bytes[index..].starts_with(b"<!--") {
-            let rest = &content[index..];
-            let end = rest.find("-->").map_or(content.len(), |at| index + at + 3);
+        let after_open = index + "<!--".len();
+        if content[index..].starts_with("<!--")
+            && let Some(at) = content[after_open..].find("-->")
+        {
+            let end = after_open + at + "-->".len();
             for character in content[index..end].chars() {
                 if character == '\n' {
                     out.push('\n');
@@ -64,14 +77,14 @@ fn mask_xml_comments(content: &str) -> String {
                 }
             }
             index = end;
-        } else {
-            let character = content[index..]
-                .chars()
-                .next()
-                .expect("index is on a character boundary");
-            out.push(character);
-            index += character.len_utf8();
+            continue;
         }
+        let character = content[index..]
+            .chars()
+            .next()
+            .expect("index is on a character boundary");
+        out.push(character);
+        index += character.len_utf8();
     }
 
     debug_assert_eq!(
@@ -141,9 +154,30 @@ mod tests {
         );
     }
 
+    /// Found by the generated differential against the extension: this
+    /// swallowed the rest of the document, the extension masked nothing,
+    /// and the shared `extract_dates` tool answered two different
+    /// things. The extension is the reference implementation.
     #[test]
-    fn an_unclosed_comment_swallows_the_rest() {
-        assert!(values("<!-- 2024-01-15", "xml").is_empty());
+    fn a_comment_nobody_closed_is_not_a_comment() {
+        assert_eq!(values("<!-- 2024-01-15", "xml"), ["2024-01-15"]);
+        assert_eq!(
+            values("<a>1</a><!-- 2024-01-15", "xml"),
+            ["2024-01-15"],
+            "an unclosed comment must not hide what follows it either"
+        );
+    }
+
+    /// The closing marker is searched for after the four characters that
+    /// open the comment, so the two `-` in `<!--` cannot be read as the
+    /// start of one. `<!-->` is not an empty comment in XML and is not
+    /// one to the extension's regex either.
+    #[test]
+    fn the_opening_marker_cannot_close_itself() {
+        assert_eq!(values("<!-->2024-01-15", "xml"), ["2024-01-15"]);
+        assert_eq!(values("<!--->2024-01-15", "xml"), ["2024-01-15"]);
+        assert_eq!(values("<!---->2024-01-15", "xml"), ["2024-01-15"]);
+        assert!(values("<!--2024-01-15-->", "xml").is_empty());
     }
 
     /// The bug this class of code causes, pinned three ways: the length

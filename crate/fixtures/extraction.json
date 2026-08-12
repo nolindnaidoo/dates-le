@@ -277,6 +277,62 @@
 			]
 		},
 		{
+			"name": "JavaScript, where a constructor argument is the only thing that makes a string a date",
+			"file": "calendar.js",
+			"fileType": "javascript",
+			"expected": [
+				{
+					"value": "March 5, 2024",
+					"format": "custom",
+					"timestamp": 1709614800000,
+					"line": 5,
+					"column": 27
+				},
+				{
+					"value": "15 Jan 2024 10:30:08 +0000",
+					"format": "custom",
+					"timestamp": 1705314608000,
+					"line": 6,
+					"column": 24
+				},
+				{
+					"value": "2024-01-15T10:30:45Z",
+					"format": "iso",
+					"timestamp": 1705314645000,
+					"line": 7,
+					"column": 24
+				},
+				{
+					"value": "Mon, 15 Jan 2024 10:30:45 CEST",
+					"format": "rfc2822",
+					"timestamp": 1705307445000,
+					"line": 8,
+					"column": 28
+				},
+				{
+					"value": "2024-01-15",
+					"format": "simple",
+					"timestamp": 1705276800000,
+					"line": 9,
+					"column": 25
+				},
+				{
+					"value": "2024-02-29",
+					"format": "simple",
+					"timestamp": 1709164800000,
+					"line": 9,
+					"column": 43
+				},
+				{
+					"value": "January 15 2024",
+					"format": "custom",
+					"timestamp": 1705294800000,
+					"line": 13,
+					"column": 3
+				}
+			]
+		},
+		{
 			"name": "datetime attributes, a date meta tag and JSON-LD",
 			"file": "page.html",
 			"fileType": "html",

@@ -106,7 +106,7 @@ pub(crate) fn scan_text(
 /// incomplete. Binaries are counted in the summary instead, so the
 /// reader still knows the walk covered less than the tree.
 pub(crate) fn scan_file(path: &Path, options: &ScanOptions) -> Option<FileReport> {
-    let label = path.display().to_string();
+    let label = reported_path(path);
     let name = path.file_name().and_then(|name| name.to_str());
 
     let language = resolve_format(options.format.as_deref(), name);
@@ -121,6 +121,33 @@ pub(crate) fn scan_file(path: &Path, options: &ScanOptions) -> Option<FileReport
         return Some(FileReport::skipped(&label, "not UTF-8 text".to_string()));
     };
     Some(scan_text(&label, without_bom(&content), language, options))
+}
+
+/// A path as the report spells it, with `/` on every platform.
+///
+/// stdout is protocol — one JSON object per line, read by scripts, by
+/// other tools and by whoever diffs two runs. The platform's own
+/// spelling put `\` in every `file` value on Windows, so the same tree
+/// produced two reports and a committed baseline broke the moment
+/// somebody ran it there. A sibling in this family shipped that for a
+/// release. stderr is a projection of the same reports, so it inherits
+/// the same spelling.
+pub(crate) fn reported_path(path: &Path) -> String {
+    with_forward_slashes(&path.to_string_lossy(), std::path::MAIN_SEPARATOR)
+}
+
+/// The separator is a parameter, not a `cfg!`, for two reasons: it is
+/// the actual discriminator, and it makes the Windows spelling testable
+/// on every platform rather than only on the one that produces it —
+/// which is how it shipped wrong in the first place.
+///
+/// A backslash is a legal character in a Unix filename, so the
+/// substitution happens only where the backslash *is* the separator.
+fn with_forward_slashes(path: &str, separator: char) -> String {
+    if separator == '/' {
+        return path.to_string();
+    }
+    path.replace(separator, "/")
 }
 
 /// ripgrep's heuristic: a NUL byte near the start means binary.
@@ -381,6 +408,28 @@ mod tests {
         let mut bytes = vec![b'a'; 9000];
         bytes.push(0);
         assert!(!is_binary(&bytes));
+    }
+
+    /// The report is protocol, so it has one spelling of a path rather
+    /// than one per operating system. Both directions are checked here
+    /// because only one of them is reachable on any given machine.
+    #[test]
+    fn a_reported_path_uses_forward_slashes_on_every_platform() {
+        assert_eq!(
+            with_forward_slashes(r"C:\repo\src\app.json", '\\'),
+            "C:/repo/src/app.json"
+        );
+        assert_eq!(
+            with_forward_slashes("/repo/src/app.json", '/'),
+            "/repo/src/app.json"
+        );
+        // A backslash is a legal character in a Unix filename, and there
+        // it is part of the name rather than a separator.
+        assert_eq!(
+            with_forward_slashes(r"/repo/od\d.json", '/'),
+            r"/repo/od\d.json"
+        );
+        assert!(!reported_path(Path::new("a")).contains('\\'));
     }
 
     /// Three invisible bytes that Notepad, Excel and a PowerShell

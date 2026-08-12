@@ -238,7 +238,7 @@ dates-le mcp                        # the same extraction over MCP on stdio
 `Mon, 15 Jan 2024` are one moment written three ways, and resolving each
 to a number is what makes them sortable and comparable rather than three
 strings to read. Resolution matches `Date.parse` in V8 exactly — legacy
-parser included — against 140 cases taken from V8 itself.
+parser included — against 178 cases taken from V8 itself.
 
 A date with no timezone resolves against the machine's, because that is
 the true answer and it genuinely differs by machine. `TZ` is honoured.

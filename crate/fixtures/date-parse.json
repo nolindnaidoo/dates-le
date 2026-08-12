@@ -448,6 +448,126 @@
 			"timestamp": null
 		},
 		{
+			"input": "Jané 15 2024",
+			"why": "an accent joins the word, and jan still matches",
+			"timestamp": 1705294800000
+		},
+		{
+			"input": "Jané15 2024",
+			"why": "and it does not separate the word from the number",
+			"timestamp": 1705294800000
+		},
+		{
+			"input": "Jaé 15 2024",
+			"why": "two letters and an accent is not a month",
+			"timestamp": null
+		},
+		{
+			"input": "JANUARYé 15 2024",
+			"why": "the accent is past the prefix",
+			"timestamp": 1705294800000
+		},
+		{
+			"input": "café 15 2024",
+			"why": "a word of letters and an accent is garbage",
+			"timestamp": null
+		},
+		{
+			"input": "é 15 2024",
+			"why": "a lone accent is a word, so 15 and 2024 have no month",
+			"timestamp": null
+		},
+		{
+			"input": "é Jan 15 2024",
+			"why": "and before a month it is garbage that is skipped",
+			"timestamp": 1705294800000
+		},
+		{
+			"input": "Jan 15 2024 é",
+			"why": "after the first number it is fatal like any word",
+			"timestamp": null
+		},
+		{
+			"input": "Jan 15 2024",
+			"why": "a non-breaking space is a word character, not a space",
+			"timestamp": 1705294800000
+		},
+		{
+			"input": "Jan 15 2024 ",
+			"why": "so a trailing one is a garbage word, and fatal",
+			"timestamp": null
+		},
+		{
+			"input": "Jan 15 2024　",
+			"why": "an ideographic space is the same",
+			"timestamp": null
+		},
+		{
+			"input": "Jan 15 2024﻿",
+			"why": "and so is a byte-order mark",
+			"timestamp": null
+		},
+		{
+			"input": "﻿Jan 15 2024",
+			"why": "a leading one joins the month and breaks it",
+			"timestamp": null
+		},
+		{
+			"input": "Jan 15 2024\u0001",
+			"why": "a control character is below A, so it is neither a word nor fatal",
+			"timestamp": 1705294800000
+		},
+		{
+			"input": "Jan 15 2024@",
+			"why": "nor is a symbol below A",
+			"timestamp": 1705294800000
+		},
+		{
+			"input": "Jan 15 2024_",
+			"why": "an underscore is above A, so it is a word and is fatal",
+			"timestamp": null
+		},
+		{
+			"input": "🗓 Jan 15 2024",
+			"why": "an astral character is a word, and garbage",
+			"timestamp": 1705294800000
+		},
+		{
+			"input": "İJan 15 2024",
+			"why": "a dotted capital I joins the month and breaks the prefix",
+			"timestamp": null
+		},
+		{
+			"input": "Janİ 15 2024",
+			"why": "past the prefix it changes nothing",
+			"timestamp": 1705294800000
+		},
+		{
+			"input": "İ Jan 15 2024",
+			"why": "and alone it is a garbage word",
+			"timestamp": 1705294800000
+		},
+		{
+			"input": "KJan 15 2024",
+			"why": "a kelvin sign is the same, and lowercases shorter",
+			"timestamp": null
+		},
+		{
+			"input": "Kan 15 2024",
+			"why": "and is not the letter k for this",
+			"timestamp": null
+		},
+		{
+			"input": "Jan 15 2024K",
+			"why": "trailing, it is a word and is fatal",
+			"timestamp": null
+		},
+		{
+			"input": "Ja🗓 15 2024",
+			"why": "joined to two letters it is still not a month",
+			"timestamp": null
+		},
+		{
 			"input": "Jan 15 2024 (a comment)",
 			"why": "parenthesised text is a comment",
 			"timestamp": 1705294800000

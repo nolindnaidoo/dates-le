@@ -17,13 +17,17 @@
 //! written `(?<![A-Za-z0-9_])`, or `datetime=` after an accented character would
 //! match in one frontend and not the other.
 //!
-//! `\s` is left Unicode, which is the *closer* match: JavaScript's `\s`
-//! includes the non-breaking space and Rust's Unicode `\s` does too,
-//! where an ASCII-only one would not.
+//! `\s` has the same split and is handled the same way, by `build`
+//! below: JavaScript's set includes U+FEFF and excludes U+0085, and
+//! Rust's Unicode `\s` does the opposite. Leaving it Unicode is *closer*
+//! than an ASCII-only one and still not the same set, which made
+//! `Mon,\u{feff}15 Jan 2024 10:30:45 GMT` an RFC 2822 date in one
+//! frontend and nothing in the other.
 
-use fancy_regex::Regex;
+use fancy_regex::{Regex, RegexBuilder};
 
 use super::extended;
+use super::js;
 use super::position::locate_all;
 
 /// What a value was recognised as. These names reach the user as
@@ -263,8 +267,34 @@ fn html_patterns() -> Vec<Pattern> {
     ]
 }
 
+/// **The backtrack limit is removed, and that is the point of this
+/// function.**
+///
+/// `fancy-regex` stops after a million backtracking steps by default,
+/// and an unanchored search spends one of them per starting position —
+/// so past about a megabyte every pattern here simply stopped matching.
+/// It did not stop loudly: `captures_from_pos` returns an error, the
+/// scan below read it as "no more matches", and a file with a date after
+/// a megabyte of anything else came back clean. A short answer that
+/// looks like a complete one is the single worst thing this tool can
+/// produce.
+///
+/// Removed rather than raised, because there is no document length at
+/// which a silently short answer becomes acceptable. What makes that
+/// safe is the shape of the patterns rather than the limit: none of them
+/// nests a quantifier, so there is nothing to backtrack catastrophically
+/// over, and `tests/scenarios.rs` holds the megabyte-scale documents
+/// that would show it if one ever did.
 fn build(pattern: &str) -> Regex {
-    Regex::new(pattern).expect("every pattern in this file is a literal and is tested")
+    // `\s` is rewritten into JavaScript's own set, once, here rather
+    // than in each of the twelve patterns that use it — the pattern
+    // literals stay readable and there is one place for the rule. See
+    // `js.rs` for why the two languages disagree.
+    let pattern = pattern.replace(r"\s", &format!("[{}]", js::JS_SPACE_CLASS));
+    RegexBuilder::new(&pattern)
+        .backtrack_limit(usize::MAX)
+        .build()
+        .expect("every pattern in this file is a literal and is tested")
 }
 
 /// Which extra patterns a language id brings, on top of the six.
@@ -303,7 +333,19 @@ pub(crate) fn scan(haystack: &str, original: &str, patterns: &[Pattern], year: i
 
     for (order, pattern) in patterns.iter().enumerate() {
         let mut from = 0;
-        while let Ok(Some(captures)) = pattern.regex.captures_from_pos(content, from) {
+        // Not `while let Ok(Some(..))`: that reads an engine error as
+        // the end of the document and returns a short answer as if it
+        // were a complete one, which is exactly the bug `build` removes
+        // the backtrack limit to prevent. With no limit the only
+        // remaining runtime failure is a stack overflow inside the
+        // engine, which none of these patterns can reach — so a failure
+        // here is a broken invariant and stops, rather than quietly
+        // truncating the report.
+        while let Some(captures) = pattern
+            .regex
+            .captures_from_pos(content, from)
+            .expect("the patterns in this file have no backtrack limit and cannot fail at runtime")
+        {
             // The date is the last capture group, or the whole match
             // when the pattern has none.
             let group = captures.len() - 1;
@@ -729,6 +771,35 @@ mod tests {
     #[test]
     fn non_ascii_digits_are_not_digits() {
         assert!(values("٢٠٢٤-٠١-١٥", "json").is_empty());
+    }
+
+    /// `\s` has the same split as `\d` and `\b`, and the two sets differ
+    /// by exactly two characters. Found by the generated differential;
+    /// both are named here so a rewrite to a bare `\s` fails loudly.
+    ///
+    /// The cases that show it are the ones where the whitespace is
+    /// *structural* rather than part of the value — a `datetime=`
+    /// attribute or a constructor call, where the context is the only
+    /// thing that makes the string a date. Where the whitespace is
+    /// inside the value instead, V8 refuses the value and the answer is
+    /// the same either way.
+    #[test]
+    fn the_separator_class_is_javascripts_whitespace() {
+        // U+FEFF is whitespace to JavaScript and not to Rust, so the
+        // extension read these and this did not.
+        assert_eq!(
+            values("<time datetime\u{feff}=\"March 5, 2024\">x</time>", "html"),
+            ["March 5, 2024"]
+        );
+        assert_eq!(
+            values("new\u{feff}Date('March 5, 2024')", "javascript"),
+            ["March 5, 2024"]
+        );
+        // U+0085 is whitespace to Rust and not to JavaScript, so it must
+        // not separate anything: this read them and the extension did
+        // not.
+        assert!(values("<time datetime\u{85}=\"March 5, 2024\">x</time>", "html").is_empty());
+        assert!(values("new\u{85}Date('March 5, 2024')", "javascript").is_empty());
     }
 
     #[test]

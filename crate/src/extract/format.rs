@@ -14,6 +14,8 @@
 //! refusing to give it was the tool declining to read `.py`, `.go`,
 //! `.toml` and `.md` at all.
 
+use super::js;
+
 /// Every name a caller can send, and the language id it means.
 const ALIASES: [(&str, &str); 31] = [
     ("json", "json"),
@@ -79,12 +81,22 @@ pub(crate) const SUPPORTED_FORMATS: [&str; 11] = [
 /// field that is right there in the response.
 pub(crate) const FALLBACK_FORMAT: &str = "unknown";
 
+/// `value.trim().toLowerCase().replace(/^\./, '')`, character for
+/// character.
+///
+/// Two things here are not the obvious Rust spelling, and both were
+/// divergences from the extension on the tool the two servers share:
+///
+/// - **`js::trim`, not `str::trim`.** JavaScript's whitespace set
+///   includes U+FEFF and Rust's does not, so `"\u{feff}json"` resolved
+///   to `json` in the editor and `unknown` here — and a name read out of
+///   a file that Notepad saved carries one.
+/// - **One leading dot, not every leading dot.** `replace(/^\./, '')`
+///   strips a single dot, so `..json` is not a format there. It was
+///   here.
 fn normalise(value: &str) -> String {
-    value
-        .trim()
-        .to_lowercase()
-        .trim_start_matches('.')
-        .to_string()
+    let lowered = js::trim(value).to_lowercase();
+    lowered.strip_prefix('.').unwrap_or(&lowered).to_string()
 }
 
 fn lookup(name: &str) -> Option<&'static str> {
@@ -151,6 +163,30 @@ mod tests {
         assert_eq!(resolve_format(None, Some("Makefile")), FALLBACK_FORMAT);
         assert_eq!(resolve_format(None, Some("noextension")), FALLBACK_FORMAT);
         assert_eq!(resolve_format(None, None), FALLBACK_FORMAT);
+    }
+
+    /// Found by the generated differential against the extension. The
+    /// name is trimmed before it is looked up, and Rust and JavaScript
+    /// disagree about what a trim removes — by exactly two characters,
+    /// both named here so a future `str::trim` fails loudly.
+    #[test]
+    fn the_name_is_trimmed_the_way_javascript_trims() {
+        // U+FEFF is whitespace to JavaScript and not to Rust. A name
+        // read out of a file that Notepad saved carries one.
+        assert_eq!(resolve_format(Some("\u{feff}json"), None), "json");
+        assert_eq!(resolve_format(Some("json\u{feff}"), None), "json");
+        // U+0085 is whitespace to Rust and not to JavaScript, so it must
+        // survive the trim and leave the name unrecognised.
+        assert_eq!(resolve_format(Some("\u{85}json"), None), FALLBACK_FORMAT);
+        assert_eq!(resolve_format(Some("  json\t"), None), "json");
+    }
+
+    /// `replace(/^\./, '')` strips one dot, so a second one is part of
+    /// the name and the name is then not a format.
+    #[test]
+    fn only_one_leading_dot_is_stripped() {
+        assert_eq!(resolve_format(Some(".json"), None), "json");
+        assert_eq!(resolve_format(Some("..json"), None), FALLBACK_FORMAT);
     }
 
     #[test]

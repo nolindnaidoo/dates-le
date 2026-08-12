@@ -64,7 +64,7 @@ merely close does not produce slightly different numbers — it produces a
 different set of findings. No general date library is bug-compatible
 with V8's legacy parser, so this crate implements it directly.
 
-`fixtures/date-parse.json` holds V8's own answers to 140 cases and is
+`fixtures/date-parse.json` holds V8's own answers to 178 cases and is
 the authority. Regenerate it only with the generator, under `TZ` — the
 generator runs in V8, which does honour it — never by hand. **A disagreement means the parser is wrong**, because the
 extension is V8.
@@ -154,6 +154,21 @@ JavaScript's `\d` is `[0-9]` and Rust's is every Unicode decimal digit;
 `\b` splits the same way. Both are written out explicitly. Left alone
 they would find dates the extension cannot see, and miss ones it can.
 
+### Whitespace is JavaScript's, and lives in one file
+
+`\s` and `String.prototype.trim` have the same trap and it is not the
+same set: JavaScript counts U+FEFF and Rust does not, Rust counts U+0085
+and JavaScript does not. `extract/js.rs` defines the set once, in two
+forms held equal by a test — `js::trim` for anything trimmed, and
+`JS_SPACE_CLASS`, which `heuristics::build` substitutes for every `\s` in
+the patterns. **Anything in `extract/` that trims or matches whitespace
+goes through it**; a bare `str::trim` or `\s` is a review failure.
+
+The one exception is `parse.rs`, and it is not a lapse: V8's date parser
+has its own, narrower notion — it scans a *word* while the character is
+`A` or above, so a non-breaking space is part of a word there. The oracle
+is the authority for that, and `fixtures/date-parse.json` pins it.
+
 ### Extraction only
 
 `analyze`, `convert`, `filter` and `validate` are interactive
@@ -194,6 +209,35 @@ Four layers, each answering something the others cannot.
 4. **Scenarios** (`tests/scenarios.rs`), gated behind
    `DATES_LE_SCENARIOS=1`, for documents too big for the ordinary suite.
    Every case there is a real failure a green suite let through.
+
+And four more that exist because a green suite is not evidence. Each one
+found a real defect the first time it ran.
+
+5. **Hazards** (`tests/hazards.rs`), against the built binary over a tree
+   built at run time — a byte-order mark, a lone carriage return, a NUL
+   byte, undecodable bytes, a megabyte-long line, a symlink loop, a FIFO,
+   a file nobody may read. Every case asserts the process does not panic,
+   does not hang, and leaves with 0, 1 or 2 rather than a signal. A case
+   the platform cannot express is skipped **by name**, never quietly.
+6. **Platform** (`tests/platform.rs`), for what differs by operating
+   system: the report's path separator, case-folding filesystems,
+   reserved Windows names, a child that closes stdin before the writer
+   finishes. The workflow additionally runs the whole suite under
+   `TZ=UTC`, under `TZ=Asia/Kolkata` and with `TZ` unset and requires
+   identical results — Windows ignores `TZ`, so a suite that read it
+   could only be checked on two of three platforms.
+7. **Differential** (`scripts/check-extraction-differential.ts`),
+   generating over a thousand documents from a printed seed and requiring
+   both servers' `extract_dates` to answer byte-identically. **Scoped to
+   the shared tool.** The two surfaces are meant to differ — the
+   extension is IDE-first, the CLI terminal-first, and the walk,
+   `--strict`, `--sort`, `--tz` and the exit codes are capabilities
+   rather than drift. What may never differ is the answer an agent gets
+   from the same call.
+8. **Fuzz** (`src/fuzz.rs`), gated behind `DATES_LE_FUZZ=1`: sixty
+   seconds a target of seeded mutations of the oracle's own inputs,
+   against `date_parse`, the layer above it and the whole scan. Any
+   panic, any input past two seconds, is a failure.
 
 Every bug fix ships with the test that would have caught it.
 

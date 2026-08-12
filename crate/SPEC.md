@@ -36,7 +36,7 @@ Eleven names resolve, and everything else resolves to `unknown`:
 | Name | Extractor | Adds |
 |---|---|---|
 | `json`, `csv`, `yaml`, `toml`, `markdown` | shared core | — |
-| `xml` | shared core | comments masked before scanning |
+| `xml` | shared core | closed comments masked before scanning |
 | `log`, `plaintext` | shared core | log timestamps, syslog, Apache |
 | `javascript`, `typescript` | shared core | date-constructor arguments |
 | `html` | shared core | `datetime=`, date `<meta>`, JSON-LD |
@@ -46,6 +46,21 @@ There is no parsing. Every extractor is the same regex scan over raw
 text; the format only decides which extra patterns join it. That is why
 a `.json` file and a `.csv` file are read identically, and why a
 malformed document still yields its dates instead of a parse error.
+
+**A comment nobody closed is not a comment.** Masking needs the `-->`,
+so `<a>1</a><!-- 2024-01-15` yields that date rather than losing the rest
+of the document — the same rule the extension's masking regex has always
+had. The opening `<!--` cannot close itself either: `<!-->` is not an
+empty comment.
+
+**Whitespace is JavaScript's, not Rust's.** The two sets differ by
+exactly two characters — U+FEFF, which only JavaScript counts, and
+U+0085, which only Unicode's `White_Space` does. It matters wherever a
+format name is trimmed and wherever a pattern separates one token from
+another, so `format: "\u{feff}json"` is `json` and
+`datetime\u{feff}="March 5, 2024"` is a date. This is the same trap as
+`\d` and `\b`, which are Unicode in Rust and ASCII in JavaScript and are
+written out for the same reason.
 
 **An unrecognised format is a fallback, not a refusal.** Because a
 format only ever *adds* patterns to the shared ones, the shared scan is
@@ -177,7 +192,7 @@ divergence**, listed under Deliberate divergences below, and each is
 implemented the same way: the value is normalised into a string V8 *does*
 read and handed back to `Date.parse`. Nothing here computes an instant,
 so a week date is UTC for exactly the reason `2024-01-15` is UTC, and the
-140-case oracle stays untouched — this layer can only turn a refusal into
+178-case oracle stays untouched — this layer can only turn a refusal into
 a value, never a value into a different one.
 
 - **ISO 8601 week dates.** `2024-W03` is the Monday of ISO week 3, the
@@ -234,6 +249,10 @@ parallel prose.
 `timezone` exists in the extension's value shape and is never populated
 by extraction. It is omitted here rather than emitted as `null`, which
 is what the extension's own JSON does.
+
+**`file` uses `/` on every platform.** The report is protocol, so it has
+one spelling rather than one per operating system; a Windows run
+otherwise produced JSON the same consumer could not read.
 
 Exit codes follow grep: `0` dates found, `1` none found, `2` a malformed
 question. Finding none is an answer, not an error.

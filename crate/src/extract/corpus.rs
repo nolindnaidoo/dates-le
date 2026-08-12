@@ -24,6 +24,7 @@ macro_rules! documents {
 
 documents!(
     "app.log",
+    "calendar.js",
     "dates.ts",
     "events.json",
     "feed.xml",

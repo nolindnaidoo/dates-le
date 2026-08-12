@@ -100,10 +100,22 @@ enum Keyword {
 /// `Janxxx` is January and `Ja` is nothing at all. Entries shorter than
 /// three characters match only a word of exactly that length, which is
 /// why `z` is a zone and `zz` is not.
+///
+/// The three are **characters, not bytes**. Taking bytes aborted the
+/// process on `Jaé` — and a date-constructor argument and a `datetime=`
+/// attribute both hand this arbitrary text, so a single accented word in
+/// an HTML file killed the run.
 fn keyword(word: &str) -> Keyword {
     const MONTHS: [&str; 12] = [
         "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec",
     ];
+    // **ASCII lowercasing, and it must stay that way.** V8 folds with
+    // `c | 0x20`, which changes no character outside ASCII; Rust's full
+    // `to_lowercase` changes the *length* of some — `İ` grows to two
+    // code points and `K` (U+212A) shrinks to one byte — so a prefix
+    // taken from that copy would describe a different span of the word,
+    // and a span that lands mid-character aborts the process. All four
+    // characters are in the oracle.
     let lower = word.to_ascii_lowercase();
 
     match lower.as_str() {
@@ -113,10 +125,11 @@ fn keyword(word: &str) -> Keyword {
         "z" | "ut" | "utc" => return Keyword::Zone(0),
         _ => {}
     }
-    if lower.len() < 3 {
+    let head: String = lower.chars().take(3).collect();
+    if head.chars().count() < 3 {
         return Keyword::Unknown;
     }
-    let head = &lower[..3];
+    let head = head.as_str();
     if let Some(index) = MONTHS.iter().position(|month| *month == head) {
         return Keyword::Month(index as i64 + 1);
     }
@@ -129,6 +142,25 @@ fn keyword(word: &str) -> Keyword {
         "pst" => Keyword::Zone(-8),
         _ => Keyword::Unknown,
     }
+}
+
+/// What V8 counts as part of a word, which is not "a letter".
+///
+/// `DateStringTokenizer` scans a keyword while the character
+/// `IsAsciiAlphaOrAbove` — code point `A` or above. So `é`, a
+/// non-breaking space, an ideographic space and a byte-order mark are
+/// all *inside* the word rather than beside it, and every one of them
+/// changes an answer: `Jané 15 2024` is January because the keyword
+/// matches on its first three characters, and `Jan 15 2024\u{a0}` is a
+/// refusal because a garbage word after the first number is fatal.
+///
+/// Rust's `is_alphabetic` answers a different question and disagreed
+/// with V8 on all four. The characters below `A` that the grammar needs
+/// — `+ - : . / ( )` — are all symbols under both rules, and every
+/// Unicode whitespace character below `A` is ASCII whitespace, so the
+/// two branches after this one are unaffected.
+fn is_word_character(character: char) -> bool {
+    character >= 'A'
 }
 
 fn tokenize(input: &str) -> Vec<Token> {
@@ -155,9 +187,9 @@ fn tokenize(input: &str) -> Vec<Token> {
                 value,
                 width: digits.len(),
             });
-        } else if character.is_alphabetic() {
+        } else if is_word_character(character) {
             let start = index;
-            while index < characters.len() && characters[index].is_alphabetic() {
+            while index < characters.len() && is_word_character(characters[index]) {
                 index += 1;
             }
             let word: String = characters[start..index].iter().collect();
