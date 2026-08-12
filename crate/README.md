@@ -85,6 +85,34 @@ command was typed cannot change the answer. At a daylight-saving
 transition the offset in force *before* the transition wins, for both
 the hour that does not exist and the hour that happens twice.
 
+## Options
+
+```
+--after <date>       keep dates at or after this instant
+--before <date>      keep dates strictly before this instant
+--sort               order by instant rather than by position
+--dedupe             collapse repeated dates to their first occurrence
+--iso                add each instant as a UTC ISO 8601 string
+--tz <zone>          resolve dates that carry no timezone in this IANA
+                     zone, e.g. UTC or America/New_York, instead of
+                     this machine's
+--format <format>    force a format instead of inferring it from the
+                     file name; a name nothing recognises falls back to
+                     the shared patterns rather than failing
+--year <year>        the year a syslog line is assumed to be in, since
+                     the line does not carry one. Defaults to this one,
+                     which makes that answer move
+--values             print only the dates, one per line, for piping
+--strict             exit 2 if any file could not be read, rather than
+                     reporting it and carrying on
+--stdin              read one document from stdin
+--hidden             walk hidden files and directories too
+--no-ignore          walk files that .gitignore excludes
+```
+
+`--after` and `--before` accept anything this tool can read, so
+`--after 2024-01-15` and `--after 'March 5, 2024'` both work.
+
 ## As an MCP server
 
 ```bash

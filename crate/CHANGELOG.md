@@ -257,3 +257,6 @@ proved nothing.
 - **A file that is not text is named rather than dropped.** It used to
   vanish from the report entirely, which reads to whoever ran it as
   "that file was clean".
+
+[0.2.0]: https://crates.io/crates/dates-le/0.2.0
+[0.1.0]: https://crates.io/crates/dates-le/0.1.0
