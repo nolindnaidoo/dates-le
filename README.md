@@ -119,11 +119,11 @@ That prints the tool list and exits — if you see `extract_dates`, the server w
 
 **Every document is read.** A format only ever *adds* patterns to the shared ones, so a language ID this does not name — Python, Go, Rust, shell, SQL — is scanned with the shared patterns rather than refused. What it does not get is the format-specific extras: `Jan 15 10:30:47` is a date in a log file and three words in a Python one.
 
-Recognized date patterns: ISO 8601 in extended (`2024-01-15T10:30:00Z`, with optional milliseconds and offset), **basic** (`20240115`, `20240115T103045Z`), **week** (`2024-W03`, `2024-W03-1`) and **ordinal** (`2024-015`) form; RFC 2822 (`Mon, 15 Jan 2024 10:30:00 GMT`); Unix epochs in seconds, milliseconds, microseconds and nanoseconds (exactly 10, 13, 16 or 19 digits in a plausible range — digits embedded in longer numbers, and the fractional part of a float, are never matched); UTC strings; US-style `M/D/YYYY HH:mm:ss`; and bare `YYYY-MM-DD`. Every occurrence is reported with its real line and column. Values that cannot be resolved to a timestamp are not extracted.
+Recognized date patterns: ISO 8601 in extended (`2024-01-15T10:30:00Z`, with optional milliseconds and offset), **basic** (`20240115`, `20240115T103045Z`), **week** (`2024-W03`, `2024-W03-1`) and **ordinal** (`2024-015`) form; RFC 2822 (`Mon, 15 Jan 2024 10:30:00 GMT`); Unix epochs in seconds, milliseconds, microseconds and nanoseconds (exactly 10, 13, 16 or 19 digits; everything wider than 10 must also land between 2001-09-09 and 2100, so a request id or a card number is not a date in the 2200s, and digits embedded in longer numbers or in the fraction of a float are never matched at all); UTC strings; US-style `M/D/YYYY HH:mm:ss`; and bare `YYYY-MM-DD`. Every occurrence is reported with its real line and column. Values that cannot be resolved to a timestamp are not extracted.
 
 Timezone names are the fixed offsets `GMT`/`UT`/`UTC`/`Z`, the eight US abbreviations, and `CEST`, `CET`, `BST`, `JST`, `AEST`, `IST`. They are fixed, not zone-aware.
 
-Known limitations: `M/D/YYYY` assumes US ordering; syslog lines carry no year, so the current year is assumed; `IST` names three different zones and is read as India's `+05:30`; a bare 8-digit run is only a date inside 1900–2099, and a 10- or 16-digit number in the plausible epoch range cannot be told from a phone or card number.
+Known limitations: `M/D/YYYY` assumes US ordering; syslog lines carry no year, so the current year is assumed; `IST` names three different zones and is read as India's `+05:30`; a bare 8-digit run is only a date inside 1900–2099, and a 10-digit number in the plausible epoch range cannot be told from a phone number.
 
 ## Commands
 
@@ -206,10 +206,10 @@ a build only tells you how busy the runner was.
 <!-- coverage:start -->
 | Metric | Coverage |
 | --- | --- |
-| Statements | 91.71% |
-| Branches | 81.32% |
+| Statements | 91.69% |
+| Branches | 81.39% |
 | Functions | 96.32% |
-| Lines | 92.99% |
+| Lines | 92.97% |
 
 213 test cases across 18 files, plus an integration suite that runs
 in a real VS Code extension host and an end-to-end test that installs the

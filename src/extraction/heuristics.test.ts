@@ -58,20 +58,29 @@ describe('scanDates', () => {
 		expect(scanDates('1705314645123456')).toHaveLength(1);
 	});
 
-	// The window is what separates a microsecond epoch from a number that
-	// merely has 16 digits. Both of these were dates before it, at 2113
-	// and 2255.
-	it('rejects a finer epoch outside the plausible window', () => {
+	// The window is what separates an epoch from a number that merely has
+	// 13, 16 or 19 digits. Every one of these was a date before it,
+	// between 2113 and 2286.
+	it('rejects an epoch outside the plausible window', () => {
 		expect(scanDates('const maxSafe = 9007199254740991;')).toHaveLength(0);
 		expect(scanDates('card 4532015112830366')).toHaveLength(0);
+		expect(scanDates('truncated 4532015112830')).toHaveLength(0);
+		expect(scanDates('truncated 9007199254740')).toHaveLength(0);
 		expect(scanDates('9999999999999999999')).toHaveLength(0);
 	});
 
-	// The boundary, both ends, so neither can move by accident.
+	// The boundary, both ends and every width that shares the window, so
+	// none of them can move by accident.
 	it('ends the window at the year 2100', () => {
 		// 4102444799999 is 2099-12-31T23:59:59.999Z.
-		expect(scanDates('4102444799999123')).toHaveLength(1);
-		expect(scanDates('4102444800000123')).toHaveLength(0);
+		for (const [inside, outside] of [
+			['4102444799999', '4102444800000'],
+			['4102444799999123', '4102444800000123'],
+			['4102444799999123456', '4102444800000123456'],
+		]) {
+			expect(scanDates(inside as string)).toHaveLength(1);
+			expect(scanDates(outside as string)).toHaveLength(0);
+		}
 	});
 
 	// A window bounds instants, not digits. This one is 2005-03-18 and is

@@ -150,25 +150,26 @@ export function scanDates(
 }
 
 /**
- * The instant a microsecond or nanosecond epoch has to land in.
+ * The instant an epoch written in milliseconds or finer has to land in.
  *
- * The floor is the one the millisecond rule already uses — 1e12 ms,
+ * The floor is the one the millisecond rule always used — 1e12 ms,
  * after 2001-09-09.
  *
- * The ceiling exists because at 16 and 19 digits the digit count stops
- * being one. At 10 digits it is a real bound: the widest value a
- * 10-digit numeral holds is the year 2286, so "10 digits in range"
- * excludes a great many numbers. At 16 the range is the SAME 2001–2286,
- * so every 16-digit number in existence lands inside it and the check
+ * The ceiling exists because past 10 digits the digit count stops being
+ * one. At 10 digits it is a real bound: the widest value a 10-digit
+ * numeral holds is the year 2286, so "10 digits, in range" excludes a
+ * great many numbers. At 13, 16 and 19 the range is the SAME 2001–2286,
+ * so every numeral of those widths lands inside it and the floor
  * excludes nothing — which is how a Visa number read as 2113 and
  * Number.MAX_SAFE_INTEGER as 2255.
  *
- * Microseconds and nanoseconds are where a bound can be drawn honestly:
- * they are machine-stamped (`time.time_ns()`, `UnixNano()`) and record
- * the moment a program ran. A future date in a codebase is an expiry, a
- * cutoff or a schedule, and those are written as dates or as seconds —
- * nobody writes the year 2113 in nanoseconds. 2100 is the boundary,
- * matching the 1900–2099 window the bare 8-digit form is held to.
+ * A ceiling can be drawn honestly here because these units are
+ * machine-stamped (`Date.now()`, `time.time_ns()`, `UnixNano()`) and
+ * record the moment a program ran. A future date in a codebase is an
+ * expiry, a cutoff or a schedule, and those are written as dates or as
+ * seconds — nobody writes the year 2113 in milliseconds. 2100 is the
+ * boundary, matching the 1900–2099 window the bare 8-digit form is held
+ * to.
  *
  * This is a window, not a shape test: `1111111111111111111` is
  * 2005-03-18 and is still read as a date, because by instant it is
@@ -181,21 +182,20 @@ const PLAUSIBLE_UNTIL = 4_102_444_800_000;
 /**
  * Seconds, milliseconds, microseconds or nanoseconds.
  *
- * The finer units are truncated by CHARACTER, not divided: 19 digits do
+ * 10 digits is the one width where the digit count is its own ceiling;
+ * every wider form shares one window (see PLAUSIBLE_UNTIL).
+ *
+ * The wider forms are truncated by CHARACTER, not divided: 19 digits do
  * not fit a double, so dividing one would round it — and the Rust CLI,
  * working in i64, would not. Taking the leading 13 digits is exact in
- * both.
+ * both, and is the identity at 13.
  */
 function unixToTimestamp(value: string): number {
 	if (value.length === 10) {
 		const raw = Number.parseInt(value, 10);
 		return raw > 1_000_000_000 ? raw * 1000 : Number.NaN;
 	}
-	if (value.length === 13) {
-		const raw = Number.parseInt(value, 10);
-		return raw > PLAUSIBLE_FROM ? raw : Number.NaN;
-	}
-	if (value.length === 16 || value.length === 19) {
+	if (value.length === 13 || value.length === 16 || value.length === 19) {
 		const milliseconds = Number.parseInt(value.slice(0, 13), 10);
 		const plausible =
 			milliseconds > PLAUSIBLE_FROM && milliseconds < PLAUSIBLE_UNTIL;

@@ -54,17 +54,22 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   counted in the stderr summary (`, 14 binary files skipped`) so the
   coverage is still stated. A file that *is* text and cannot be read
   keeps its named `skipped` diagnostic and still fails `--strict`.
-- **Microsecond and nanosecond epochs are held to a ceiling as well as a
-  floor** — on or after 2001-09-09, before 2100-01-01. At ten digits the
-  digit count is a real ceiling (2286); at sixteen the range is the same
-  2001–2286, so every 16-digit number in existence landed inside it and
-  the floor excluded nothing — a card number read as 2113 and
-  `Number.MAX_SAFE_INTEGER` as 2255. Both are now refused, and the
-  corpus pins them as non-dates. The 10-digit phone number stays a
-  pinned false positive: it cannot be told apart by shape *or* by
-  instant, and neither can `1111111111111111111`, which is 2005.
-  10- and 13-digit runs keep the digit count as their only ceiling; 13
-  has the identical gap and predates this window.
+- **Every epoch wider than ten digits is held to a ceiling as well as a
+  floor** — on or after 2001-09-09, before 2100-01-01, one window shared
+  by the 13-, 16- and 19-digit forms. At ten digits the digit count is a
+  real ceiling (2286); at every wider width the range is the same
+  2001–2286, so every numeral of that width landed inside it and the
+  floor excluded nothing. The corpus had a 13-digit `request_id` pinned
+  as a date in 2282; a card number read as 2113 and
+  `Number.MAX_SAFE_INTEGER` as 2255. All three are refused now and
+  pinned as non-dates.
+
+  Ten digits keeps the digit count as its only ceiling: there the count
+  genuinely bounds the value, and a seconds epoch is the form people
+  write by hand for a future cutoff. Its phone-number false positive
+  stays pinned, as does `1111111111111111111` — 2005-03-18, and
+  indistinguishable from a real timestamp by any rule that does not look
+  at the characters.
 
 ## [0.1.0] - 2026-08-11
 
