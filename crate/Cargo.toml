@@ -5,12 +5,12 @@ edition = "2024"
 rust-version = "1.88"
 license = "MIT"
 readme = "README.md"
-description = "Find every date and timestamp in a codebase, and the instant each one resolves to"
+description = "Find every date and timestamp in a codebase — ISO 8601, RFC 2822, Unix epoch, syslog and Apache logs — and the exact instant each one resolves to"
 authors = ["Nolin D Naidoo"]
 homepage = "https://letools.dev/tools/dates-le"
 repository = "https://github.com/nolindnaidoo/dates-le"
-keywords = ["dates", "timestamp", "iso8601", "audit", "cli"]
-categories = ["command-line-utilities", "development-tools", "text-processing"]
+keywords = ["date", "timestamp", "iso8601", "datetime", "epoch"]
+categories = ["command-line-utilities", "development-tools", "date-and-time", "text-processing", "parsing"]
 # What a consumer gets, and why.
 #
 # Ships: src/, Cargo.toml, Cargo.lock, LICENSE, README.md — needed to
