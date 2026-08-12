@@ -22,7 +22,7 @@ the same moment and no reviewer sees that by reading. Resolving each one
 to a number is what turns a list of strings into something that can be
 sorted, filtered and compared. Every decision below follows from that.
 
-**Status: built, unpublished.** Both surfaces and the test layers below
+**Status: released.** Both surfaces and the test layers below
 are green. Releases go out through `release-crate.yml`, which is
 dispatch-only and refuses a version that crates.io already carries, has
 no changelog entry, would ship a tarball missing its own corpus, or
