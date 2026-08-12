@@ -765,7 +765,7 @@
 	},
 	{
 		"name": "TOML, by format",
-		"file": "pyproject.toml",
+		"file": "project.toml",
 		"arguments": {
 			"format": "toml"
 		},

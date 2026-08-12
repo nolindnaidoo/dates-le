@@ -31,7 +31,7 @@ documents!(
     "handler.go",
     "notations.txt",
     "page.html",
-    "pyproject.toml",
+    "project.toml",
     "release-notes.md",
     "rows.csv",
     "schedule.yaml",

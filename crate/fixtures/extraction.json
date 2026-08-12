@@ -586,7 +586,7 @@
 		},
 		{
 			"name": "TOML, where the date type is unquoted and read the same as a string",
-			"file": "pyproject.toml",
+			"file": "project.toml",
 			"fileType": "toml",
 			"expected": [
 				{
