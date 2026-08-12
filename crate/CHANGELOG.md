@@ -7,7 +7,16 @@ this repository release on their own cadence.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] - 2026-08-12
+
+The release where this reads a whole repository rather than the parts of
+one it happened to recognise, and where the numbers it reports about
+digits stop being generous.
+
+**Expect the count to go up, and expect none of the old ones to be
+missing.** A large tree that reported 488 dates reports 615 now; every
+date the previous version found is still found, and the difference is
+files that were never opened plus notations that were never read.
 
 ### Added
 
@@ -21,15 +30,20 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `has_a_format()` is gone from `walk.rs`. `toml`, `ini`, `cfg`, `conf`,
   `properties`, `markdown` and `md` are named formats rather than
   unknowns; `toml` and `markdown` join the tool schema's enum.
-- **Four notations `Date.parse` refuses**, in a new `extract/extended.rs`
-  that sits *above* the V8 parser and leaves the oracle
-  untouched: ISO 8601 week dates (`2024-W03`, `2024-W03-1`), ordinal
-  dates (`2024-015`), the basic format (`20240115`, `20240115T103045Z`),
-  and the abbreviations `CEST CET BST JST AEST IST` as fixed offsets.
-  Each is normalised into a string V8 does read, so nothing here computes
-  an instant and both frontends diverge identically. `week`, `ordinal`
-  and `basic` are new `format` values. SPEC.md lists all of it under
-  Deliberate divergences, `IST` named as the guess it is.
+- **Four date shapes that appear in real files and that JavaScript
+  cannot read at all**: ISO 8601 week dates (`2024-W03`, `2024-W03-1`),
+  ordinal dates (`2024-015`), the basic format (`20240115`,
+  `20240115T103045Z`), and the timezone abbreviations `CEST CET BST JST
+  AEST IST` as fixed offsets. Every one of them is `NaN` to `Date.parse`,
+  so every one of them used to be dropped.
+
+  `week`, `ordinal` and `basic` are new `format` values in the output,
+  which is worth knowing if you filter on that field. Each shape is
+  normalised into a string V8 *does* read rather than resolved here, so a
+  week date is UTC for the same reason `2024-01-15` is, and the CLI and
+  the editor answer identically. `IST` names three different zones —
+  India, Ireland and Israel — and India is the one taken; SPEC.md says so
+  plainly rather than leaving it to be discovered.
 - **Unix epochs in microseconds and nanoseconds** — 16 and 19 digits,
   same plausible-range floor, converted by taking the leading 13
   *characters* rather than by dividing, because 19 digits do not fit a
@@ -127,22 +141,36 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   counted in the stderr summary (`, 14 binary files skipped`) so the
   coverage is still stated. A file that *is* text and cannot be read
   keeps its named `skipped` diagnostic and still fails `--strict`.
-- **Every epoch wider than ten digits is held to a ceiling as well as a
-  floor** — on or after 2001-09-09, before 2100-01-01, one window shared
-  by the 13-, 16- and 19-digit forms. At ten digits the digit count is a
-  real ceiling (2286); at every wider width the range is the same
-  2001–2286, so every numeral of that width landed inside it and the
-  floor excluded nothing. The corpus had a 13-digit `request_id` pinned
-  as a date in 2282; a card number read as 2113 and
-  `Number.MAX_SAFE_INTEGER` as 2255. All three are refused now and
-  pinned as non-dates.
+- **A long run of digits now has to be a plausible date, not merely the
+  right length.** This is the one change here that can remove something
+  from your output, and it has two halves.
 
-  Ten digits keeps the digit count as its only ceiling: there the count
-  genuinely bounds the value, and a seconds epoch is the form people
-  write by hand for a future cutoff. Its phone-number false positive
-  stays pinned, as does `1111111111111111111` — 2005-03-18, and
-  indistinguishable from a real timestamp by any rule that does not look
-  at the characters.
+  What it removes: a 13-, 16- or 19-digit run is read as a timestamp only
+  if it lands on or after 2001-09-09 and before 2100-01-01. Card numbers,
+  request ids and large constants are not dates any more — a card number
+  was being reported as 2113, `Number.MAX_SAFE_INTEGER` as 2255, and a
+  13-digit `request_id` in this project's own fixture as December 2282.
+
+  What it costs: a genuinely far-future timestamp written in
+  milliseconds, microseconds or nanoseconds is no longer reported. Those
+  units are machine-stamped — `Date.now()`, `time.time_ns()`,
+  `UnixNano()` — and record when a program ran; a cutoff a person wrote
+  is a date or a seconds epoch. If you keep the year 2200 in
+  milliseconds, this release stops seeing it.
+
+  The reason the rule has to exist at all: past ten digits the digit
+  count stops bounding anything. At ten digits it does — the widest
+  ten-digit numeral is the year 2286 — but at thirteen, sixteen and
+  nineteen *every* numeral of that width already lands in 2001–2286, so
+  the old floor excluded nothing whatsoever.
+
+- **The ten-digit rule is unchanged, and it still has one honest false
+  positive.** A ten-digit phone number is a valid seconds epoch and
+  reads as 2145-11-29. Nothing about its shape or its instant can tell it
+  from a real timestamp, so it is pinned in the corpus as the false
+  positive it is rather than hidden by a rule that would also throw away
+  real dates. `1111111111111111111` is the same story: it is 2005-03-18,
+  and only its digits say otherwise.
 
 ## [0.1.0] - 2026-08-11
 

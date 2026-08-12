@@ -9,7 +9,16 @@ This file covers the **VS Code extension**. The Rust CLI in `crate/` is a
 separate product on its own cadence and keeps its own
 [CHANGELOG](crate/CHANGELOG.md).
 
-## [Unreleased]
+## [2.3.0] - 2026-08-12
+
+The release where Dates-LE reads the documents you already expected it
+to read, and stops calling long numbers dates.
+
+**Expect the count to go up, and expect none of the old ones to be
+missing.** Every date the previous version found is still found; what is
+new is documents that were never scanned and notations that were never
+resolved. On one large tree the equivalent scan went from 488 dates to
+615.
 
 ### Added
 
@@ -22,13 +31,18 @@ separate product on its own cadence and keeps its own
   their own. `toml` and `markdown` join the MCP tool's format enum, and
   activation is `onStartupFinished` rather than a language allow-list
   that could only ever be wrong in one direction.
-- **Four notations `Date.parse` refuses**, in a new
-  `src/extraction/extended.ts`: ISO 8601 week dates (`2024-W03`), ordinal
-  dates (`2024-015`), the basic format (`20240115T103045Z`), and the
-  abbreviations `CEST CET BST JST AEST IST` as fixed offsets. Each is
-  normalised into a string V8 does read rather than resolved here, so the
-  Rust CLI holds the identical rule. `week`, `ordinal` and `basic` are
-  new `DateFormat` values.
+- **Four date shapes that appear in real files and that JavaScript
+  cannot read at all**: ISO 8601 week dates (`2024-W03`), ordinal dates
+  (`2024-015`), the basic format (`20240115T103045Z`), and the timezone
+  abbreviations `CEST CET BST JST AEST IST` as fixed offsets. Every one
+  of them is `NaN` to `Date.parse`, so every one of them used to be
+  dropped on the floor.
+
+  `week`, `ordinal` and `basic` are new `DateFormat` values, which is
+  worth knowing if you filter on that field. Each shape is normalised
+  into a string `Date.parse` *does* read rather than resolved here, so
+  the Rust CLI holds the identical rule. `IST` names three zones — India,
+  Ireland and Israel — and India is the one taken.
 - **Unix epochs in microseconds and nanoseconds** — 16 and 19 digits,
   truncated to the millisecond by character rather than by division,
   because 19 digits do not fit a double.
@@ -39,12 +53,37 @@ separate product on its own cadence and keeps its own
   `resolveFormat` yields `unknown` rather than null, and the answer
   carries it as `fileType`, so an agent that cannot name a document still
   gets its dates.
-- **Every epoch wider than 10 digits is held to a ceiling as well as a
-  floor** — on or after 2001-09-09, before 2100-01-01, one window shared
-  by the 13-, 16- and 19-digit forms — because past 10 digits the digit
-  count is not a ceiling: every such numeral lands in 2001–2286. A
-  13-digit request id read as 2282, a card number as 2113 and
-  `Number.MAX_SAFE_INTEGER` as 2255. All three are refused now.
+- **A long run of digits now has to be a plausible date, not merely the
+  right length.** This is the one change here that can remove something
+  from your results, and it has two halves.
+
+  What it removes: a 13-, 16- or 19-digit run is read as a timestamp only
+  if it lands on or after 2001-09-09 and before 2100-01-01. A card number
+  was being reported as a date in 2113, `Number.MAX_SAFE_INTEGER` as
+  2255, and a 13-digit request id in this project's own fixture as
+  December 2282.
+
+  What it costs: a genuinely far-future timestamp written in
+  milliseconds, microseconds or nanoseconds is no longer reported. Those
+  units are machine-stamped — `Date.now()`, `time.time_ns()` — and record
+  when a program ran; a cutoff a person writes is a date or a seconds
+  epoch. If you keep the year 2200 in milliseconds, this release stops
+  seeing it.
+
+  Past 10 digits the digit count stops bounding anything: every 13-, 16-
+  or 19-digit numeral already lands in 2001–2286, so the old floor
+  excluded nothing at all.
+
+- **The 10-digit rule is unchanged, and it still has one honest false
+  positive.** A 10-digit phone number is a valid seconds epoch and reads
+  as 2145-11-29. Nothing about its shape or its instant can tell it from
+  a real timestamp, so it stays pinned in the corpus as the false
+  positive it is rather than hidden behind a rule that would also throw
+  away real dates.
+
+  Still unsupported, and not implied anywhere: DD/MM/YYYY ordering —
+  `15/1/2024 10:30:45` is a refusal rather than 15 January — and month
+  names outside English.
 
 - A **Rust CLI and MCP server** in [`crate/`](crate/README.md), to be
   published to crates.io as `dates-le`. It runs the same extraction over
