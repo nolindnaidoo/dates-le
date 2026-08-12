@@ -132,8 +132,8 @@ fn base_patterns() -> Vec<Pattern> {
         //
         // **A decimal point counts as a digit here.** The fractional
         // part of a float is a digit run of any length, and once
-        // sixteen of them are microseconds, `Z_95 = 1.6448536269514722`
-        // in a real Python file is a timestamp in 2174.
+        // sixteen of them are microseconds, `RATIO = 1.2345678901234567`
+        // is a timestamp in 2044.
         Pattern {
             regex: build(r"(?<![0-9.])(?:[0-9]{19}|[0-9]{16}|[0-9]{13}|[0-9]{10})(?![0-9])"),
             notation: Notation::Unix,
@@ -345,17 +345,49 @@ fn resolve(value: &str, resolver: Resolver, year: i64) -> Option<i64> {
     }
 }
 
+/// The instant a microsecond or nanosecond epoch has to land in.
+///
+/// **The floor is the one the millisecond rule already uses** — 1e12
+/// milliseconds, which is after 2001-09-09.
+///
+/// The ceiling exists because at sixteen and nineteen digits the digit
+/// count stops being one. At ten digits it is a real bound: the widest
+/// value a ten-digit numeral can hold is the year 2286, so "ten digits
+/// in range" excludes a great many numbers. At sixteen the range is the
+/// *same* 2001–2286, so **every** sixteen-digit number in existence
+/// lands inside it and the check excludes nothing at all — which is how
+/// a Visa number read as 2113 and `Number.MAX_SAFE_INTEGER` as 2255.
+///
+/// So the finer units need a bound the digit count cannot give, and
+/// microseconds and nanoseconds are the units where one can be drawn
+/// honestly: they are machine-stamped — `time.time_ns()`,
+/// `UnixNano()` — and record the moment a program ran. A *future* date
+/// in a codebase is an expiry, a cutoff or a schedule, and those are
+/// written as dates or as seconds; nobody writes the year 2113 in
+/// nanoseconds. 2100 is the boundary, matching the 1900–2099 window the
+/// bare eight-digit form is held to, so the crate has one notion of a
+/// plausible year in a source file rather than two.
+///
+/// **This is a window, not a shape test.** `1111111111111111111` is
+/// 2005-03-18 and is still read as a date, because by instant it is
+/// indistinguishable from one; only its digits say otherwise and this
+/// rule does not look at digits.
+const PLAUSIBLE_FROM: i64 = 1_000_000_000_000;
+/// 2100-01-01T00:00:00Z.
+const PLAUSIBLE_UNTIL: i64 = 4_102_444_800_000;
+
 /// A bare epoch, in seconds, milliseconds, microseconds or nanoseconds.
 ///
 /// Ten digits alone is not enough — that is any account number — so the
 /// value must also be past 1e9 seconds or 1e12 milliseconds, which puts
-/// it after 2001. The upper end is whatever the digit count allows,
-/// around 2286, and a ten-digit phone number does land inside it. So
-/// does a sixteen-digit card number, once microseconds are read. Those
-/// are false positives the shape cannot distinguish, and they are in the
-/// corpus rather than hidden.
+/// it after 2001. For those two widths the upper end is whatever the
+/// digit count allows, around 2286, and a ten-digit phone number does
+/// land inside it: a false positive the shape cannot distinguish, in the
+/// corpus rather than hidden. The finer units get a real ceiling as
+/// well; see `PLAUSIBLE_UNTIL` for why they need one and those two do
+/// not get the same treatment here.
 ///
-/// The finer units are **truncated by character, not divided**. A
+/// The finer units are also **truncated by character, not divided**. A
 /// nineteen-digit numeral does not fit a double, and dividing one in
 /// JavaScript would round it — so the two frontends would disagree about
 /// the last millisecond of some nanosecond timestamps and agree about
@@ -369,11 +401,12 @@ fn unix_timestamp(value: &str) -> Option<i64> {
         }
         13 => {
             let number: i64 = value.parse().ok()?;
-            (number > 1_000_000_000_000).then_some(number)
+            (number > PLAUSIBLE_FROM).then_some(number)
         }
         16 | 19 => {
             let milliseconds: i64 = value.get(..13)?.parse().ok()?;
-            (milliseconds > 1_000_000_000_000).then_some(milliseconds)
+            (milliseconds > PLAUSIBLE_FROM && milliseconds < PLAUSIBLE_UNTIL)
+                .then_some(milliseconds)
         }
         _ => None,
     }
@@ -535,21 +568,72 @@ mod tests {
     }
 
     /// A ten-digit phone number is inside the plausible range and cannot
-    /// be told apart. Neither can a sixteen-digit card number, once
-    /// microseconds are a unit an epoch can be written in. Pinned so the
-    /// limitation is visible rather than discovered.
+    /// be told apart by shape or by instant. Pinned so the limitation is
+    /// visible rather than discovered.
     #[test]
-    fn a_digit_run_that_is_not_a_date_can_still_be_a_plausible_epoch() {
+    fn a_ten_digit_phone_number_is_a_false_positive() {
         assert_eq!(values("5551234567", "json"), ["5551234567"]);
-        assert_eq!(values("4532015112830366", "json"), ["4532015112830366"]);
     }
 
-    /// The fractional part of a float is a digit run like any other, and
-    /// this is a real line from a real Python file. Without the decimal
-    /// point in the lookbehind it is a timestamp in 2174.
+    /// The window is what separates a microsecond epoch from a number
+    /// that merely has sixteen digits. Both of these were dates before
+    /// it, at 2113 and 2255.
+    #[test]
+    fn a_finer_epoch_outside_the_plausible_window_is_not_a_date() {
+        assert!(
+            values("4532015112830366", "json").is_empty(),
+            "a card number"
+        );
+        assert!(
+            values("9007199254740991", "json").is_empty(),
+            "Number.MAX_SAFE_INTEGER"
+        );
+        assert!(
+            values("9999999999999999999", "json").is_empty(),
+            "nineteen nines"
+        );
+        assert!(
+            values("1000000000000000", "json").is_empty(),
+            "on the floor"
+        );
+    }
+
+    /// The boundary, both ends, so neither can move by accident.
+    #[test]
+    fn the_window_ends_at_the_year_twenty_one_hundred() {
+        // 4102444799999 is 2099-12-31T23:59:59.999Z; 4102444800000 is
+        // the first millisecond of 2100.
+        assert_eq!(
+            values("4102444799999123", "json"),
+            ["4102444799999123"],
+            "the last instant inside"
+        );
+        assert!(
+            values("4102444800000123", "json").is_empty(),
+            "the first instant outside"
+        );
+    }
+
+    /// A window bounds instants, not digits. This one is 2005-03-18 and
+    /// is indistinguishable from a real timestamp by any rule that does
+    /// not look at the characters — pinned so the limit of the window is
+    /// visible rather than assumed away.
+    #[test]
+    fn a_run_of_one_digit_inside_the_window_is_still_a_date() {
+        assert_eq!(
+            values("1111111111111111111", "json"),
+            ["1111111111111111111"]
+        );
+    }
+
+    /// The fractional part of a float is a digit run like any other:
+    /// sixteen digits after a decimal point are sixteen digits, and
+    /// without the point in the lookbehind they are microseconds. The
+    /// fraction here lands inside the plausible window on purpose, so
+    /// the lookbehind is the only thing that can reject it.
     #[test]
     fn the_fraction_of_a_float_is_not_an_epoch() {
-        assert!(values("Z_95 = 1.6448536269514722", "json").is_empty());
+        assert!(values("RATIO = 1.2345678901234567", "json").is_empty());
         assert!(values("ratio = 0.1705314645123", "json").is_empty());
         assert!(values("share = 0.20240115", "json").is_empty());
         // The digits themselves are still an epoch when they stand alone.

@@ -45,24 +45,40 @@ describe('scanDates', () => {
 		expect(scanDates('id 12345678901234567')).toHaveLength(0);
 	});
 
-	// The fractional part of a float is a digit run like any other, and
-	// this is a real line from a real Python file. Without the decimal
-	// point in the lookbehind it is a timestamp in 2174.
+	// The fractional part of a float is a digit run like any other: 16
+	// digits after a decimal point are 16 digits, and without the point
+	// in the lookbehind they are microseconds. The fraction here lands
+	// inside the plausible window on purpose, so the lookbehind is the
+	// only thing that can reject it.
 	it('does not read the fraction of a float as an epoch', () => {
-		expect(scanDates('Z_95 = 1.6448536269514722')).toHaveLength(0);
+		expect(scanDates('RATIO = 1.2345678901234567')).toHaveLength(0);
 		expect(scanDates('ratio = 0.1705314645123')).toHaveLength(0);
 		expect(scanDates('share = 0.20240115')).toHaveLength(0);
 		// The digits themselves are still an epoch when they stand alone.
 		expect(scanDates('1705314645123456')).toHaveLength(1);
 	});
 
-	// The cost of reading microseconds: every 16-digit literal in the
-	// plausible range is one, and Number.MAX_SAFE_INTEGER is 16 digits.
-	// Pinned so the limitation is visible rather than discovered.
-	it('reads a 16-digit literal as microseconds, MAX_SAFE_INTEGER included', () => {
-		const dates = scanDates('const maxSafe = 9007199254740991;');
-		expect(dates.map((d) => d.format)).toEqual(['unix']);
-		expect(dates[0]?.timestamp).toBe(9_007_199_254_740);
+	// The window is what separates a microsecond epoch from a number that
+	// merely has 16 digits. Both of these were dates before it, at 2113
+	// and 2255.
+	it('rejects a finer epoch outside the plausible window', () => {
+		expect(scanDates('const maxSafe = 9007199254740991;')).toHaveLength(0);
+		expect(scanDates('card 4532015112830366')).toHaveLength(0);
+		expect(scanDates('9999999999999999999')).toHaveLength(0);
+	});
+
+	// The boundary, both ends, so neither can move by accident.
+	it('ends the window at the year 2100', () => {
+		// 4102444799999 is 2099-12-31T23:59:59.999Z.
+		expect(scanDates('4102444799999123')).toHaveLength(1);
+		expect(scanDates('4102444800000123')).toHaveLength(0);
+	});
+
+	// A window bounds instants, not digits. This one is 2005-03-18 and is
+	// indistinguishable from a real timestamp by any rule that does not
+	// look at the characters.
+	it('still reads a run of one digit that lands inside the window', () => {
+		expect(scanDates('1111111111111111111')).toHaveLength(1);
 	});
 
 	it('accepts exactly-10 and exactly-13 digit epochs and scales seconds', () => {

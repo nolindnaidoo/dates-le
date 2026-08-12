@@ -89,11 +89,35 @@ would round a division and the crate's i64 would not — the two frontends
 would then agree about most nanosecond timestamps and differ in the last
 millisecond of some, which is the worst kind of difference to find.
 
-That floor is nearly vacuous at those lengths, and the cost is stated
-rather than hidden: a 16-digit card number and `Number.MAX_SAFE_INTEGER`
-are both plausible microsecond epochs, and both are in the corpus as
-false positives, beside the 10-digit phone number that was already
-there.
+**The finer units are also held to a ceiling, and need one because the
+digit count stops being one.** At ten digits the count is a real bound:
+the widest value a ten-digit numeral holds is the year 2286, so "ten
+digits, in range" excludes a great many numbers. At sixteen digits the
+range is the *same* 2001–2286, so every sixteen-digit number in
+existence lands inside it and the floor excludes nothing at all — which
+is how a 16-digit card number read as 2113 and `Number.MAX_SAFE_INTEGER`
+as 2255.
+
+Microseconds and nanoseconds are the units where a ceiling can be drawn
+honestly. They are machine-stamped — `time.time_ns()`, `UnixNano()` —
+and record the moment a program ran. A *future* date in a codebase is an
+expiry, a cutoff or a schedule, and those are written as dates or as
+seconds; nobody writes the year 2113 in nanoseconds. So a 16- or
+19-digit run is a date only if it lands **on or after 2001-09-09 and
+before 2100-01-01** — the same 2100 boundary the bare eight-digit form's
+1900–2099 window uses, so there is one notion of a plausible year here
+rather than two.
+
+What that window cannot do is judge digits. `1111111111111111111` is
+2005-03-18 and is still read as a date, because by instant it is
+indistinguishable from one. So is the 10-digit phone number that was
+always here. Both are in the corpus as the false positives they are.
+
+**10 and 13 digits keep the digit count as their only ceiling**, and
+that is a known asymmetry rather than a reasoned one: 13 digits has the
+identical gap — `9007199254740` is 2255 — and simply predates this
+window. Narrowing it is a change to behaviour that shipped, and is a
+decision of its own.
 
 ### Overlap
 

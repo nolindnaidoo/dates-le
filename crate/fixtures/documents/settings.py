@@ -16,5 +16,5 @@ VERSION = "3.12.1"
 LOG_PREFIX = "Jan 15 10:30:47"
 
 # The fraction of a float is a digit run of any length, and sixteen of
-# them are microseconds. This is a real constant, not a timestamp.
-Z_95 = 1.6448536269514722
+# them are microseconds. This is a ratio, not a timestamp.
+RATIO = 1.2345678901234567

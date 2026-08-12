@@ -45,13 +45,6 @@
 						"column": 18
 					},
 					{
-						"value": "4532015112830366",
-						"format": "unix",
-						"timestamp": 4532015112830,
-						"line": 7,
-						"column": 20
-					},
-					{
 						"value": "5551234567",
 						"format": "unix",
 						"timestamp": 5551234567000,
@@ -85,7 +78,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 10,
+				"count": 9,
 				"truncated": false
 			}
 		}
@@ -136,13 +129,6 @@
 						"column": 18
 					},
 					{
-						"value": "4532015112830366",
-						"format": "unix",
-						"timestamp": 4532015112830,
-						"line": 7,
-						"column": 20
-					},
-					{
 						"value": "5551234567",
 						"format": "unix",
 						"timestamp": 5551234567000,
@@ -176,7 +162,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 10,
+				"count": 9,
 				"truncated": false
 			}
 		}

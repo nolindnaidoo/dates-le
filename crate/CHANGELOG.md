@@ -54,9 +54,17 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   counted in the stderr summary (`, 14 binary files skipped`) so the
   coverage is still stated. A file that *is* text and cannot be read
   keeps its named `skipped` diagnostic and still fails `--strict`.
-- **A 16-digit card number is now a plausible microsecond epoch**, as a
-  10-digit phone number was already a plausible second one. The corpus
-  pinned it as a non-date and now pins it as the false positive it is.
+- **Microsecond and nanosecond epochs are held to a ceiling as well as a
+  floor** — on or after 2001-09-09, before 2100-01-01. At ten digits the
+  digit count is a real ceiling (2286); at sixteen the range is the same
+  2001–2286, so every 16-digit number in existence landed inside it and
+  the floor excluded nothing — a card number read as 2113 and
+  `Number.MAX_SAFE_INTEGER` as 2255. Both are now refused, and the
+  corpus pins them as non-dates. The 10-digit phone number stays a
+  pinned false positive: it cannot be told apart by shape *or* by
+  instant, and neither can `1111111111111111111`, which is 2005.
+  10- and 13-digit runs keep the digit count as their only ceiling; 13
+  has the identical gap and predates this window.
 
 ## [0.1.0] - 2026-08-11
 

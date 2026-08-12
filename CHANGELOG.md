@@ -39,9 +39,11 @@ separate product on its own cadence and keeps its own
   `resolveFormat` yields `unknown` rather than null, and the answer
   carries it as `fileType`, so an agent that cannot name a document still
   gets its dates.
-- **A 16-digit literal is now a plausible microsecond epoch**, which
-  includes `Number.MAX_SAFE_INTEGER`. The characterization goldens were
-  updated deliberately.
+- **Microsecond and nanosecond epochs are held to a ceiling as well as a
+  floor** — on or after 2001-09-09, before 2100-01-01 — because at 16
+  digits the digit count is not a ceiling: every 16-digit number lands
+  in 2001–2286, so a card number read as 2113 and
+  `Number.MAX_SAFE_INTEGER` as 2255. Both are refused now.
 
 - A **Rust CLI and MCP server** in [`crate/`](crate/README.md), to be
   published to crates.io as `dates-le`. It runs the same extraction over
