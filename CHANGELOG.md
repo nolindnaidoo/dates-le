@@ -13,6 +13,36 @@ separate product on its own cadence and keeps its own
 
 ### Added
 
+- **Every document is read.** `extractDates` returned an empty result for
+  any language id outside the nine it knew — indistinguishable from a
+  file with no dates in it — so Python, Go, Rust, TOML and Markdown
+  produced nothing. A format only ever *adds* patterns to the shared
+  ones, so `unknown` now routes to the shared scan, and `toml`, `ini`,
+  `cfg`, `conf`, `properties`, `markdown` and `md` resolve as names of
+  their own. `toml` and `markdown` join the MCP tool's format enum, and
+  activation is `onStartupFinished` rather than a language allow-list
+  that could only ever be wrong in one direction.
+- **Four notations `Date.parse` refuses**, in a new
+  `src/extraction/extended.ts`: ISO 8601 week dates (`2024-W03`), ordinal
+  dates (`2024-015`), the basic format (`20240115T103045Z`), and the
+  abbreviations `CEST CET BST JST AEST IST` as fixed offsets. Each is
+  normalised into a string V8 does read rather than resolved here, so the
+  Rust CLI holds the identical rule. `week`, `ordinal` and `basic` are
+  new `DateFormat` values.
+- **Unix epochs in microseconds and nanoseconds** — 16 and 19 digits,
+  truncated to the millisecond by character rather than by division,
+  because 19 digits do not fit a double.
+
+### Changed
+
+- **`extract_dates` no longer refuses a call with no usable format.**
+  `resolveFormat` yields `unknown` rather than null, and the answer
+  carries it as `fileType`, so an agent that cannot name a document still
+  gets its dates.
+- **A 16-digit literal is now a plausible microsecond epoch**, which
+  includes `Number.MAX_SAFE_INTEGER`. The characterization goldens were
+  updated deliberately.
+
 - A **Rust CLI and MCP server** in [`crate/`](crate/README.md), to be
   published to crates.io as `dates-le`. It runs the same extraction over
   a whole tree, resolves every value to the instant it actually means,

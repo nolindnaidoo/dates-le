@@ -212,6 +212,16 @@ exports[`extraction characterization > dates.js as javascript 1`] = `
       "value": "1705312200",
     },
     {
+      "context": "const maxSafe = 9007199254740991;",
+      "format": "unix",
+      "position": {
+        "column": 17,
+        "line": 10,
+      },
+      "timestamp": 9007199254740,
+      "value": "9007199254740991",
+    },
+    {
       "context": "// released 2024-07-04 per the roadmap",
       "format": "simple",
       "position": {
@@ -299,6 +309,16 @@ exports[`extraction characterization > dates.js as typescript 1`] = `
       },
       "timestamp": 1705312200000,
       "value": "1705312200",
+    },
+    {
+      "context": "const maxSafe = 9007199254740991;",
+      "format": "unix",
+      "position": {
+        "column": 17,
+        "line": 10,
+      },
+      "timestamp": 9007199254740,
+      "value": "9007199254740991",
     },
     {
       "context": "// released 2024-07-04 per the roadmap",

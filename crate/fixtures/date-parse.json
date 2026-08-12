@@ -28,6 +28,11 @@
 			"timestamp": 1705294845000
 		},
 		{
+			"input": "2024-01-15T10:30:45+05:00",
+			"why": "the offset a basic-format +05 is padded into",
+			"timestamp": 1705296645000
+		},
+		{
 			"input": "2024-01-15T10:30:45-08:00",
 			"why": "iso, negative offset",
 			"timestamp": 1705343445000
@@ -218,6 +223,16 @@
 			"timestamp": null
 		},
 		{
+			"input": "Mon, 15 Jan 2024 10:30:45 CET",
+			"why": "nor CET",
+			"timestamp": null
+		},
+		{
+			"input": "Mon, 15 Jan 2024 10:30:45 BST",
+			"why": "nor BST",
+			"timestamp": null
+		},
+		{
 			"input": "Mon, 15 Jan 2024 10:30:45 JST",
 			"why": "JST is not a word — a refusal",
 			"timestamp": null
@@ -228,9 +243,39 @@
 			"timestamp": null
 		},
 		{
+			"input": "Mon, 15 Jan 2024 10:30:45 IST",
+			"why": "nor IST, which stands for three different zones",
+			"timestamp": null
+		},
+		{
 			"input": "Mon, 15 Jan 2024 10:30:45 XYZ",
 			"why": "nonsense is a refusal",
 			"timestamp": null
+		},
+		{
+			"input": "Mon, 15 Jan 2024 10:30:45 +0100",
+			"why": "the offset CET is rewritten to",
+			"timestamp": 1705311045000
+		},
+		{
+			"input": "Mon, 15 Jan 2024 10:30:45 +0200",
+			"why": "and CEST",
+			"timestamp": 1705307445000
+		},
+		{
+			"input": "Mon, 15 Jan 2024 10:30:45 +0900",
+			"why": "and JST",
+			"timestamp": 1705282245000
+		},
+		{
+			"input": "Mon, 15 Jan 2024 10:30:45 +1000",
+			"why": "and AEST",
+			"timestamp": 1705278645000
+		},
+		{
+			"input": "Mon, 15 Jan 2024 10:30:45 +0530",
+			"why": "and IST",
+			"timestamp": 1705294845000
 		},
 		{
 			"input": "Mon Jan 15 2024 10:30:45 GMT+0000",
@@ -608,8 +653,33 @@
 			"timestamp": null
 		},
 		{
+			"input": "2024-W03-1",
+			"why": "nor with a day of the week",
+			"timestamp": null
+		},
+		{
+			"input": "2024-015",
+			"why": "an ordinal date is a refusal once the number cannot be a month",
+			"timestamp": null
+		},
+		{
+			"input": "2024-060",
+			"why": "and another",
+			"timestamp": null
+		},
+		{
 			"input": "20240115",
 			"why": "basic-format ISO is not supported",
+			"timestamp": null
+		},
+		{
+			"input": "20240115T103045Z",
+			"why": "nor the basic date-time form",
+			"timestamp": null
+		},
+		{
+			"input": "20240115T103045",
+			"why": "nor without a zone",
 			"timestamp": null
 		},
 		{

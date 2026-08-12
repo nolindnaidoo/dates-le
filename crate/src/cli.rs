@@ -8,19 +8,24 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use crate::extract::{SUPPORTED_FORMATS, parse::date_parse, resolve_format};
+use crate::extract::{extended, resolve_format};
 use crate::scan::{self, FileReport, ScanOptions};
 use crate::walk::{self, WalkOptions};
 
 const USAGE: &str = "usage: dates-le [options] <file|dir>...
-       dates-le [options] --stdin --format <format>
+       dates-le [options] --stdin [--format <format>]
        dates-le mcp
        dates-le --version | --help
 
 Finds every date and timestamp in a tree and puts them where a person
-can read them: ISO 8601, RFC 2822, Unix epochs, US notations, log and
-syslog lines, Apache access logs, and the strings inside date
-constructors that nothing else would recognise as dates.
+can read them: ISO 8601 in every form it is written — extended, basic,
+week and ordinal — RFC 2822, Unix epochs from seconds to nanoseconds,
+US notations, log and syslog lines, Apache access logs, and the strings
+inside date constructors that nothing else would recognise as dates.
+
+Every file is read. A name that matches no format is scanned with the
+patterns every format shares, so a .py, .go, .toml or .md file yields
+its dates rather than being skipped.
 
 Each one carries the instant it actually resolves to, so `2024-01-15`,
 `1705276800` and `Mon, 15 Jan 2024` can be compared rather than read.
@@ -35,7 +40,8 @@ Options:
                        IANA zone, e.g. UTC or America/New_York, instead
                        of this machine's
   --format <format>    force a format instead of inferring it from the
-                       file name
+                       file name; a name nothing recognises falls back
+                       to the shared patterns rather than failing
   --year <year>        the year a syslog line is assumed to be in,
                        since the line does not carry one. Defaults to
                        this one, which makes that answer move
@@ -53,9 +59,11 @@ A date with no timezone resolves against this machine's. Use --tz to
 name one instead; the answer genuinely differs by zone, exactly as it
 does for the code being read.
 
-Files that are not text, or that cannot be opened, are named on stderr
-and carried in the report, and do not by themselves fail the run — every
-repository has a PNG in it. --strict turns them back into a failure.
+A file that is not text — a PNG, a zip — is not read and not reported;
+it was never a candidate. It is counted in the summary so the coverage
+is still stated. A file that IS text and could not be read, or is not
+UTF-8, is named on stderr and carried in the report, and does not by
+itself fail the run. --strict turns those back into a failure.
 
 Exit codes follow grep: 0 dates found · 1 none found · 2 malformed
 question. Finding none is an answer, not an error.";
@@ -108,13 +116,13 @@ pub fn run(arguments: &[String]) -> ExitCode {
         Err(message) => return refuse(&message),
     };
 
-    let reports = match gather(&invocation) {
-        Ok(reports) => reports,
+    let scanned = match gather(&invocation) {
+        Ok(scanned) => scanned,
         Err(message) => return refuse(&message),
     };
 
-    report(&reports, invocation.values);
-    scan::exit_code(&reports, invocation.strict)
+    report(&scanned, invocation.values);
+    scan::exit_code(&scanned.reports, invocation.strict)
 }
 
 fn refuse(message: &str) -> ExitCode {
@@ -170,14 +178,7 @@ fn parse_arguments(arguments: &[String]) -> Result<Invocation, String> {
                 index += 1;
             }
             "--format" => {
-                let raw = value("--format")?;
-                if resolve_format(Some(&raw), None).is_none() {
-                    return Err(format!(
-                        "unknown format {raw:?} — one of: {}",
-                        SUPPORTED_FORMATS.join(", ")
-                    ));
-                }
-                invocation.scan.format = Some(raw);
+                invocation.scan.format = Some(value("--format")?);
                 index += 1;
             }
             // Already applied by `apply_zone_first`; skip its value.
@@ -208,9 +209,6 @@ fn parse_arguments(arguments: &[String]) -> Result<Invocation, String> {
         index += 1;
     }
 
-    if invocation.stdin && invocation.scan.format.is_none() {
-        return Err("--stdin needs --format, since there is no file name to infer one from".into());
-    }
     if !invocation.stdin && invocation.roots.is_empty() {
         return Err("name a file or directory, or pass --stdin".into());
     }
@@ -221,27 +219,39 @@ fn parse_arguments(arguments: &[String]) -> Result<Invocation, String> {
 /// reads the documents. A tool that could not read its own output as
 /// input would be a strange one.
 fn instant(raw: &str) -> Result<i64, String> {
-    date_parse(raw).ok_or_else(|| format!("{raw:?} is not a date this can read"))
+    extended::instant(raw).ok_or_else(|| format!("{raw:?} is not a date this can read"))
 }
 
-fn gather(invocation: &Invocation) -> Result<Vec<FileReport>, String> {
+/// What a run read: a report per text file, and a count of the files
+/// that were never text candidates.
+///
+/// The count is carried rather than dropped because a walk that covered
+/// less than the tree has to say so — but a PNG is not a file that
+/// failed to be read, so it gets a number in the summary rather than a
+/// line in the report and a hold over the exit code.
+struct Scanned {
+    reports: Vec<FileReport>,
+    binary: usize,
+}
+
+fn gather(invocation: &Invocation) -> Result<Scanned, String> {
     if invocation.stdin {
-        let language = invocation
-            .scan
-            .format
-            .as_deref()
-            .and_then(|format| resolve_format(Some(format), None))
-            .ok_or("--stdin needs --format")?;
+        // No file name to infer from, so an unnamed format falls back —
+        // the same answer a `.py` file gets, and no special case.
+        let language = resolve_format(invocation.scan.format.as_deref(), None);
         let mut content = String::new();
         std::io::stdin()
             .read_to_string(&mut content)
             .map_err(|error| format!("could not read stdin: {error}"))?;
-        return Ok(vec![scan::scan_text(
-            "<stdin>",
-            scan::without_bom(&content),
-            language,
-            &invocation.scan,
-        )]);
+        return Ok(Scanned {
+            reports: vec![scan::scan_text(
+                "<stdin>",
+                scan::without_bom(&content),
+                language,
+                &invocation.scan,
+            )],
+            binary: 0,
+        });
     }
 
     for root in &invocation.roots {
@@ -250,13 +260,18 @@ fn gather(invocation: &Invocation) -> Result<Vec<FileReport>, String> {
         }
     }
     let files = walk::collect(&invocation.roots, invocation.walk);
-    Ok(files
+    let reports: Vec<FileReport> = files
         .iter()
-        .map(|path| scan::scan_file(path, &invocation.scan))
-        .collect())
+        .filter_map(|path| scan::scan_file(path, &invocation.scan))
+        .collect();
+    Ok(Scanned {
+        binary: files.len() - reports.len(),
+        reports,
+    })
 }
 
-fn report(reports: &[FileReport], values_only: bool) {
+fn report(scanned: &Scanned, values_only: bool) {
+    let reports = &scanned.reports;
     let stdout = std::io::stdout();
     let mut out = stdout.lock();
 
@@ -282,13 +297,24 @@ fn report(reports: &[FileReport], values_only: bool) {
         .count();
     let files = reports.len() - skipped;
     eprintln!(
-        "{total} date{} in {files} file{}{}",
+        "{total} date{} in {files} file{}{}{}",
         plural(total),
         plural(files),
         if skipped == 0 {
             String::new()
         } else {
             format!(", {skipped} skipped")
+        },
+        // Counted, never named: naming fourteen PNGs is the noise that
+        // stops anyone reading the line that matters.
+        if scanned.binary == 0 {
+            String::new()
+        } else {
+            format!(
+                ", {} binary file{} skipped",
+                scanned.binary,
+                plural(scanned.binary)
+            )
         }
     );
     // Named, every one of them. A tool that quietly reads fewer files
@@ -309,6 +335,8 @@ fn plural(count: usize) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::extract::SUPPORTED_FORMATS;
+    use crate::extract::format::FALLBACK_FORMAT;
 
     fn parse(arguments: &[&str]) -> Result<Invocation, String> {
         parse_arguments(
@@ -360,16 +388,26 @@ mod tests {
         assert!(error.contains("not a date"), "{error}");
     }
 
+    /// A format nothing recognises is read with the shared patterns,
+    /// the same as a file whose name says nothing. Refusing it was the
+    /// tool declining to read most of a repository.
     #[test]
-    fn an_unknown_format_names_the_ones_that_work() {
-        let error = parse(&["--format", "rust", "."]).expect_err("refuses");
-        assert!(error.contains("typescript"), "{error}");
+    fn an_unknown_format_falls_back_rather_than_failing() {
+        let invocation = parse(&["--format", "rust", "."]).expect("parses");
+        assert_eq!(invocation.scan.format.as_deref(), Some("rust"));
+        assert_eq!(resolve_format(Some("rust"), None), FALLBACK_FORMAT);
     }
 
     #[test]
-    fn stdin_without_a_format_is_refused() {
-        let error = parse(&["--stdin"]).expect_err("refuses");
-        assert!(error.contains("--format"), "{error}");
+    fn every_advertised_format_is_accepted_by_name() {
+        for name in SUPPORTED_FORMATS {
+            assert!(parse(&["--format", name, "."]).is_ok(), "{name}");
+        }
+    }
+
+    #[test]
+    fn stdin_without_a_format_reads_the_document_anyway() {
+        assert!(parse(&["--stdin"]).is_ok());
     }
 
     #[test]

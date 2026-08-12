@@ -20,10 +20,12 @@ pub(crate) fn definition() -> Value {
     json!({
         "name": "extract_dates",
         "description": "Extract every date and timestamp from a document, with its notation, \
-                        epoch value where resolvable, and 1-based line and column. Supports \
-                        JSON, YAML, CSV, XML, log and plaintext, JavaScript, TypeScript and \
-                        HTML. Recognises ISO 8601, RFC formats, common regional notations and \
-                        Unix timestamps.",
+                        epoch value where resolvable, and 1-based line and column. Reads any \
+                        text: JSON, YAML, CSV, XML, log and plaintext, JavaScript, TypeScript, \
+                        HTML, TOML and Markdown are named formats, and anything else is scanned \
+                        with the patterns they share. Recognises ISO 8601 in extended, basic, \
+                        week and ordinal form, RFC formats, common regional notations and Unix \
+                        timestamps from seconds to nanoseconds.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -31,8 +33,9 @@ pub(crate) fn definition() -> Value {
                 "format": {
                     "type": "string",
                     "enum": SUPPORTED_FORMATS,
-                    "description": "Document format. Provide this or `filename`. Common \
-                                    extensions and aliases are accepted.",
+                    "description": "Document format. Common extensions and aliases are \
+                                    accepted. Optional: with neither this nor `filename` the \
+                                    document is scanned with the shared patterns.",
                 },
                 "filename": {
                     "type": "string",
@@ -68,20 +71,15 @@ pub(crate) fn run(arguments: &Value) -> Result<Value, String> {
         .ok_or_else(|| "content is required and must be a string".to_string())?;
     let max_results = read_max_results(arguments)?;
 
-    // Requiring one of the two up front gives a message naming the
-    // problem. Without it an unrecognised format returns an empty
-    // result with no error, which reads as "this document has no
-    // dates" — the least debuggable answer available.
+    // Never a refusal. An agent that knows nothing about a document
+    // still gets its dates, and `fileType` in the answer says which
+    // patterns read it — so an unrecognised format is visible in the
+    // result rather than hidden behind an error the agent has no way to
+    // satisfy.
     let language = resolve_format(
         arguments.get("format").and_then(Value::as_str),
         arguments.get("filename").and_then(Value::as_str),
-    )
-    .ok_or_else(|| {
-        format!(
-            "Provide `format` (one of: {}) or a `filename` with a recognised extension.",
-            SUPPORTED_FORMATS.join(", ")
-        )
-    })?;
+    );
 
     // A syslog line carries no year, so extraction here depends on the
     // clock exactly as the extension's does. The CLI can pin it with

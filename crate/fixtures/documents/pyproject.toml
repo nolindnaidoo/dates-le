@@ -1,0 +1,12 @@
+[project]
+name = "example"
+version = "2.1.0"
+requires-python = ">=3.12"
+
+[tool.release]
+# TOML has a date type of its own, and it is read exactly as a quoted
+# one would be — nothing here is parsed, everything is scanned.
+cut = 2024-01-15T10:30:45Z
+window-opens = 2024-01-15
+window-closes = 20241231
+reviewed = 2024-W03-5

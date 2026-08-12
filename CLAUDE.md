@@ -47,7 +47,7 @@ artifact users actually install.
   between them. Changing extraction behaviour means running
   `TZ=America/New_York bun scripts/check-extraction-parity.ts` and updating the
   corpus — on both sides, in the same commit. CI fails when either drifts.
-- **The corpus pins a timezone and a year, and needs both.** Four of the six
+- **The corpus pins a timezone and a year, and needs both.** Several of the
   date shapes carry no timezone and a syslog line carries no year, so without
   `TZ=America/New_York` the parity script compares against the wrong instants,
   and without the clock stub it expires on 1 January.

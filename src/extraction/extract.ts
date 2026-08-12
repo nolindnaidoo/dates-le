@@ -11,25 +11,29 @@ import { extractFromJson } from './formats/json';
 import { extractFromLog } from './formats/log';
 import { extractFromXml } from './formats/xml';
 import { extractFromYaml } from './formats/yaml';
+import { scanDates } from './heuristics';
 
 export async function extractDates(
 	content: string,
 	languageId: string,
 ): Promise<ExtractionResult> {
-	const fileType = determineFileType(languageId);
-
-	if (fileType === 'unknown') {
-		return createEmptyResult();
-	}
-
 	try {
-		const dates = extractByFileType(content, fileType);
+		const dates = extractByFileType(content, determineFileType(languageId));
 		return createSuccessResult(dates);
 	} catch (error) {
 		return createErrorResult(error);
 	}
 }
 
+/**
+ * A format only ever ADDS patterns to the shared ones — log adds syslog
+ * and Apache, JavaScript adds constructor arguments, HTML adds
+ * attributes — so the shared scan is the right answer for a document
+ * whose language nothing here recognises, and `unknown` routes to it.
+ * Returning nothing was this extension declining to read Python, Go,
+ * TOML and Markdown at all, and saying so in a way indistinguishable
+ * from a file with no dates in it.
+ */
 function extractByFileType(
 	content: string,
 	fileType: FileType,
@@ -50,7 +54,7 @@ function extractByFileType(
 		case 'html':
 			return extractFromHtml(content);
 		default:
-			return [];
+			return scanDates(content);
 	}
 }
 
@@ -78,14 +82,6 @@ function determineFileType(languageId: string): FileType {
 		default:
 			return 'unknown';
 	}
-}
-
-function createEmptyResult(): ExtractionResult {
-	return Object.freeze({
-		success: true,
-		dates: Object.freeze([]),
-		errors: Object.freeze([]),
-	});
 }
 
 function createSuccessResult(dates: readonly DateValue[]): ExtractionResult {

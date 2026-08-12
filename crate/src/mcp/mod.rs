@@ -20,7 +20,7 @@ use std::process::ExitCode;
 
 use serde_json::{Value, json};
 
-use crate::extract::{SUPPORTED_FORMATS, resolve_format};
+use crate::extract::SUPPORTED_FORMATS;
 use crate::scan::{self, ScanOptions};
 use crate::walk::{self, WalkOptions};
 
@@ -94,7 +94,9 @@ fn tool_definitions() -> Value {
             "description": "Extract every date and timestamp from files or directories, with \
                             the file it came from, its notation, the instant it resolves to, \
                             and its line and column. Reads the filesystem; never writes to it. \
-                            Files whose name resolves to no supported format are skipped.",
+                            Every text file is read: a name that matches no format is scanned \
+                            with the patterns every format shares. Files .gitignore excludes \
+                            are skipped unless `ignored` says otherwise.",
             "inputSchema": {
                 "type": "object",
                 "properties": {
@@ -108,7 +110,8 @@ fn tool_definitions() -> Value {
                         "type": "string",
                         "enum": SUPPORTED_FORMATS,
                         "description": "Force a format for every file instead of inferring one \
-                                        per file name.",
+                                        per file name. A name nothing recognises falls back to \
+                                        the shared patterns.",
                     },
                     "after": {
                         "type": "string",
@@ -187,20 +190,11 @@ fn scan_tool(arguments: &Value) -> Result<Value, String> {
     let boundary = |name: &str| -> Result<Option<i64>, String> {
         match arguments.get(name).and_then(Value::as_str) {
             None => Ok(None),
-            Some(raw) => crate::extract::parse::date_parse(raw)
+            Some(raw) => crate::extract::extended::instant(raw)
                 .map(Some)
                 .ok_or_else(|| format!("`{name}` is not a date this can read: {raw:?}")),
         }
     };
-
-    if let Some(format) = arguments.get("format").and_then(Value::as_str)
-        && resolve_format(Some(format), None).is_none()
-    {
-        return Err(format!(
-            "unknown format {format:?} — one of: {}",
-            SUPPORTED_FORMATS.join(", ")
-        ));
-    }
 
     let options = ScanOptions {
         format: arguments
@@ -220,13 +214,17 @@ fn scan_tool(arguments: &Value) -> Result<Value, String> {
     };
 
     let targets = walk::collect(&inputs, walk_options);
+    // A file that is not text at all yields no report; it was never a
+    // candidate, and a PNG named in the answer is noise an agent has to
+    // reason past. The count is carried so the coverage is still stated.
     let reports: Vec<scan::FileReport> = targets
         .iter()
-        .map(|target| scan::scan_file(target, &options))
+        .filter_map(|target| scan::scan_file(target, &options))
         .collect();
+    let binary = targets.len() - reports.len();
 
     let dates: usize = reports.iter().map(|report| report.dates.len()).sum();
-    let diagnostics: Vec<Value> = reports
+    let mut diagnostics: Vec<Value> = reports
         .iter()
         .filter(|report| report.skipped.is_some())
         .map(|report| {
@@ -239,6 +237,12 @@ fn scan_tool(arguments: &Value) -> Result<Value, String> {
             )
         })
         .collect();
+    if binary > 0 {
+        diagnostics.push(warning(
+            "binary",
+            &format!("{binary} file(s) are not text and were not read"),
+        ));
+    }
 
     let count = reports.len();
     let reports: Vec<Value> = reports
@@ -388,13 +392,16 @@ mod tests {
         assert!(text.contains("after"), "{text}");
     }
 
+    /// A format nothing recognises is read with the shared patterns
+    /// rather than refused — an agent that guesses `rust` gets the
+    /// dates in the file, not an error naming eleven other words.
     #[test]
-    fn an_unknown_format_names_the_ones_that_work() {
-        let response = call("dates_le_scan", &json!({ "path": ".", "format": "rust" }));
-        let text = response["result"]["content"][0]["text"]
-            .as_str()
-            .unwrap_or_default();
-        assert!(text.contains("typescript"), "{text}");
+    fn an_unknown_format_is_read_rather_than_refused() {
+        let response = call(
+            "dates_le_scan",
+            &json!({ "path": "fixtures/documents", "format": "rust" }),
+        );
+        assert_ne!(response["result"]["isError"], true);
     }
 
     #[test]

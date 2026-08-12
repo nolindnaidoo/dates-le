@@ -49,16 +49,11 @@ async function extract(args: Record<string, unknown>): Promise<unknown> {
 	const filename =
 		typeof args.filename === 'string' ? args.filename : undefined;
 
-	// Requiring one of the two up front gives a message naming the problem.
-	// Without it an unrecognised language returns an empty result with no
-	// error, which reads as "this document has no dates".
+	// Never a refusal. An agent that knows nothing about a document still
+	// gets its dates, and `fileType` in the answer says which patterns
+	// read it — so an unrecognised format is visible in the result rather
+	// than hidden behind an error the agent has no way to satisfy.
 	const languageId = resolveFormat(format, filename);
-	if (!languageId) {
-		throw new Error(
-			`Provide \`format\` (one of: ${SUPPORTED_FORMATS.join(', ')}) or a \`filename\` with a recognised extension.`,
-		);
-	}
-
 	const result = await extractDates(content, languageId);
 	const values = result.dates.map((date) => ({
 		value: date.value,
@@ -92,7 +87,7 @@ export const TOOLS: readonly ToolDefinition[] = Object.freeze([
 	Object.freeze({
 		name: 'extract_dates',
 		description:
-			'Extract every date and timestamp from a document, with its notation, epoch value where resolvable, and 1-based line and column. Supports JSON, YAML, CSV, XML, log and plaintext, JavaScript, TypeScript and HTML. Recognises ISO 8601, RFC formats, common regional notations and Unix timestamps.',
+			'Extract every date and timestamp from a document, with its notation, epoch value where resolvable, and 1-based line and column. Reads any text: JSON, YAML, CSV, XML, log and plaintext, JavaScript, TypeScript, HTML, TOML and Markdown are named formats, and anything else is scanned with the patterns they share. Recognises ISO 8601 in extended, basic, week and ordinal form, RFC formats, common regional notations and Unix timestamps from seconds to nanoseconds.',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -104,7 +99,7 @@ export const TOOLS: readonly ToolDefinition[] = Object.freeze([
 					type: 'string',
 					enum: SUPPORTED_FORMATS,
 					description:
-						'Document format. Provide this or `filename`. Common extensions and aliases are accepted.',
+						'Document format. Common extensions and aliases are accepted. Optional: with neither this nor `filename` the document is scanned with the shared patterns.',
 				},
 				filename: {
 					type: 'string',

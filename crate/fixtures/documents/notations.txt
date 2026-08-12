@@ -1,0 +1,21 @@
+Every notation this tool reads that Date.parse does not, and the
+digit runs beside them that are not dates at all.
+
+week                2024-W03
+week with a day     2024-W03-1
+ordinal             2024-015
+basic date          20240115
+basic date-time     20240115T103045Z
+microseconds        1705314645123456
+nanoseconds         1705314645123456789
+central european    Mon, 15 Jan 2024 10:30:45 CET
+central european dst Mon, 15 Jan 2024 10:30:45 CEST
+british summer      Mon, 15 Jan 2024 10:30:45 BST
+japan               Mon, 15 Jan 2024 10:30:45 JST
+australia east      Mon, 15 Jan 2024 10:30:45 AEST
+india               Mon, 15 Jan 2024 10:30:45 IST
+
+not a week          2024-W99
+not a year          98765432
+not a month         12345678
+not any epoch unit  12345678901234567

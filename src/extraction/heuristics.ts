@@ -1,4 +1,10 @@
 import type { DateFormat, DateValue } from '../types';
+import {
+	isoBasicFormat,
+	isoOrdinalDate,
+	isoWeekDate,
+	resolveInstant,
+} from './extended';
 import { createPositionIndex } from './position';
 
 /**
@@ -48,7 +54,15 @@ export const BASE_PATTERNS: readonly DatePatternSpec[] = [
 		format: 'rfc2822',
 	},
 	{
-		pattern: /(?<!\d)(?:\d{13}|\d{10})(?!\d)/dg,
+		// Seconds, milliseconds, microseconds or nanoseconds. Longest
+		// alternative first, so a 19-digit run is read whole rather than
+		// as its first 16 digits.
+		//
+		// A decimal point counts as a digit in the lookbehind: the
+		// fractional part of a float is a digit run of any length, and
+		// once 16 of them are microseconds, `Z_95 = 1.6448536269514722`
+		// in a real Python file is a timestamp in 2174.
+		pattern: /(?<![\d.])(?:\d{19}|\d{16}|\d{13}|\d{10})(?!\d)/dg,
 		format: 'unix',
 		toTimestamp: unixToTimestamp,
 	},
@@ -64,6 +78,28 @@ export const BASE_PATTERNS: readonly DatePatternSpec[] = [
 	{
 		pattern: /(?<!\d)\d{4}-\d{2}-\d{2}(?!\d)/dg,
 		format: 'simple',
+	},
+	// The three ISO 8601 shapes Date.parse refuses. Last because spec
+	// order breaks a tie at identical ranges, and none of them can
+	// overlap the six above — a `W`, a three-digit tail and an
+	// eight-digit run are each unreachable by the others.
+	{
+		pattern: /(?<!\d)\d{4}-W\d{2}(?:-[1-7])?(?!\d)/dg,
+		format: 'week',
+		toTimestamp: isoWeekDate,
+	},
+	{
+		pattern: /(?<!\d)\d{4}-\d{3}(?!\d)/dg,
+		format: 'ordinal',
+		toTimestamp: isoOrdinalDate,
+	},
+	{
+		// A decimal point counts as a digit for the same reason it does
+		// in the epoch pattern: `0.20240115` is a float.
+		pattern:
+			/(?<![\d.])\d{8}(?:T\d{6}(?:\.\d{1,3})?(?:Z|[+-]\d{4}|[+-]\d{2})?)?(?!\d)/dg,
+		format: 'basic',
+		toTimestamp: isoBasicFormat,
 	},
 ];
 
@@ -97,7 +133,7 @@ export function scanDates(
 			const indices = match.indices?.[groupIndex];
 			if (!value || !indices) continue;
 
-			const timestamp = (spec.toTimestamp ?? Date.parse)(value);
+			const timestamp = (spec.toTimestamp ?? resolveInstant)(value);
 			if (Number.isNaN(timestamp)) continue;
 
 			candidates.push({
@@ -113,12 +149,27 @@ export function scanDates(
 	return toDateValues(content, dedupeContained(candidates));
 }
 
+/**
+ * Seconds, milliseconds, microseconds or nanoseconds.
+ *
+ * The finer units are truncated by CHARACTER, not divided: 19 digits do
+ * not fit a double, so dividing one would round it — and the Rust CLI,
+ * working in i64, would not. Taking the leading 13 digits is exact in
+ * both.
+ */
 function unixToTimestamp(value: string): number {
-	const raw = Number.parseInt(value, 10);
-	const isSeconds = value.length === 10 && raw > 1_000_000_000;
-	const isMillis = value.length === 13 && raw > 1_000_000_000_000;
-	if (isSeconds) return raw * 1000;
-	if (isMillis) return raw;
+	if (value.length === 10) {
+		const raw = Number.parseInt(value, 10);
+		return raw > 1_000_000_000 ? raw * 1000 : Number.NaN;
+	}
+	if (value.length === 13) {
+		const raw = Number.parseInt(value, 10);
+		return raw > 1_000_000_000_000 ? raw : Number.NaN;
+	}
+	if (value.length === 16 || value.length === 19) {
+		const milliseconds = Number.parseInt(value.slice(0, 13), 10);
+		return milliseconds > 1_000_000_000_000 ? milliseconds : Number.NaN;
+	}
 	return Number.NaN;
 }
 

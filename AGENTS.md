@@ -6,7 +6,7 @@ This repo hosts **two products**: the extension at the root (this document's sco
 
 ## What this is
 
-A VS Code extension that extracts dates and timestamps from the active document (JSON, YAML, CSV, XML, logs/plaintext, JS/TS, HTML) into a results editor, with analyze/convert/filter/validate/dedupe/sort post-processing. No network access, no filesystem writes.
+A VS Code extension that extracts dates and timestamps from the active document into a results editor, with analyze/convert/filter/validate/dedupe/sort post-processing. JSON, YAML, CSV, XML, logs/plaintext, JS/TS, HTML, TOML and Markdown are languages it names; **every other languageId is read with the patterns they all share**, because a format only ever adds patterns to those and returning nothing was indistinguishable from a document with no dates in it. No network access, no filesystem writes.
 
 ## Architecture
 
@@ -17,7 +17,10 @@ commands/               one file per command; deps injected as a frozen bag
 extraction/extract.ts   dispatcher: languageId -> FileType -> extractor
 extraction/heuristics.ts  THE date-pattern core: BASE_PATTERNS + scanDates()
                           (whole-content d-flag regex, offset-containment dedupe,
-                          Date.parse gate — NaN timestamps are never emitted)
+                          instant gate — NaN timestamps are never emitted)
+extraction/extended.ts    the shapes Date.parse refuses (ISO week/ordinal/basic,
+                          six timezone abbreviations), each normalised into one
+                          it does read. Mirrored by crate/src/extract/extended.rs
 extraction/position.ts    offset -> {line, column} via newline index (1-based)
 extraction/formats/*.ts   per-format extractors; json/yaml/csv are plain
                           scanDates, xml masks comments first, log/js/html add
@@ -51,8 +54,6 @@ happy path at a single indent level, and it reads top to bottom.
 // Yes — preconditions leave, then the real work runs unindented.
 function extract(document: TextDocument, config: Configuration): Result {
 	if (!document) return EMPTY;
-	if (!isSupported(document.languageId)) return unsupported(document.languageId);
-
 	const text = document.getText();
 	if (!text.trim()) return EMPTY;
 

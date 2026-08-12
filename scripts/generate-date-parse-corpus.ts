@@ -34,6 +34,7 @@ const SHAPES: Case[] = [
 	{ input: '2024-01-15T10:30:45', why: 'iso, no zone — local' },
 	{ input: '2024-01-15T10:30:45.123', why: 'iso, millis, no zone' },
 	{ input: '2024-01-15T10:30:45+05:30', why: 'iso, positive offset' },
+	{ input: '2024-01-15T10:30:45+05:00', why: 'the offset a basic-format +05 is padded into' },
 	{ input: '2024-01-15T10:30:45-08:00', why: 'iso, negative offset' },
 	{ input: '2024-01-15T10:30:45+00:00', why: 'iso, zero offset' },
 	{ input: '2024-01-15T00:00:00Z', why: 'iso, midnight' },
@@ -75,9 +76,19 @@ const SHAPES: Case[] = [
 	{ input: 'Mon, 15 Jan 2024 10:30:45 PST', why: 'PST is always -8' },
 	{ input: 'Mon, 15 Jan 2024 10:30:45 PDT', why: 'PDT is always -7' },
 	{ input: 'Mon, 15 Jan 2024 10:30:45 CEST', why: 'CEST is not a word — a refusal' },
+	{ input: 'Mon, 15 Jan 2024 10:30:45 CET', why: 'nor CET' },
+	{ input: 'Mon, 15 Jan 2024 10:30:45 BST', why: 'nor BST' },
 	{ input: 'Mon, 15 Jan 2024 10:30:45 JST', why: 'JST is not a word — a refusal' },
 	{ input: 'Mon, 15 Jan 2024 10:30:45 AEST', why: 'AEST is not a word — a refusal' },
+	{ input: 'Mon, 15 Jan 2024 10:30:45 IST', why: 'nor IST, which stands for three different zones' },
 	{ input: 'Mon, 15 Jan 2024 10:30:45 XYZ', why: 'nonsense is a refusal' },
+	// The numeric offsets extraction rewrites those abbreviations into
+	// before handing the string back to this parser.
+	{ input: 'Mon, 15 Jan 2024 10:30:45 +0100', why: 'the offset CET is rewritten to' },
+	{ input: 'Mon, 15 Jan 2024 10:30:45 +0200', why: 'and CEST' },
+	{ input: 'Mon, 15 Jan 2024 10:30:45 +0900', why: 'and JST' },
+	{ input: 'Mon, 15 Jan 2024 10:30:45 +1000', why: 'and AEST' },
+	{ input: 'Mon, 15 Jan 2024 10:30:45 +0530', why: 'and IST' },
 	// --- the toString form ---
 	{ input: 'Mon Jan 15 2024 10:30:45 GMT+0000', why: 'utc form' },
 	{ input: 'Mon Jan 15 2024 10:30:45 GMT-0800', why: 'utc form, negative' },
@@ -169,8 +180,17 @@ const LEGACY: Case[] = [
 	{ input: 'not a date', why: 'a refusal' },
 	{ input: '', why: 'the empty string is a refusal' },
 	{ input: 'now', why: 'not a thing V8 knows' },
+	// The ISO 8601 shapes V8 has no rule for. Extraction resolves these
+	// itself, above this parser, and normalises each into a form that
+	// appears elsewhere in this file — so the divergence is one string
+	// rewrite rather than a second calendar.
 	{ input: '2024-W03', why: 'week dates are not supported' },
+	{ input: '2024-W03-1', why: 'nor with a day of the week' },
+	{ input: '2024-015', why: 'an ordinal date is a refusal once the number cannot be a month' },
+	{ input: '2024-060', why: 'and another' },
 	{ input: '20240115', why: 'basic-format ISO is not supported' },
+	{ input: '20240115T103045Z', why: 'nor the basic date-time form' },
+	{ input: '20240115T103045', why: 'nor without a zone' },
 	{ input: '10:30:45', why: 'a time with no date is a refusal' },
 	{ input: 'T10:30:45', why: 'nor with a T' },
 	{ input: '2024-01-15T10:30', why: 'minutes without seconds' },

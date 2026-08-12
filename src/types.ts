@@ -63,6 +63,9 @@ export type DateFormat =
 	| 'utc'
 	| 'local'
 	| 'simple'
+	| 'week'
+	| 'ordinal'
+	| 'basic'
 	| 'custom'
 	| 'unknown';
 

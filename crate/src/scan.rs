@@ -93,22 +93,45 @@ pub(crate) fn scan_text(
     }
 }
 
-/// Read a file and extract from it.
-pub(crate) fn scan_file(path: &Path, options: &ScanOptions) -> FileReport {
+/// Read a file and extract from it, or `None` if it is not text at all.
+///
+/// **A binary file is not a failure to read, and the difference is the
+/// whole reason this returns an `Option`.** A PNG was never a candidate:
+/// before the walk read every file it was never opened, and reporting
+/// one as `skipped` would put fourteen images in the report of a website
+/// repository and make `--strict` exit 2 on any tree containing one. A
+/// file that genuinely *is* text and could not be read — no permission,
+/// or bytes that are not UTF-8 — keeps its named `skipped` diagnostic
+/// and keeps failing `--strict`, because that answer really is
+/// incomplete. Binaries are counted in the summary instead, so the
+/// reader still knows the walk covered less than the tree.
+pub(crate) fn scan_file(path: &Path, options: &ScanOptions) -> Option<FileReport> {
     let label = path.display().to_string();
     let name = path.file_name().and_then(|name| name.to_str());
 
-    let Some(language) = resolve_format(options.format.as_deref(), name) else {
-        return FileReport::skipped(&label, "no supported format for this file name".to_string());
-    };
+    let language = resolve_format(options.format.as_deref(), name);
     let bytes = match std::fs::read(path) {
         Ok(bytes) => bytes,
-        Err(error) => return FileReport::skipped(&label, error.to_string()),
+        Err(error) => return Some(FileReport::skipped(&label, error.to_string())),
     };
+    if is_binary(&bytes) {
+        return None;
+    }
     let Ok(content) = String::from_utf8(bytes) else {
-        return FileReport::skipped(&label, "not UTF-8 text".to_string());
+        return Some(FileReport::skipped(&label, "not UTF-8 text".to_string()));
     };
-    scan_text(&label, without_bom(&content), language, options)
+    Some(scan_text(&label, without_bom(&content), language, options))
+}
+
+/// ripgrep's heuristic: a NUL byte near the start means binary.
+///
+/// The same rule as the walker's, so "what this reads" stays the answer
+/// a person already has in their head. Text does not contain NUL and
+/// every common binary format has one in its header; eight kilobytes is
+/// far enough in to find it and short enough to be free.
+fn is_binary(bytes: &[u8]) -> bool {
+    const SNIFFED_BYTES: usize = 8192;
+    bytes.iter().take(SNIFFED_BYTES).any(|byte| *byte == b'\0')
 }
 
 /// Drop a leading byte-order mark.
@@ -158,11 +181,12 @@ fn shape(found: Vec<Found>, options: &ScanOptions) -> Vec<Date> {
 /// grep's convention: found, not found, or a malformed question.
 ///
 /// **A file that could not be read is not a malformed question.** Every
-/// real repository has a PNG, a zip and something the runner lacks
-/// permission for; exiting 2 on those makes the tool unusable in CI,
-/// which is the one place it is most worth running. They are reported
-/// on stderr and in the JSON, and `--strict` is there for a pipeline
-/// that genuinely wants them to fail the build.
+/// real repository has something the runner lacks permission for or that
+/// is not UTF-8; exiting 2 on those makes the tool unusable in CI, which
+/// is the one place it is most worth running. They are reported on
+/// stderr and in the JSON, and `--strict` is there for a pipeline that
+/// genuinely wants them to fail the build. A file that is not text never
+/// reaches here — `scan_file` returns nothing for it.
 pub(crate) fn exit_code(reports: &[FileReport], strict: bool) -> std::process::ExitCode {
     if strict && reports.iter().any(|report| report.skipped.is_some()) {
         return std::process::ExitCode::from(2);
@@ -317,17 +341,46 @@ mod tests {
         );
     }
 
+    /// A name that matches no format is read with the base patterns, so
+    /// the only thing that can skip a file now is the file itself.
     #[test]
-    fn a_file_with_no_supported_format_is_named_rather_than_dropped() {
-        let report = scan_file(Path::new("/nonexistent/main.rs"), &options());
-        assert!(report.skipped.is_some());
+    fn a_name_that_matches_no_format_is_read_rather_than_skipped() {
+        let report = scan_text("main.rs", "2024-01-15", "unknown", &options());
+        assert!(report.skipped.is_none());
+        assert_eq!(report.file_type, "unknown");
+        assert_eq!(report.dates.len(), 1);
     }
 
+    /// A file that could not be opened is a text file this run failed to
+    /// cover, so it is named rather than dropped.
     #[test]
     fn an_unreadable_file_says_so() {
-        let report = scan_file(Path::new("/nonexistent/a.json"), &options());
+        let report = scan_file(Path::new("/nonexistent/a.json"), &options()).expect("a report");
         assert!(report.skipped.is_some());
         assert!(report.dates.is_empty());
+    }
+
+    /// The rule that keeps `--strict` usable: a PNG was never a text
+    /// candidate, so it produces no report at all — where a file that is
+    /// text and cannot be read produces one that says why.
+    #[test]
+    fn a_nul_byte_is_the_line_between_binary_and_unreadable() {
+        assert!(is_binary(b"\x89PNG\r\n\x1a\n\0\0\0\rIHDR"));
+        assert!(!is_binary(b"2024-01-15\n"));
+        assert!(!is_binary(b""));
+        // Latin-1 text is not UTF-8 and not binary either: it is named,
+        // not dropped.
+        assert!(!is_binary(b"caf\xe9 2024-01-15"));
+    }
+
+    /// Only the head is sniffed, so a NUL far into a huge file does not
+    /// make it binary — and the cost of the check does not scale with
+    /// the file.
+    #[test]
+    fn only_the_head_of_a_file_is_sniffed() {
+        let mut bytes = vec![b'a'; 9000];
+        bytes.push(0);
+        assert!(!is_binary(&bytes));
     }
 
     /// Three invisible bytes that Notepad, Excel and a PowerShell

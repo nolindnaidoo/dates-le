@@ -101,9 +101,15 @@ describe('fileType: tolerant resolution', () => {
 		expect(resolveFormat(undefined, 'data.csv')).toBe('csv');
 	});
 
-	it('returns null when neither input resolves', () => {
-		expect(resolveFormat('klingon', 'a.klingon')).toBeNull();
-		expect(resolveFormat(undefined, undefined)).toBeNull();
+	it('falls back rather than refusing when neither input resolves', () => {
+		expect(resolveFormat('klingon', 'a.klingon')).toBe('unknown');
+		expect(resolveFormat(undefined, undefined)).toBe('unknown');
+	});
+
+	it('accepts the configuration and prose names', () => {
+		expect(resolveFormat(undefined, 'pyproject.toml')).toBe('toml');
+		expect(resolveFormat(undefined, 'README.md')).toBe('markdown');
+		expect(resolveFormat('conf', undefined)).toBe('ini');
 	});
 
 	it('advertises only formats the engine supports', () => {
@@ -178,12 +184,12 @@ describe('extract_dates', () => {
 		expect(result.meta.truncated).toBe(true);
 	});
 
-	it('names the fix when no usable format is given', async () => {
-		// Without this an unrecognised language returns an empty result with no
-		// error, which reads as "this document has no dates".
-		await expect(call({ content: '2024-03-15' })).rejects.toThrow(
-			/Provide `format`/,
-		);
+	it('reads the document when no format is given at all', async () => {
+		// Refusing here made the tool unusable on the documents an agent
+		// most often has: a source file whose language it cannot name.
+		const result = await call({ content: '2024-03-15' });
+		expect(result.data.dates[0]?.value).toBe('2024-03-15');
+		expect(result.ok).toBe(true);
 	});
 
 	it('requires content', async () => {
@@ -242,7 +248,7 @@ describe('protocol', () => {
 			jsonrpc: '2.0',
 			id: 4,
 			method: 'tools/call',
-			params: { name: 'extract_dates', arguments: { content: 'x' } },
+			params: { name: 'extract_dates', arguments: {} },
 		});
 		expect(reply?.error).toBeUndefined();
 		expect(reply?.result?.isError).toBe(true);

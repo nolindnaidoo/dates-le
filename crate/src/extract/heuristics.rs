@@ -2,9 +2,10 @@
 //!
 //! There is no parsing here and none anywhere else in this crate: every
 //! format is this same scan over raw text, and the format only decides
-//! which extra patterns join the six shared ones. That is why a
+//! which extra patterns join the nine shared ones. That is why a
 //! malformed JSON file still yields its dates instead of a parse error,
-//! and why `.json` and `.csv` are read identically.
+//! why `.json` and `.csv` are read identically, and why a document whose
+//! format nothing recognises is read with the nine rather than skipped.
 //!
 //! Two things about the patterns are ported deliberately rather than
 //! transcribed.
@@ -22,7 +23,7 @@
 
 use fancy_regex::Regex;
 
-use super::parse::date_parse;
+use super::extended;
 use super::position::locate_all;
 
 /// What a value was recognised as. These names reach the user as
@@ -35,6 +36,9 @@ pub(crate) enum Notation {
     Utc,
     Local,
     Simple,
+    Week,
+    Ordinal,
+    Basic,
     Custom,
 }
 
@@ -47,6 +51,9 @@ impl Notation {
             Self::Utc => "utc",
             Self::Local => "local",
             Self::Simple => "simple",
+            Self::Week => "week",
+            Self::Ordinal => "ordinal",
+            Self::Basic => "basic",
             Self::Custom => "custom",
         }
     }
@@ -64,6 +71,11 @@ enum Resolver {
     /// Apache's `15/Jan/2024:10:30:08 +0000` is not a shape `Date.parse`
     /// reads, so it is rewritten into one first.
     Apache,
+    /// The three ISO 8601 shapes `Date.parse` has no rule for at all.
+    /// Each is normalised into one it does read; see `extended.rs`.
+    Week,
+    Ordinal,
+    Basic,
 }
 
 pub(crate) struct Pattern {
@@ -94,7 +106,7 @@ struct Candidate {
     order: usize,
 }
 
-/// The six patterns every format is scanned with.
+/// The nine patterns every format is scanned with.
 fn base_patterns() -> Vec<Pattern> {
     vec![
         Pattern {
@@ -111,12 +123,19 @@ fn base_patterns() -> Vec<Pattern> {
             notation: Notation::Rfc2822,
             resolver: Resolver::DateParse,
         },
-        // Ten or thirteen digits with no digit either side. The
-        // lookbehind is what keeps an epoch out of a sixteen-digit card
-        // number; the range check in `unix_timestamp` is what keeps a
-        // nine-digit id out of 1970.
+        // Seconds, milliseconds, microseconds or nanoseconds, with no
+        // digit either side. The lookbehind is what keeps a ten-digit
+        // epoch from matching inside a longer run; the range check in
+        // `unix_timestamp` is what keeps a nine-digit id out of 1970.
+        // Longest alternative first, so a nineteen-digit run is read
+        // whole rather than as its first sixteen digits.
+        //
+        // **A decimal point counts as a digit here.** The fractional
+        // part of a float is a digit run of any length, and once
+        // sixteen of them are microseconds, `Z_95 = 1.6448536269514722`
+        // in a real Python file is a timestamp in 2174.
         Pattern {
-            regex: build(r"(?<![0-9])(?:[0-9]{13}|[0-9]{10})(?![0-9])"),
+            regex: build(r"(?<![0-9.])(?:[0-9]{19}|[0-9]{16}|[0-9]{13}|[0-9]{10})(?![0-9])"),
             notation: Notation::Unix,
             resolver: Resolver::Unix,
         },
@@ -138,6 +157,29 @@ fn base_patterns() -> Vec<Pattern> {
             regex: build(r"(?<![0-9])[0-9]{4}-[0-9]{2}-[0-9]{2}(?![0-9])"),
             notation: Notation::Simple,
             resolver: Resolver::DateParse,
+        },
+        // The three ISO 8601 shapes `Date.parse` refuses. They are last
+        // because order breaks a tie at identical ranges, and none of
+        // them can overlap the six above — a `W`, a three-digit tail and
+        // an eight-digit run are each unreachable by the others.
+        Pattern {
+            regex: build(r"(?<![0-9])[0-9]{4}-W[0-9]{2}(?:-[1-7])?(?![0-9])"),
+            notation: Notation::Week,
+            resolver: Resolver::Week,
+        },
+        Pattern {
+            regex: build(r"(?<![0-9])[0-9]{4}-[0-9]{3}(?![0-9])"),
+            notation: Notation::Ordinal,
+            resolver: Resolver::Ordinal,
+        },
+        Pattern {
+            // A decimal point counts as a digit for the same reason it
+            // does in the epoch pattern: `0.20240115` is a float.
+            regex: build(
+                r"(?<![0-9.])[0-9]{8}(?:T[0-9]{6}(?:\.[0-9]{1,3})?(?:Z|[+-][0-9]{4}|[+-][0-9]{2})?)?(?![0-9])",
+            ),
+            notation: Notation::Basic,
+            resolver: Resolver::Basic,
         },
     ]
 }
@@ -293,26 +335,46 @@ pub(crate) fn scan(haystack: &str, original: &str, patterns: &[Pattern], year: i
 
 fn resolve(value: &str, resolver: Resolver, year: i64) -> Option<i64> {
     match resolver {
-        Resolver::DateParse => date_parse(value),
+        Resolver::DateParse => extended::instant(value),
         Resolver::Unix => unix_timestamp(value),
-        Resolver::Syslog => date_parse(&format!("{value} {year}")),
-        Resolver::Apache => date_parse(&apache_shape(value)),
+        Resolver::Syslog => extended::instant(&format!("{value} {year}")),
+        Resolver::Apache => extended::instant(&apache_shape(value)),
+        Resolver::Week => extended::week_date(value),
+        Resolver::Ordinal => extended::ordinal_date(value),
+        Resolver::Basic => extended::basic_format(value),
     }
 }
 
-/// A bare epoch, in seconds or milliseconds.
+/// A bare epoch, in seconds, milliseconds, microseconds or nanoseconds.
 ///
 /// Ten digits alone is not enough — that is any account number — so the
 /// value must also be past 1e9 seconds or 1e12 milliseconds, which puts
 /// it after 2001. The upper end is whatever the digit count allows,
-/// around 2286, and a ten-digit phone number does land inside it. That
-/// is a false positive the shape cannot distinguish, and it is in the
+/// around 2286, and a ten-digit phone number does land inside it. So
+/// does a sixteen-digit card number, once microseconds are read. Those
+/// are false positives the shape cannot distinguish, and they are in the
 /// corpus rather than hidden.
+///
+/// The finer units are **truncated by character, not divided**. A
+/// nineteen-digit numeral does not fit a double, and dividing one in
+/// JavaScript would round it — so the two frontends would disagree about
+/// the last millisecond of some nanosecond timestamps and agree about
+/// the rest, which is the worst kind of difference to find. Taking the
+/// leading thirteen digits is exact in both.
 fn unix_timestamp(value: &str) -> Option<i64> {
-    let number: i64 = value.parse().ok()?;
     match value.len() {
-        10 if number > 1_000_000_000 => Some(number * 1000),
-        13 if number > 1_000_000_000_000 => Some(number),
+        10 => {
+            let number: i64 = value.parse().ok()?;
+            (number > 1_000_000_000).then_some(number * 1000)
+        }
+        13 => {
+            let number: i64 = value.parse().ok()?;
+            (number > 1_000_000_000_000).then_some(number)
+        }
+        16 | 19 => {
+            let milliseconds: i64 = value.get(..13)?.parse().ok()?;
+            (milliseconds > 1_000_000_000_000).then_some(milliseconds)
+        }
         _ => None,
     }
 }
@@ -392,7 +454,7 @@ mod tests {
     }
 
     #[test]
-    fn each_of_the_six_shapes_is_classified() {
+    fn each_of_the_nine_shapes_is_classified() {
         for (text, expected) in [
             ("2024-01-15T10:30:45Z", Notation::Iso),
             ("Mon, 15 Jan 2024 10:30:45 GMT", Notation::Rfc2822),
@@ -400,11 +462,46 @@ mod tests {
             ("Mon Jan 15 2024 10:30:45 GMT+0000", Notation::Utc),
             ("1/15/2024 10:30:45", Notation::Local),
             ("2024-01-15", Notation::Simple),
+            ("2024-W03-1", Notation::Week),
+            ("2024-015", Notation::Ordinal),
+            ("20240115T103045Z", Notation::Basic),
         ] {
             let found = find(text, "json");
             assert_eq!(found.len(), 1, "{text}");
             assert_eq!(found[0].notation, expected, "{text}");
         }
+    }
+
+    /// All three resolve to the same day as the extended form of it,
+    /// which is what makes them worth reading rather than merely
+    /// matching.
+    #[test]
+    fn the_iso_shapes_v8_refuses_land_on_the_same_instant() {
+        let extended = find("2024-01-15", "json")[0].timestamp;
+        for text in ["2024-W03-1", "2024-015", "20240115"] {
+            let found = find(text, "json");
+            assert_eq!(found.len(), 1, "{text}");
+            assert_eq!(found[0].timestamp, extended, "{text}");
+        }
+    }
+
+    /// An eight-digit run is the one new shape that cannot prove it is a
+    /// date, so it is held to a plausible year the way an epoch is held
+    /// to a plausible range.
+    #[test]
+    fn an_eight_digit_identifier_is_not_a_date() {
+        assert!(values("98765432", "json").is_empty(), "the year 9876");
+        assert!(values("12345678", "json").is_empty(), "month 56");
+    }
+
+    /// A zone V8 has no rule for. Before this the whole value was
+    /// dropped, because a value with no instant is not emitted.
+    #[test]
+    fn a_zone_v8_refuses_is_still_read() {
+        let found = find("Mon, 15 Jan 2024 10:30:45 CEST", "json");
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0].notation, Notation::Rfc2822);
+        assert_eq!(found[0].timestamp, 1_705_307_445_000);
     }
 
     /// The longer match wins where they overlap, and an identical string
@@ -429,20 +526,51 @@ mod tests {
     /// check: neither alone is enough.
     #[test]
     fn a_digit_run_that_is_not_an_epoch_is_not_a_date() {
-        assert!(
-            values("4532015112830366", "json").is_empty(),
-            "a card number"
-        );
         assert!(values("999999999", "json").is_empty(), "nine digits");
         assert!(values("0000000001", "json").is_empty(), "below the floor");
+        assert!(
+            values("12345678901234567", "json").is_empty(),
+            "seventeen digits is no unit at all"
+        );
     }
 
     /// A ten-digit phone number is inside the plausible range and cannot
-    /// be told apart. Pinned so the limitation is visible rather than
-    /// discovered.
+    /// be told apart. Neither can a sixteen-digit card number, once
+    /// microseconds are a unit an epoch can be written in. Pinned so the
+    /// limitation is visible rather than discovered.
     #[test]
-    fn a_ten_digit_phone_number_is_a_false_positive() {
+    fn a_digit_run_that_is_not_a_date_can_still_be_a_plausible_epoch() {
         assert_eq!(values("5551234567", "json"), ["5551234567"]);
+        assert_eq!(values("4532015112830366", "json"), ["4532015112830366"]);
+    }
+
+    /// The fractional part of a float is a digit run like any other, and
+    /// this is a real line from a real Python file. Without the decimal
+    /// point in the lookbehind it is a timestamp in 2174.
+    #[test]
+    fn the_fraction_of_a_float_is_not_an_epoch() {
+        assert!(values("Z_95 = 1.6448536269514722", "json").is_empty());
+        assert!(values("ratio = 0.1705314645123", "json").is_empty());
+        assert!(values("share = 0.20240115", "json").is_empty());
+        // The digits themselves are still an epoch when they stand alone.
+        assert_eq!(values("1705314645123456", "json"), ["1705314645123456"]);
+    }
+
+    /// Microseconds and nanoseconds truncate to the millisecond, and by
+    /// character rather than by division — a nineteen-digit numeral does
+    /// not fit a double, so dividing one would answer differently in the
+    /// two frontends.
+    #[test]
+    fn the_finer_epoch_units_truncate_to_the_millisecond() {
+        for value in [
+            "1705314645123456",    // microseconds
+            "1705314645123456789", // nanoseconds
+        ] {
+            let found = find(value, "json");
+            assert_eq!(found.len(), 1, "{value}");
+            assert_eq!(found[0].timestamp, 1_705_314_645_123, "{value}");
+            assert_eq!(found[0].notation, Notation::Unix, "{value}");
+        }
     }
 
     #[test]

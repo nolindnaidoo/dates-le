@@ -45,6 +45,13 @@
 						"column": 18
 					},
 					{
+						"value": "4532015112830366",
+						"format": "unix",
+						"timestamp": 4532015112830,
+						"line": 7,
+						"column": 20
+					},
+					{
 						"value": "5551234567",
 						"format": "unix",
 						"timestamp": 5551234567000,
@@ -78,7 +85,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 9,
+				"count": 10,
 				"truncated": false
 			}
 		}
@@ -129,6 +136,13 @@
 						"column": 18
 					},
 					{
+						"value": "4532015112830366",
+						"format": "unix",
+						"timestamp": 4532015112830,
+						"line": 7,
+						"column": 20
+					},
+					{
 						"value": "5551234567",
 						"format": "unix",
 						"timestamp": 5551234567000,
@@ -162,7 +176,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 9,
+				"count": 10,
 				"truncated": false
 			}
 		}
@@ -409,6 +423,13 @@
 						"column": 11
 					},
 					{
+						"value": "20240115",
+						"format": "basic",
+						"timestamp": 1705276800000,
+						"line": 8,
+						"column": 12
+					},
+					{
 						"value": "2024-03-05",
 						"format": "simple",
 						"timestamp": 1709596800000,
@@ -428,7 +449,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 8,
+				"count": 9,
 				"truncated": false
 			}
 		}
@@ -589,18 +610,387 @@
 		}
 	},
 	{
-		"name": "no format and no filename names the problem",
-		"content": "2024-01-15\n",
-		"arguments": {},
-		"expectedError": "Provide `format` (one of: json, yaml, csv, xml, log, plaintext, javascript, typescript, html) or a `filename` with a recognised extension."
+		"name": "a Python file, by filename — an extension nothing recognises still reads",
+		"file": "settings.py",
+		"arguments": {
+			"filename": "settings.py"
+		},
+		"expected": {
+			"ok": true,
+			"data": {
+				"dates": [
+					{
+						"value": "2024-01-15",
+						"format": "simple",
+						"timestamp": 1705276800000,
+						"line": 5,
+						"column": 17
+					},
+					{
+						"value": "2024-01-15T10:30:45Z",
+						"format": "iso",
+						"timestamp": 1705314645000,
+						"line": 6,
+						"column": 16
+					},
+					{
+						"value": "1705314645",
+						"format": "unix",
+						"timestamp": 1705314645000,
+						"line": 7,
+						"column": 17
+					}
+				],
+				"fileType": "unknown"
+			},
+			"diagnostics": [],
+			"meta": {
+				"tool": "extract_dates",
+				"count": 3,
+				"truncated": false
+			}
+		}
 	},
 	{
-		"name": "an unrecognised format is refused rather than guessed",
+		"name": "a Go file, by a format name nothing recognises",
+		"file": "handler.go",
+		"arguments": {
+			"format": "go"
+		},
+		"expected": {
+			"ok": true,
+			"data": {
+				"dates": [
+					{
+						"value": "2024-01-15",
+						"format": "simple",
+						"timestamp": 1705276800000,
+						"line": 3,
+						"column": 13
+					},
+					{
+						"value": "2024-06-01T00:00:00Z",
+						"format": "iso",
+						"timestamp": 1717200000000,
+						"line": 3,
+						"column": 50
+					},
+					{
+						"value": "2024-01-15",
+						"format": "simple",
+						"timestamp": 1705276800000,
+						"line": 5,
+						"column": 16
+					},
+					{
+						"value": "2024-06-01T00:00:00Z",
+						"format": "iso",
+						"timestamp": 1717200000000,
+						"line": 6,
+						"column": 16
+					},
+					{
+						"value": "1705314645123456789",
+						"format": "unix",
+						"timestamp": 1705314645123,
+						"line": 10,
+						"column": 20
+					}
+				],
+				"fileType": "unknown"
+			},
+			"diagnostics": [],
+			"meta": {
+				"tool": "extract_dates",
+				"count": 5,
+				"truncated": false
+			}
+		}
+	},
+	{
+		"name": "Markdown, by filename",
+		"file": "release-notes.md",
+		"arguments": {
+			"filename": "release-notes.md"
+		},
+		"expected": {
+			"ok": true,
+			"data": {
+				"dates": [
+					{
+						"value": "2024-01-15",
+						"format": "simple",
+						"timestamp": 1705276800000,
+						"line": 3,
+						"column": 12
+					},
+					{
+						"value": "2024-W03",
+						"format": "week",
+						"timestamp": 1705276800000,
+						"line": 5,
+						"column": 8
+					},
+					{
+						"value": "2024-01-15T10:30:45Z",
+						"format": "iso",
+						"timestamp": 1705314645000,
+						"line": 5,
+						"column": 34
+					},
+					{
+						"value": "2024-01-15",
+						"format": "simple",
+						"timestamp": 1705276800000,
+						"line": 9,
+						"column": 13
+					},
+					{
+						"value": "1705314645",
+						"format": "unix",
+						"timestamp": 1705314645000,
+						"line": 9,
+						"column": 26
+					},
+					{
+						"value": "2023-11-02",
+						"format": "simple",
+						"timestamp": 1698883200000,
+						"line": 10,
+						"column": 13
+					},
+					{
+						"value": "1698883200",
+						"format": "unix",
+						"timestamp": 1698883200000,
+						"line": 10,
+						"column": 26
+					}
+				],
+				"fileType": "markdown"
+			},
+			"diagnostics": [],
+			"meta": {
+				"tool": "extract_dates",
+				"count": 7,
+				"truncated": false
+			}
+		}
+	},
+	{
+		"name": "TOML, by format",
+		"file": "pyproject.toml",
+		"arguments": {
+			"format": "toml"
+		},
+		"expected": {
+			"ok": true,
+			"data": {
+				"dates": [
+					{
+						"value": "2024-01-15T10:30:45Z",
+						"format": "iso",
+						"timestamp": 1705314645000,
+						"line": 9,
+						"column": 7
+					},
+					{
+						"value": "2024-01-15",
+						"format": "simple",
+						"timestamp": 1705276800000,
+						"line": 10,
+						"column": 16
+					},
+					{
+						"value": "20241231",
+						"format": "basic",
+						"timestamp": 1735603200000,
+						"line": 11,
+						"column": 17
+					},
+					{
+						"value": "2024-W03-5",
+						"format": "week",
+						"timestamp": 1705622400000,
+						"line": 12,
+						"column": 12
+					}
+				],
+				"fileType": "toml"
+			},
+			"diagnostics": [],
+			"meta": {
+				"tool": "extract_dates",
+				"count": 4,
+				"truncated": false
+			}
+		}
+	},
+	{
+		"name": "every notation Date.parse refuses",
+		"file": "notations.txt",
+		"arguments": {
+			"format": "plaintext"
+		},
+		"expected": {
+			"ok": true,
+			"data": {
+				"dates": [
+					{
+						"value": "2024-W03",
+						"format": "week",
+						"timestamp": 1705276800000,
+						"line": 4,
+						"column": 21
+					},
+					{
+						"value": "2024-W03-1",
+						"format": "week",
+						"timestamp": 1705276800000,
+						"line": 5,
+						"column": 21
+					},
+					{
+						"value": "2024-015",
+						"format": "ordinal",
+						"timestamp": 1705276800000,
+						"line": 6,
+						"column": 21
+					},
+					{
+						"value": "20240115",
+						"format": "basic",
+						"timestamp": 1705276800000,
+						"line": 7,
+						"column": 21
+					},
+					{
+						"value": "20240115T103045Z",
+						"format": "basic",
+						"timestamp": 1705314645000,
+						"line": 8,
+						"column": 21
+					},
+					{
+						"value": "1705314645123456",
+						"format": "unix",
+						"timestamp": 1705314645123,
+						"line": 9,
+						"column": 21
+					},
+					{
+						"value": "1705314645123456789",
+						"format": "unix",
+						"timestamp": 1705314645123,
+						"line": 10,
+						"column": 21
+					},
+					{
+						"value": "Mon, 15 Jan 2024 10:30:45 CET",
+						"format": "rfc2822",
+						"timestamp": 1705311045000,
+						"line": 11,
+						"column": 21
+					},
+					{
+						"value": "Mon, 15 Jan 2024 10:30:45 CEST",
+						"format": "rfc2822",
+						"timestamp": 1705307445000,
+						"line": 12,
+						"column": 22
+					},
+					{
+						"value": "Mon, 15 Jan 2024 10:30:45 BST",
+						"format": "rfc2822",
+						"timestamp": 1705311045000,
+						"line": 13,
+						"column": 21
+					},
+					{
+						"value": "Mon, 15 Jan 2024 10:30:45 JST",
+						"format": "rfc2822",
+						"timestamp": 1705282245000,
+						"line": 14,
+						"column": 21
+					},
+					{
+						"value": "Mon, 15 Jan 2024 10:30:45 AEST",
+						"format": "rfc2822",
+						"timestamp": 1705278645000,
+						"line": 15,
+						"column": 21
+					},
+					{
+						"value": "Mon, 15 Jan 2024 10:30:45 IST",
+						"format": "rfc2822",
+						"timestamp": 1705294845000,
+						"line": 16,
+						"column": 21
+					}
+				],
+				"fileType": "plaintext"
+			},
+			"diagnostics": [],
+			"meta": {
+				"tool": "extract_dates",
+				"count": 13,
+				"truncated": false
+			}
+		}
+	},
+	{
+		"name": "no format and no filename is an answer, not a refusal",
+		"content": "2024-01-15\n",
+		"arguments": {},
+		"expected": {
+			"ok": true,
+			"data": {
+				"dates": [
+					{
+						"value": "2024-01-15",
+						"format": "simple",
+						"timestamp": 1705276800000,
+						"line": 1,
+						"column": 1
+					}
+				],
+				"fileType": "unknown"
+			},
+			"diagnostics": [],
+			"meta": {
+				"tool": "extract_dates",
+				"count": 1,
+				"truncated": false
+			}
+		}
+	},
+	{
+		"name": "an unrecognised format falls back rather than being refused",
 		"content": "2024-01-15\n",
 		"arguments": {
 			"format": "rust"
 		},
-		"expectedError": "Provide `format` (one of: json, yaml, csv, xml, log, plaintext, javascript, typescript, html) or a `filename` with a recognised extension."
+		"expected": {
+			"ok": true,
+			"data": {
+				"dates": [
+					{
+						"value": "2024-01-15",
+						"format": "simple",
+						"timestamp": 1705276800000,
+						"line": 1,
+						"column": 1
+					}
+				],
+				"fileType": "unknown"
+			},
+			"diagnostics": [],
+			"meta": {
+				"tool": "extract_dates",
+				"count": 1,
+				"truncated": false
+			}
+		}
 	},
 	{
 		"name": "a fractional cap is refused",

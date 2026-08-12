@@ -31,27 +31,37 @@ capability; both spend the timestamp that extraction already resolved.
 
 ## Formats
 
-Nine names resolve, to seven extractors:
+Eleven names resolve, and everything else resolves to `unknown`:
 
 | Name | Extractor | Adds |
 |---|---|---|
-| `json`, `csv`, `yaml` | shared core | — |
+| `json`, `csv`, `yaml`, `toml`, `markdown` | shared core | — |
 | `xml` | shared core | comments masked before scanning |
 | `log`, `plaintext` | shared core | log timestamps, syslog, Apache |
 | `javascript`, `typescript` | shared core | date-constructor arguments |
 | `html` | shared core | `datetime=`, date `<meta>`, JSON-LD |
+| anything else — `unknown` | shared core | — |
 
 There is no parsing. Every extractor is the same regex scan over raw
 text; the format only decides which extra patterns join it. That is why
 a `.json` file and a `.csv` file are read identically, and why a
 malformed document still yields its dates instead of a parse error.
 
-**An unrecognised format is a refusal, not a fallback.** The name a
-caller sends is reported back as `fileType`, so `typescript` and
-`plaintext` are their own keys rather than aliases of `javascript` and
-`log` — the two servers must not disagree about what they just read.
+**An unrecognised format is a fallback, not a refusal.** Because a
+format only ever *adds* patterns to the shared ones, the shared scan is
+the correct reading of a document nobody named — and refusing it was
+this tool declining to open `.py`, `.go`, `.rs`, `.toml` and `.md` at
+all, in a repository where Python was the largest file type. What the
+fallback does **not** get is the format-specific patterns: `Jan 15
+10:30:47` is a date in a log file and three words in a Python one.
 
-## The six shared patterns
+The name a caller sends is still reported back as `fileType`, so
+`typescript` and `plaintext` are their own keys rather than aliases of
+`javascript` and `log`, and an unrecognised one comes back as `unknown`
+rather than silently as something else — the two servers must not
+disagree about what they just read.
+
+## The nine shared patterns
 
 Matched over the whole document, not per line, so a construct spanning
 lines is still found.
@@ -60,14 +70,30 @@ lines is still found.
 |---|---|
 | `iso` | `2024-01-15T10:30:45`, optional `.mmm`, optional `Z` or `±HH:MM` |
 | `rfc2822` | `Mon, 15 Jan 2024 10:30:45 GMT` |
-| `unix` | exactly 10 or 13 digits, no digit either side |
+| `unix` | exactly 10, 13, 16 or 19 digits, no digit either side |
 | `utc` | `Mon Jan 15 2024 10:30:45 GMT+0000` |
 | `local` | `1/15/2024 10:30:45` |
 | `simple` | `2024-01-15` |
+| `week` | `2024-W03`, `2024-W03-1` |
+| `ordinal` | `2024-015` |
+| `basic` | `20240115`, `20240115T103045Z` |
 
 A Unix timestamp must also land above 1e9 seconds / 1e12 milliseconds,
 so a 10-digit account number is not read as a date in 1970. Ten digits
 is the pattern's own floor; the range check is what makes it a date.
+
+**Sixteen and nineteen digits are microseconds and nanoseconds**, and
+they are converted by taking the leading thirteen **characters** rather
+than by dividing. Nineteen digits do not fit a double, so JavaScript
+would round a division and the crate's i64 would not — the two frontends
+would then agree about most nanosecond timestamps and differ in the last
+millisecond of some, which is the worst kind of difference to find.
+
+That floor is nearly vacuous at those lengths, and the cost is stated
+rather than hidden: a 16-digit card number and `Number.MAX_SAFE_INTEGER`
+are both plausible microsecond epochs, and both are in the corpus as
+false positives, beside the 10-digit phone number that was already
+there.
 
 ### Overlap
 
@@ -111,17 +137,49 @@ Two parsers, in order:
    - A month is matched on its first three letters.
    - Named zones are the fixed offsets `GMT`/`UT`/`UTC`/`Z` and the eight
      US abbreviations. They are **fixed**, not zone-aware: `EST` is
-     always −5. `CEST` and `JST` are not recognised and are refusals.
+     always −5. `CEST` and `JST` are refusals *here*; see the layer
+     above this one.
    - A two-digit year is 1900s from 50, 2000s below it.
    - Parenthesised text is a comment, closed or not.
    - `1:30 PM` is 13:30; `13:30 PM` is a refusal.
 
-Anything neither parser reads is a refusal, and a refused value is
-dropped rather than emitted without an instant.
+Anything neither parser reads is a refusal at this layer, and a refused
+value is dropped rather than emitted without an instant.
+
+### The layer above `Date.parse`
+
+Four things are read that V8 answers `NaN` to. Each is a **deliberate
+divergence**, listed under Deliberate divergences below, and each is
+implemented the same way: the value is normalised into a string V8 *does*
+read and handed back to `Date.parse`. Nothing here computes an instant,
+so a week date is UTC for exactly the reason `2024-01-15` is UTC, and the
+140-case oracle stays untouched — this layer can only turn a refusal into
+a value, never a value into a different one.
+
+- **ISO 8601 week dates.** `2024-W03` is the Monday of ISO week 3, the
+  week containing 4 January being week 1. A week the year does not have
+  (`2024-W53`) is a refusal rather than the next year's first week.
+- **ISO 8601 ordinal dates.** `2024-015` is the fifteenth day of 2024.
+  `2023-366` is a refusal. Note that V8 *does* read `2024-001` — as
+  January of the year 2024, in local time — and extraction reads it as
+  day one instead, which is the one place this layer disagrees with an
+  answer V8 would have given rather than filling a gap.
+- **ISO 8601 basic format.** `20240115T103045Z` becomes
+  `2024-01-15T10:30:45Z`, keeping every zone rule the extended form has.
+  A bare `20240115` is the one shape here that cannot prove it is a date,
+  so it is additionally held to a year in **1900–2099**: `12345678` is
+  month 56 and `98765432` would otherwise be a September in the year
+  9876.
+- **Six more timezone abbreviations** — `CEST +02:00`, `CET +01:00`,
+  `BST +01:00`, `JST +09:00`, `AEST +10:00`, `IST +05:30` — each
+  rewritten to its numeric offset, matched as a whole word so `HISTORY`
+  is not India. Fixed offsets, not zone-aware, the same rule V8 applies
+  to `EST`. **`IST` is a guess**: it names India, Ireland and Israel, no
+  text can say which, and India is the one taken.
 
 ### Local time is a real dependency
 
-Four of the six shapes carry no timezone, so their instant depends on
+Several of the shapes carry no timezone, so their instant depends on
 the machine's. That is not a defect to hide — it is the answer, and the
 answer genuinely differs by machine, exactly as it does for the code
 being audited.
@@ -162,7 +220,17 @@ Exit 2 means the *question* was malformed — an unknown flag, an
 unreadable format name, a path that does not exist. It does not mean one
 file in fifty thousand was a PNG.
 
-A file that is not UTF-8 text, or that cannot be opened, is:
+**A file that is not text at all is not a file that failed to be read.**
+A PNG or a zip — a NUL byte in its first 8KB, ripgrep's own heuristic —
+produces no report line and no diagnostic, because it was never a text
+candidate: before the walk read every file it was never opened, and
+reporting one would put every image in a repository into the report and
+make `--strict` exit 2 on any tree containing one. They are **counted**
+in the stderr summary, so the reader still knows the walk covered less
+than the tree.
+
+A file that IS text and could not be read — no permission, or bytes that
+are not UTF-8 — is:
 
 - named on stderr,
 - carried in the JSON report with a `skipped` diagnostic saying why,
@@ -198,5 +266,10 @@ else is a regression.
   both frontends agree only within a calendar year, which is why the
   syslog fixture pins the year explicitly.
 - **The walk** is the crate's alone; the extension reads one document.
-  Files whose name resolves to no format are skipped rather than read
-  and refused.
+- **Week dates, ordinal dates, the basic format and six timezone
+  abbreviations** are read here and are `NaN` in `Date.parse`. The
+  extension diverges identically — both frontends run the same layer
+  above V8, and `fixtures/extraction.json` holds every case — so this is
+  a divergence from V8, not between the two servers. `2024-001` is the
+  sharpest of them: V8 reads it as January 2024 in local time, and this
+  reads it as the first day of 2024 in UTC.

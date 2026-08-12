@@ -3,6 +3,7 @@
 //! Pure: no filesystem, no clock except the year a caller passes in.
 //! `walk.rs` and `scan.rs` are where this meets a disk.
 
+pub(crate) mod extended;
 pub(crate) mod format;
 pub(crate) mod heuristics;
 pub(crate) mod parse;
@@ -18,8 +19,10 @@ pub(crate) use heuristics::Found;
 /// Every date in a document, in the order they appear.
 ///
 /// `language` is a resolved language id, not a caller's name for it —
-/// see `format::resolve_format`. An id with no extractor yields nothing,
-/// which is what the extension does too.
+/// see `format::resolve_format`. **An id with no extractor of its own is
+/// read with the base patterns**, not skipped: a format only ever adds
+/// patterns to those, so the base scan is the honest answer for a `.py`
+/// or a `.toml` rather than a shrug. The extension does the same.
 pub(crate) fn extract(content: &str, language: &str, year: i64) -> Vec<Found> {
     let patterns = heuristics::patterns_for(language);
     match language {
@@ -28,10 +31,7 @@ pub(crate) fn extract(content: &str, language: &str, year: i64) -> Vec<Found> {
         // against the mask, located against the original — the mask can
         // keep the byte length or the UTF-16 length, not both.
         "xml" => heuristics::scan(&mask_xml_comments(content), content, &patterns, year),
-        "json" | "yaml" | "csv" | "log" | "plaintext" | "javascript" | "typescript" | "html" => {
-            heuristics::scan(content, content, &patterns, year)
-        }
-        _ => Vec::new(),
+        _ => heuristics::scan(content, content, &patterns, year),
     }
 }
 
@@ -84,6 +84,7 @@ fn mask_xml_comments(content: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    use super::format::FALLBACK_FORMAT;
     use super::*;
 
     fn values(content: &str, language: &str) -> Vec<String> {
@@ -105,14 +106,30 @@ mod tests {
             "javascript",
             "typescript",
             "html",
+            "toml",
+            "markdown",
         ] {
             assert_eq!(values("2024-01-15", language), ["2024-01-15"], "{language}");
         }
     }
 
+    /// The change that made this tool readable over a whole repository:
+    /// a language with no extractor of its own gets the base patterns,
+    /// where it used to get nothing at all.
     #[test]
-    fn a_language_with_no_extractor_reads_nothing() {
-        assert!(values("2024-01-15", "rust").is_empty());
+    fn a_language_with_no_extractor_of_its_own_still_reads_a_date() {
+        for language in [FALLBACK_FORMAT, "rust", "python", "go", "sql"] {
+            assert_eq!(values("2024-01-15", language), ["2024-01-15"], "{language}");
+        }
+    }
+
+    /// It gets the base patterns and only those. A syslog line is a date
+    /// in a log and three words in a Python file, and the format is the
+    /// only thing that can tell them apart.
+    #[test]
+    fn the_fallback_adds_no_format_specific_patterns() {
+        assert!(values("Jan 15 10:30:47", FALLBACK_FORMAT).is_empty());
+        assert!(values("new Date('March 5, 2024')", FALLBACK_FORMAT).is_empty());
     }
 
     #[test]

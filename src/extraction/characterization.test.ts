@@ -50,10 +50,20 @@ describe('extraction characterization', () => {
 		});
 	}
 
-	it('unsupported language returns empty success', async () => {
-		const result = await extractDates('2024-01-15', 'python');
+	// A language with no extractor of its own is read with the patterns
+	// every format shares, where it used to return an empty result that
+	// was indistinguishable from a file with no dates in it.
+	it('an unsupported language is read with the shared patterns', async () => {
+		const result = await extractDates('shipped 2024-01-15', 'python');
 		expect(result.success).toBe(true);
-		expect(result.dates).toHaveLength(0);
 		expect(result.errors).toHaveLength(0);
+		expect(result.dates.map((date) => date.value)).toEqual(['2024-01-15']);
+	});
+
+	// And only those: a syslog line is a date in a log file and three
+	// words in a Python one.
+	it('the shared patterns are all an unsupported language gets', async () => {
+		const result = await extractDates('Jan 15 10:30:47', 'python');
+		expect(result.dates).toHaveLength(0);
 	});
 });

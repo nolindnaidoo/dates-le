@@ -1,4 +1,5 @@
 import type { DateValue } from '../../types';
+import { resolveInstant } from '../extended';
 import { type DatePatternSpec, scanDates } from '../heuristics';
 
 /**
@@ -20,7 +21,7 @@ const LOG_SPECS: readonly DatePatternSpec[] = [
 	{
 		pattern: /(?<![A-Za-z])[A-Za-z]{3}\s+\d{1,2}\s\d{2}:\d{2}:\d{2}(?!\d)/dg,
 		format: 'custom',
-		toTimestamp: (value) => Date.parse(`${value} ${currentYear()}`),
+		toTimestamp: (value) => resolveInstant(`${value} ${currentYear()}`),
 	},
 	{
 		pattern: /\[(\d{2}\/[A-Za-z]{3}\/\d{4}:\d{2}:\d{2}:\d{2}\s[+-]\d{4})\]/dg,
@@ -39,5 +40,5 @@ function currentYear(): number {
 
 /** `15/Jan/2024:10:30:08 +0000` → `15 Jan 2024 10:30:08 +0000` */
 function apacheToTimestamp(value: string): number {
-	return Date.parse(value.replace(/\//g, ' ').replace(':', ' '));
+	return resolveInstant(value.replace(/\//g, ' ').replace(':', ' '));
 }

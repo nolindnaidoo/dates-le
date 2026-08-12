@@ -44,6 +44,13 @@
 					"column": 18
 				},
 				{
+					"value": "4532015112830366",
+					"format": "unix",
+					"timestamp": 4532015112830,
+					"line": 7,
+					"column": 20
+				},
+				{
 					"value": "5551234567",
 					"format": "unix",
 					"timestamp": 5551234567000,
@@ -387,6 +394,13 @@
 					"column": 11
 				},
 				{
+					"value": "20240115",
+					"format": "basic",
+					"timestamp": 1705276800000,
+					"line": 8,
+					"column": 12
+				},
+				{
 					"value": "2024-03-05",
 					"format": "simple",
 					"timestamp": 1709596800000,
@@ -399,6 +413,265 @@
 					"timestamp": 1711929600000,
 					"line": 11,
 					"column": 9
+				}
+			]
+		},
+		{
+			"name": "a Python file, read by the fallback — and a syslog line that is not a date in one",
+			"file": "settings.py",
+			"fileType": "unknown",
+			"expected": [
+				{
+					"value": "2024-01-15",
+					"format": "simple",
+					"timestamp": 1705276800000,
+					"line": 5,
+					"column": 17
+				},
+				{
+					"value": "2024-01-15T10:30:45Z",
+					"format": "iso",
+					"timestamp": 1705314645000,
+					"line": 6,
+					"column": 16
+				},
+				{
+					"value": "1705314645",
+					"format": "unix",
+					"timestamp": 1705314645000,
+					"line": 7,
+					"column": 17
+				}
+			]
+		},
+		{
+			"name": "a Go file, nanosecond epochs and a constructor argument that is only a string here",
+			"file": "handler.go",
+			"fileType": "unknown",
+			"expected": [
+				{
+					"value": "2024-01-15",
+					"format": "simple",
+					"timestamp": 1705276800000,
+					"line": 3,
+					"column": 13
+				},
+				{
+					"value": "2024-06-01T00:00:00Z",
+					"format": "iso",
+					"timestamp": 1717200000000,
+					"line": 3,
+					"column": 50
+				},
+				{
+					"value": "2024-01-15",
+					"format": "simple",
+					"timestamp": 1705276800000,
+					"line": 5,
+					"column": 16
+				},
+				{
+					"value": "2024-06-01T00:00:00Z",
+					"format": "iso",
+					"timestamp": 1717200000000,
+					"line": 6,
+					"column": 16
+				},
+				{
+					"value": "1705314645123456789",
+					"format": "unix",
+					"timestamp": 1705314645123,
+					"line": 10,
+					"column": 20
+				}
+			]
+		},
+		{
+			"name": "Markdown prose and a table, with issue numbers that are not dates",
+			"file": "release-notes.md",
+			"fileType": "markdown",
+			"expected": [
+				{
+					"value": "2024-01-15",
+					"format": "simple",
+					"timestamp": 1705276800000,
+					"line": 3,
+					"column": 12
+				},
+				{
+					"value": "2024-W03",
+					"format": "week",
+					"timestamp": 1705276800000,
+					"line": 5,
+					"column": 8
+				},
+				{
+					"value": "2024-01-15T10:30:45Z",
+					"format": "iso",
+					"timestamp": 1705314645000,
+					"line": 5,
+					"column": 34
+				},
+				{
+					"value": "2024-01-15",
+					"format": "simple",
+					"timestamp": 1705276800000,
+					"line": 9,
+					"column": 13
+				},
+				{
+					"value": "1705314645",
+					"format": "unix",
+					"timestamp": 1705314645000,
+					"line": 9,
+					"column": 26
+				},
+				{
+					"value": "2023-11-02",
+					"format": "simple",
+					"timestamp": 1698883200000,
+					"line": 10,
+					"column": 13
+				},
+				{
+					"value": "1698883200",
+					"format": "unix",
+					"timestamp": 1698883200000,
+					"line": 10,
+					"column": 26
+				}
+			]
+		},
+		{
+			"name": "TOML, where the date type is unquoted and read the same as a string",
+			"file": "pyproject.toml",
+			"fileType": "toml",
+			"expected": [
+				{
+					"value": "2024-01-15T10:30:45Z",
+					"format": "iso",
+					"timestamp": 1705314645000,
+					"line": 9,
+					"column": 7
+				},
+				{
+					"value": "2024-01-15",
+					"format": "simple",
+					"timestamp": 1705276800000,
+					"line": 10,
+					"column": 16
+				},
+				{
+					"value": "20241231",
+					"format": "basic",
+					"timestamp": 1735603200000,
+					"line": 11,
+					"column": 17
+				},
+				{
+					"value": "2024-W03-5",
+					"format": "week",
+					"timestamp": 1705622400000,
+					"line": 12,
+					"column": 12
+				}
+			]
+		},
+		{
+			"name": "every notation Date.parse refuses, and the digit runs beside them that are not dates",
+			"file": "notations.txt",
+			"fileType": "plaintext",
+			"expected": [
+				{
+					"value": "2024-W03",
+					"format": "week",
+					"timestamp": 1705276800000,
+					"line": 4,
+					"column": 21
+				},
+				{
+					"value": "2024-W03-1",
+					"format": "week",
+					"timestamp": 1705276800000,
+					"line": 5,
+					"column": 21
+				},
+				{
+					"value": "2024-015",
+					"format": "ordinal",
+					"timestamp": 1705276800000,
+					"line": 6,
+					"column": 21
+				},
+				{
+					"value": "20240115",
+					"format": "basic",
+					"timestamp": 1705276800000,
+					"line": 7,
+					"column": 21
+				},
+				{
+					"value": "20240115T103045Z",
+					"format": "basic",
+					"timestamp": 1705314645000,
+					"line": 8,
+					"column": 21
+				},
+				{
+					"value": "1705314645123456",
+					"format": "unix",
+					"timestamp": 1705314645123,
+					"line": 9,
+					"column": 21
+				},
+				{
+					"value": "1705314645123456789",
+					"format": "unix",
+					"timestamp": 1705314645123,
+					"line": 10,
+					"column": 21
+				},
+				{
+					"value": "Mon, 15 Jan 2024 10:30:45 CET",
+					"format": "rfc2822",
+					"timestamp": 1705311045000,
+					"line": 11,
+					"column": 21
+				},
+				{
+					"value": "Mon, 15 Jan 2024 10:30:45 CEST",
+					"format": "rfc2822",
+					"timestamp": 1705307445000,
+					"line": 12,
+					"column": 22
+				},
+				{
+					"value": "Mon, 15 Jan 2024 10:30:45 BST",
+					"format": "rfc2822",
+					"timestamp": 1705311045000,
+					"line": 13,
+					"column": 21
+				},
+				{
+					"value": "Mon, 15 Jan 2024 10:30:45 JST",
+					"format": "rfc2822",
+					"timestamp": 1705282245000,
+					"line": 14,
+					"column": 21
+				},
+				{
+					"value": "Mon, 15 Jan 2024 10:30:45 AEST",
+					"format": "rfc2822",
+					"timestamp": 1705278645000,
+					"line": 15,
+					"column": 21
+				},
+				{
+					"value": "Mon, 15 Jan 2024 10:30:45 IST",
+					"format": "rfc2822",
+					"timestamp": 1705294845000,
+					"line": 16,
+					"column": 21
 				}
 			]
 		}

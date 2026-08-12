@@ -36,6 +36,7 @@ crate/src/
 │                arithmetic, positions. No filesystem, pub(crate).
 │   ├── heuristics.rs  the patterns and containment dedupe
 │   ├── parse.rs       Date.parse, both of V8's parsers
+│   ├── extended.rs    the shapes V8 refuses, normalised into ones it reads
 │   ├── time.rs        components → instant, and local time
 │   ├── position.rs    byte offset → line and UTF-16 column
 │   ├── format.rs      a caller's format name → a language id
@@ -68,9 +69,47 @@ the authority. Regenerate it only with the generator, under `TZ` — the
 generator runs in V8, which does honour it — never by hand. **A disagreement means the parser is wrong**, because the
 extension is V8.
 
+### Every divergence from V8 lives above `parse.rs`, never in it
+
+Week dates, ordinal dates, the basic format and the six timezone
+abbreviations V8 lacks are all read here and are all `NaN` in
+`Date.parse`. They live in `extended.rs`, which tries `date_parse`
+**first** and only then its own rules — so the oracle stays the authority
+and this layer can turn a refusal into a value but never a value into a
+different one.
+
+Nothing in `extended.rs` computes an instant. Each shape is normalised
+into a string V8 *does* read and handed back, which is what keeps a week
+date UTC for the same reason `2024-01-15` is UTC, and keeps the two
+frontends identical without either owning a second calendar. A new shape
+belongs there, with a case added to `fixtures/date-parse.json` recording
+V8's actual answer and a line in SPEC.md's divergences.
+
+### A format nobody recognises is read, not refused
+
+`patterns_for` only ever *extends* the shared list, so the shared scan is
+the correct reading of a document nobody named — and refusing it meant
+the walk skipped Python, Go, Rust, TOML and Markdown entirely, reporting
+a clean tree rather than an unread one. `resolve_format` yields
+`FALLBACK_FORMAT` and `walk.rs` filters nothing.
+
+What the fallback must **not** get is the format-specific patterns:
+`Jan 15 10:30:47` is a date in a log file and three words in a Python
+one. There is a test for exactly that.
+
+### Binary is not the same as unreadable
+
+Widening the walk means a PNG reaches `scan_file`. It returns `None` for
+one — a NUL byte in the first 8KB, ripgrep's heuristic — so no report
+line is produced and `--strict` is unaffected; otherwise a repository
+with sixteen images in it exits 2 under `--strict`, which makes the flag
+useless. They are counted in the stderr summary instead. A file that *is*
+text and could not be read keeps its named `skipped` diagnostic and keeps
+failing `--strict`.
+
 ### Local time is a real dependency, and is not hidden
 
-Four of the six shapes carry no timezone. Their instant is a property of
+Several of the shapes carry no timezone. Their instant is a property of
 the machine, and that is the honest answer rather than a defect to
 paper over — it is equally true of the code being read.
 
@@ -125,9 +164,11 @@ computes the instant they spend.
 
 ## Control flow and style
 
-- **Refuse rather than guess.** An unrecognised format resolves to
-  nothing and says so; it does not fall back to a scan that would report
-  a `#anchor` as a date.
+- **Refuse rather than guess** about a *value*: a string whose instant
+  cannot be resolved is dropped rather than emitted without one. That is
+  not the same as refusing a *format* — every format runs the same
+  shared patterns, so an unrecognised one is read with them and reported
+  as `unknown`, and the value gate is what keeps the answer honest.
 - **Early returns over nesting.** No `else` after a `return`.
 - `expect` only where the invariant is local and stated in the message.
   No `unwrap` in non-test code.

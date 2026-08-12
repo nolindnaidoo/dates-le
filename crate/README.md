@@ -25,25 +25,32 @@ dates-le --values . | sort -u       # just the strings, for piping
 Exit codes follow grep: `0` dates found, `1` none found, `2` a malformed
 question. Finding none is an answer, not an error.
 
-A file that is not text, or that cannot be opened, is named on stderr
-and carried in the report rather than failing the run — every repository
-has a PNG in it. `--strict` turns those back into a failure.
+A file that is not text is not read and not reported — it was never a
+candidate — and is counted in the stderr summary instead. A file that
+*is* text and cannot be opened is named on stderr and carried in the
+report rather than failing the run. `--strict` turns those back into a
+failure.
 
 ## What it reads
 
-JSON, YAML, CSV, XML, log and plaintext, JavaScript, TypeScript and
-HTML. There is no parsing — every format is the same scan over raw text,
-and the format only decides which extra patterns join the six shared
-ones. A malformed document still yields its dates.
+**Every text file.** JSON, YAML, CSV, XML, log and plaintext,
+JavaScript, TypeScript, HTML, TOML and Markdown are names it knows;
+anything else — Python, Go, Rust, shell, SQL — is scanned with the nine
+patterns every format shares. There is no parsing; the format only
+decides which extra patterns join the nine, so a malformed document
+still yields its dates.
 
 | Notation | Example |
 |---|---|
 | `iso` | `2024-01-15T10:30:45.123Z` |
 | `rfc2822` | `Mon, 15 Jan 2024 10:30:45 GMT` |
-| `unix` | `1705314645`, `1705314645123` |
+| `unix` | `1705314645`, `1705314645123`, and microseconds and nanoseconds |
 | `utc` | `Mon Jan 15 2024 10:30:45 GMT+0000` |
 | `local` | `1/15/2024 10:30:45` |
 | `simple` | `2024-01-15` |
+| `week` | `2024-W03`, `2024-W03-1` |
+| `ordinal` | `2024-015` |
+| `basic` | `20240115`, `20240115T103045Z` |
 | `custom` | syslog, Apache, `datetime=`, `new Date('March 5, 2024')` |
 
 XML comments are skipped. Log files add syslog and Apache access lines.
@@ -65,8 +72,13 @@ two-digit year is 1900s from 50. Those rules were established by asking
 V8 and are pinned in `fixtures/date-parse.json`, which `cargo test`
 replays.
 
-**A date with no timezone resolves against this machine's.** Four of the
-six shapes carry no zone, so their instant genuinely differs by machine
+Four shapes V8 refuses are read anyway — week dates, ordinal dates, the
+basic format, and `CEST CET BST JST AEST IST` — by normalising each into
+a string V8 does read. Every one is listed as a deliberate divergence in
+`SPEC.md`, and the extension diverges identically.
+
+**A date with no timezone resolves against this machine's.** Several of
+the shapes carry no zone, so their instant genuinely differs by machine
 — exactly as it does for the code being audited. `--tz UTC` names one
 instead, and applies to `--after` and `--before` too, so where the
 command was typed cannot change the answer. At a daylight-saving

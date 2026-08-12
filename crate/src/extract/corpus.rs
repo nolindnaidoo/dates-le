@@ -27,9 +27,14 @@ documents!(
     "dates.ts",
     "events.json",
     "feed.xml",
+    "handler.go",
+    "notations.txt",
     "page.html",
+    "pyproject.toml",
+    "release-notes.md",
     "rows.csv",
     "schedule.yaml",
+    "settings.py",
 );
 
 #[cfg(test)]

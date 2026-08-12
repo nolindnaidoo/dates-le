@@ -40,9 +40,29 @@ describe('scanDates', () => {
 		expect(dates.map((d) => d.format)).toEqual(['iso', 'simple']);
 	});
 
-	it('rejects unix timestamps embedded in longer digit runs', () => {
+	it('rejects digit runs that are no epoch unit at all', () => {
+		// 17 digits is neither microseconds (16) nor nanoseconds (19).
 		expect(scanDates('id 12345678901234567')).toHaveLength(0);
-		expect(scanDates('const maxSafe = 9007199254740991;')).toHaveLength(0);
+	});
+
+	// The fractional part of a float is a digit run like any other, and
+	// this is a real line from a real Python file. Without the decimal
+	// point in the lookbehind it is a timestamp in 2174.
+	it('does not read the fraction of a float as an epoch', () => {
+		expect(scanDates('Z_95 = 1.6448536269514722')).toHaveLength(0);
+		expect(scanDates('ratio = 0.1705314645123')).toHaveLength(0);
+		expect(scanDates('share = 0.20240115')).toHaveLength(0);
+		// The digits themselves are still an epoch when they stand alone.
+		expect(scanDates('1705314645123456')).toHaveLength(1);
+	});
+
+	// The cost of reading microseconds: every 16-digit literal in the
+	// plausible range is one, and Number.MAX_SAFE_INTEGER is 16 digits.
+	// Pinned so the limitation is visible rather than discovered.
+	it('reads a 16-digit literal as microseconds, MAX_SAFE_INTEGER included', () => {
+		const dates = scanDates('const maxSafe = 9007199254740991;');
+		expect(dates.map((d) => d.format)).toEqual(['unix']);
+		expect(dates[0]?.timestamp).toBe(9_007_199_254_740);
 	});
 
 	it('accepts exactly-10 and exactly-13 digit epochs and scales seconds', () => {

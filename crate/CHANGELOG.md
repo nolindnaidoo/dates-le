@@ -7,6 +7,57 @@ this repository release on their own cadence.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Every text file is read.** The walk skipped any file whose name
+  resolved to none of nine formats, so a repository of Python, Go, Rust,
+  TOML and Markdown was walked and almost entirely unread — and the
+  reader saw a clean report rather than a skipped one. A format only ever
+  *adds* patterns to the shared ones, so the shared scan is the correct
+  reading of a document nobody named: `resolve_format` now yields
+  `unknown` instead of nothing, `extract` has a fallback arm, and
+  `has_a_format()` is gone from `walk.rs`. `toml`, `ini`, `cfg`, `conf`,
+  `properties`, `markdown` and `md` are named formats rather than
+  unknowns; `toml` and `markdown` join the tool schema's enum.
+- **Four notations `Date.parse` refuses**, in a new `extract/extended.rs`
+  that sits *above* the V8 parser and leaves the 140-case oracle
+  untouched: ISO 8601 week dates (`2024-W03`, `2024-W03-1`), ordinal
+  dates (`2024-015`), the basic format (`20240115`, `20240115T103045Z`),
+  and the abbreviations `CEST CET BST JST AEST IST` as fixed offsets.
+  Each is normalised into a string V8 does read, so nothing here computes
+  an instant and both frontends diverge identically. `week`, `ordinal`
+  and `basic` are new `format` values. SPEC.md lists all of it under
+  Deliberate divergences, `IST` named as the guess it is.
+- **Unix epochs in microseconds and nanoseconds** — 16 and 19 digits,
+  same plausible-range floor, converted by taking the leading 13
+  *characters* rather than by dividing, because 19 digits do not fit a
+  double and a division would round in JavaScript and not in Rust.
+- Corpus documents `settings.py`, `handler.go`, `release-notes.md`,
+  `pyproject.toml` and `notations.txt`, and MCP cases for each.
+
+### Changed
+
+- **`--format` no longer refuses a name it does not recognise**, and
+  `--stdin` no longer requires one: both fall back to the shared
+  patterns. The same on the MCP surface — `extract_dates` with no
+  `format` and no `filename`, and `dates_le_scan` with an unrecognised
+  `format`, were refusals and are answers now, carrying
+  `fileType: "unknown"`. The two corpus cases that pinned those refusals
+  were updated deliberately.
+- **A binary file is skipped silently rather than reported.** Widening
+  the walk means a PNG now reaches the reader; a NUL byte in the first
+  8KB (ripgrep's heuristic) means the file was never a text candidate, so
+  it produces no report line and does not affect `--strict` — which
+  would otherwise exit 2 on any repository containing an image. They are
+  counted in the stderr summary (`, 14 binary files skipped`) so the
+  coverage is still stated. A file that *is* text and cannot be read
+  keeps its named `skipped` diagnostic and still fails `--strict`.
+- **A 16-digit card number is now a plausible microsecond epoch**, as a
+  10-digit phone number was already a plausible second one. The corpus
+  pinned it as a non-date and now pins it as the false positive it is.
+
 ## [0.1.0] - 2026-08-11
 
 First release. The extension's extraction engine, ported and pinned

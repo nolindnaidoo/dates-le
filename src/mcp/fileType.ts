@@ -2,11 +2,14 @@
  * Resolving a format hint from whatever an agent happens to send.
  *
  * The engine's own `determineFileType` accepts VS Code language ids and nothing
- * else — anything it does not recognise returns `unknown`, and `extractDates`
- * then returns an empty result with no error, which is indistinguishable from a
- * document that genuinely has no dates. An agent will send `yml`, `.log`,
- * `jsonc` or `app.log` instead. Widening happens here rather than in the
- * engine, whose behaviour is pinned by characterization goldens.
+ * else, so an agent sending `yml`, `.log`, `jsonc` or `app.log` needs widening,
+ * and it happens here rather than in the engine, whose behaviour is pinned by
+ * characterization goldens.
+ *
+ * A name nothing recognises resolves to `unknown` rather than to null. That is
+ * not a guess: `unknown` routes to the patterns every format shares, which is
+ * the correct reading of a `.py`, `.go`, `.toml` or `.md` file, and it is the
+ * `fileType` the answer carries so the caller can see which patterns ran.
  */
 
 /** Every language id the engine understands, keyed by what a caller might send. */
@@ -37,7 +40,20 @@ const ALIASES: Readonly<Record<string, string>> = Object.freeze({
 	html: 'html',
 	htm: 'html',
 	xhtml: 'html',
+	// Read by the shared patterns like everything unnamed, and named all
+	// the same: a caller who says `toml` should not be told `unknown` in
+	// the answer's own `fileType` field.
+	toml: 'toml',
+	ini: 'ini',
+	cfg: 'ini',
+	conf: 'ini',
+	properties: 'properties',
+	markdown: 'markdown',
+	md: 'markdown',
 });
+
+/** What a name nothing recognises resolves to. Held equal to the crate's. */
+export const FALLBACK_FORMAT = 'unknown';
 
 /** The formats a caller can name, for the tool schema's enum. */
 export const SUPPORTED_FORMATS: readonly string[] = Object.freeze([
@@ -50,6 +66,8 @@ export const SUPPORTED_FORMATS: readonly string[] = Object.freeze([
 	'javascript',
 	'typescript',
 	'html',
+	'toml',
+	'markdown',
 ]);
 
 function normalise(value: string): string {
@@ -57,16 +75,13 @@ function normalise(value: string): string {
 }
 
 /**
- * Resolve a language id from an explicit format, else from a filename.
- *
- * Returns null rather than guessing: a wrong format extracts nothing and looks
- * like a document with no dates, which is the least debuggable outcome for a
- * caller.
+ * Resolve a language id from an explicit format, else from a filename,
+ * else the fallback.
  */
 export function resolveFormat(
 	format: string | undefined,
 	filename: string | undefined,
-): string | null {
+): string {
 	if (format) {
 		const direct = ALIASES[normalise(format)];
 		if (direct) return direct;
@@ -80,5 +95,5 @@ export function resolveFormat(
 		if (inferred) return inferred;
 	}
 
-	return null;
+	return FALLBACK_FORMAT;
 }
