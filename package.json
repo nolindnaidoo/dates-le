@@ -2,7 +2,7 @@
 	"name": "dates-le",
 	"publisher": "nolindnaidoo",
 	"displayName": "Dates-LE",
-	"description": "Zero Hassle Date/Time Extraction and Analysis from Logs, Configs, and Code",
+	"description": "Extract every date and timestamp, and the exact instant each one resolves to",
 	"version": "2.3.0",
 	"license": "MIT",
 	"author": {
