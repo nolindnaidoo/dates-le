@@ -195,8 +195,20 @@ fn a_reserved_windows_name_does_not_stop_the_walk() {
 
     let mut created = Vec::new();
     for name in ["CON", "PRN", "AUX", "NUL", "COM1"] {
-        match std::fs::write(sandbox.path().join(name), format!("shipped {VALUE}\n")) {
-            Ok(()) => created.push(name),
+        let path = sandbox.path().join(name);
+        let expected = format!("shipped {VALUE}\n");
+        match std::fs::write(&path, &expected) {
+            // Creating `NUL` on Windows reports success and writes to the
+            // null device, so the name exists and holds nothing. A walk
+            // cannot report a date in a file with no content, and should
+            // not be asked to. The test therefore requires what it can
+            // itself read back, not what the platform claimed to write.
+            Ok(()) => match std::fs::read_to_string(&path) {
+                Ok(back) if back == expected => created.push(name),
+                _ => eprintln!(
+                    "platform: {name} accepted a write and did not hold it — a device name, not a file"
+                ),
+            },
             // Named rather than swallowed: a green run should still say
             // which cases this platform could not build.
             Err(error) => eprintln!("platform: skipped the reserved name {name} — {error}"),
