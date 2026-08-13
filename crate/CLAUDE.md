@@ -18,7 +18,7 @@ with its own `CLAUDE.md`.
   lint, or add a commented relaxation to `[lints.clippy]` in
   `Cargo.toml`. Three are there already, with their reason.
 - New logic goes in `extract/` when it is pure (it must then be
-  unit-tested, 90% module coverage floor), and in `walk.rs` / `scan.rs`
+  unit-tested, 75% module coverage floor), and in `walk.rs` / `scan.rs`
   only when it needs the filesystem.
 - **The tests name their zone; they do not read `TZ`.** Windows ignores
   `TZ`, so a corpus that depended on it could only be checked on two of

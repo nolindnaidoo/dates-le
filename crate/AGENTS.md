@@ -196,7 +196,7 @@ computes the instant they spend.
 
 Four layers, each answering something the others cannot.
 
-1. **Unit tests**, beside the code, pure. 90% line coverage per module
+1. **Unit tests**, beside the code, pure. 75% line coverage per module
    in `extract/`, enforced in CI. No clocks, no randomness, no
    filesystem.
 2. **The V8 oracle** (`fixtures/date-parse.json`), replayed by
