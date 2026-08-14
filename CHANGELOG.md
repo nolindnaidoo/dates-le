@@ -95,6 +95,12 @@ resolved. On one large tree the equivalent scan went from 488 dates to
   interactive and stay here. The extension remains the reference
   implementation and `crate/fixtures/` is the contract between the two.
 
+- **New icon artwork.** All sixteen tools were redrawn in one style, so
+  the family reads as one set wherever the listings sit side by side —
+  the Marketplace, Open VSX and letools.dev. The framing is unchanged:
+  the drawing fills 65.8% of an 800×800 canvas, and every smaller size
+  is derived from that one file rather than drawn again.
+
 ## [2.2.4] - 2026-08-07
 
 ### Changed
