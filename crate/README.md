@@ -1,7 +1,32 @@
-# dates-le
+<h1 align="center">dates-le</h1>
 
-Find every date and timestamp in a codebase, and the instant each one
-resolves to.
+<p align="center">
+  <b>Find every date and timestamp in a codebase, and the instant each one resolves to</b><br/>
+  <i>ISO-8601, RFC 2822, Unix epoch seconds and milliseconds, and the written forms in between</i>
+</p>
+
+<p align="center">
+  <a href="https://crates.io/crates/dates-le">
+    <img src="https://img.shields.io/crates/v/dates-le.svg" alt="dates-le on crates.io" />
+  </a>
+  <a href="https://crates.io/crates/dates-le">
+    <img src="https://img.shields.io/crates/d/dates-le.svg" alt="crates.io downloads" />
+  </a>
+  <a href="https://github.com/nolindnaidoo/dates-le/actions/workflows/ci-crate.yml">
+    <img src="https://github.com/nolindnaidoo/dates-le/actions/workflows/ci-crate.yml/badge.svg" alt="Build Status" />
+  </a>
+  <img src="https://img.shields.io/badge/rustc-1.88+-93450a.svg" alt="MSRV: Rust 1.88+" />
+  <a href="https://github.com/nolindnaidoo/dates-le/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" />
+  </a>
+  <a href="https://letools.dev/tools/dates-le">
+    <img src="https://img.shields.io/badge/web-letools.dev-00A0FF.svg" alt="letools.dev" />
+  </a>
+</p>
+
+> **Useful?** A star is how other developers find it —
+> [★ GitHub](https://github.com/nolindnaidoo/dates-le) ·
+> [letools.dev/tools/dates-le](https://letools.dev/tools/dates-le)
 
 A date is the one literal that looks correct in review and is wrong in
 production. `2024-01-15` in a config, `1705276800` in a fixture and
@@ -11,9 +36,14 @@ are hardcoded in here, and which have already passed" is not a question
 grep can answer, because grep matches text and the question is about
 time.
 
-```bash
-cargo install dates-le
-```
+## Install
+
+| Route | Command | Worth knowing |
+|---|---|---|
+| **cargo** | `cargo install dates-le` | Any platform, needs **Rust 1.88+**. |
+| **From source** | `git clone https://github.com/nolindnaidoo/dates-le`<br>`cd dates-le/crate && cargo build --release` | The same build CI runs. |
+
+No runtime, no network, nothing written.
 
 ```bash
 dates-le src/                       # every date, as JSON, one line per file
@@ -132,7 +162,6 @@ extension. Extraction is shared and held identical by
 interactive and stay in the editor. `SPEC.md` is the behavioural
 contract, divergences included.
 
-MIT.
 ## More from the LE family
 
 Sixteen single-purpose tools for the work in front of every model. Each ships
@@ -167,6 +196,7 @@ Each stands on its own: no shared crate, no published core. Where two of them
 agree, it is because the same answer was right twice.
 
 **Contact** — [nolindnaidoo.com](https://nolindnaidoo.com) · [GitHub](https://github.com/nolindnaidoo) · [LinkedIn](https://www.linkedin.com/in/nolindnaidoo/)
+
 ## Also by nolindnaidoo
 
 **Rust** — pixelcoords and pixelactions are one loop: pixelcoords answers
@@ -178,3 +208,6 @@ part of the LE family.
 - **[pixelactions](https://github.com/nolindnaidoo/pixelactions)** — Consume human-verified coordinates, perform the interaction, confirm it landed
   [pixelactions.dev](https://pixelactions.dev) · [crates.io](https://crates.io/crates/pixelactions) · [docs.rs](https://docs.rs/pixelactions)
 
+## License
+
+MIT — see [LICENSE](https://github.com/nolindnaidoo/dates-le/blob/main/LICENSE).

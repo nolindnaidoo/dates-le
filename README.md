@@ -17,6 +17,9 @@
   <a href="https://www.npmjs.com/package/dates-le-mcp">
     <img src="https://img.shields.io/npm/v/dates-le-mcp?style=for-the-badge&label=MCP%20server&color=blue&logo=npm" alt="dates-le-mcp on npm" />
   </a>
+  <a href="https://crates.io/crates/dates-le">
+    <img src="https://img.shields.io/crates/v/dates-le?style=for-the-badge&label=Rust%20CLI&color=blue&logo=rust" alt="dates-le on crates.io" />
+  </a>
   <a href="https://letools.dev/tools/dates-le">
     <img src="https://img.shields.io/badge/LE%20Tools-letools.dev-blue?style=for-the-badge" alt="LE Tools" />
   </a>
@@ -40,6 +43,16 @@ Open a file, press `Ctrl+Alt+D` (`Cmd+Alt+D` on Mac), and every date in the docu
 - **Log analysis** — timestamps from server logs: ISO, syslog, and Apache access-log formats
 - **Data review** — dates and epochs from JSON, YAML, CSV, and XML
 - **Code audit** — date literals and `new Date()`/`Date.parse()`/`moment()`/`dayjs()`/`DateTime.fromISO()` arguments in JS/TS, including calls formatted across multiple lines
+
+## Install
+
+| Where | What you get | Install |
+|---|---|---|
+| **VS Code** | The extraction, in your editor, on a keystroke | [Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le) |
+| **Cursor, VSCodium, Windsurf** | The same extension | [Open VSX](https://open-vsx.org/extension/OffensiveEdge/dates-le) |
+| **A terminal or a CI step** | The same run over a whole tree, with exit codes | `cargo install dates-le` · [crates.io](https://crates.io/crates/dates-le) |
+| **Any MCP agent, via Node** | `extract_dates` over stdio | `npx dates-le-mcp` · [npm](https://www.npmjs.com/package/dates-le-mcp) |
+| **Zed** | The MCP server as a context server | [zed-industries/extensions#7079](https://github.com/zed-industries/extensions/pull/7079) *(pending review)* |
 
 ## Use it from an AI agent
 
@@ -76,7 +89,7 @@ Most hosts read a JSON config. Add one entry:
 }
 ```
 
-`-y` skips the install prompt on first run. Pin a version if you would rather not track releases — `dates-le-mcp@2.2.1`.
+`-y` skips the install prompt on first run. Pin a version if you would rather not track releases — `dates-le-mcp@2.3.0`.
 
 Prefer not to go through `npx` on every launch? Install it once and point at the binary instead:
 
@@ -125,6 +138,29 @@ Timezone names are the fixed offsets `GMT`/`UT`/`UTC`/`Z`, the eight US abbrevia
 
 Known limitations: `M/D/YYYY` assumes US ordering; syslog lines carry no year, so the current year is assumed; `IST` names three different zones and is read as India's `+05:30`; a bare 8-digit run is only a date inside 1900–2099, and a 10-digit number in the plausible epoch range cannot be told from a phone number.
 
+## The CLI
+
+The same extraction runs from a terminal or a CI step: a Rust CLI in
+[`crate/`](crate/README.md), sharing one corpus with the extension —
+[`crate/fixtures/`](crate/fixtures/) — so the two can never read a
+document differently.
+
+```bash
+dates-le .                          # every date in the tree, as JSON
+dates-le --before 2026-01-01 .      # everything already in the past
+dates-le --sort --iso config/       # ordered by instant, in readable form
+dates-le mcp                        # the same extraction over MCP on stdio
+```
+
+**The instant is the point.** `2024-01-15`, `1705276800` and
+`Mon, 15 Jan 2024` are one moment written three ways, and resolving each
+to a number is what makes them sortable and comparable rather than three
+strings to read. Resolution matches `Date.parse` in V8 exactly — legacy
+parser included — against 178 cases taken from V8 itself.
+
+A date with no timezone resolves against the machine's, because that is
+the true answer and it genuinely differs by machine. `TZ` is honoured.
+
 ## Commands
 
 | Command | Description |
@@ -170,19 +206,15 @@ setting of its own.
 - **The MCP server holds the same line.** It takes content as an argument and returns data: no filesystem access, no network calls, no telemetry. Your agent already has file-read tools, so duplicating them inside the server would add a path-traversal surface for no capability. `check:mcp-bundle` fails the build if the server ever imports something that could reach either.
 - Error notifications redact home directories and credential-shaped fragments.
 
-## Development
+## Documentation
 
-```bash
-bun install
-bun run build            # esbuild bundle -> dist/extension.js
-bun run typecheck        # tsc --noEmit (includes tests)
-bun run test             # vitest unit suite
-bun run test:integration # real VS Code extension host
-bun run lint             # biome
-bun run package          # VSIX into release/
-```
-
-Architecture and conventions live in [AGENTS.md](AGENTS.md). Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
+| What | Where |
+|---|---|
+| What the tool is allowed to say — scope, output contract, refusals, non-goals | [`crate/SPEC.md`](crate/SPEC.md) |
+| How the extension is built and held together — architecture, invariants, toolchain, release | [AGENTS.md](AGENTS.md) |
+| How the CLI is built and held together | [`crate/AGENTS.md`](crate/AGENTS.md) |
+| What changed | [CHANGELOG.md](CHANGELOG.md) · [`crate/CHANGELOG.md`](crate/CHANGELOG.md) |
+| The tool's page, and the other fifteen | [letools.dev/tools/dates-le](https://letools.dev/tools/dates-le) |
 
 ## Performance
 
@@ -221,29 +253,6 @@ this section drifts. Reproduce with `bun run test:coverage`, and the case
 count is the one vitest prints.
 <!-- coverage:end -->
 
-## The CLI
-
-The same extraction runs from a terminal or a CI step: a Rust CLI in
-[`crate/`](crate/README.md), sharing one corpus with the extension —
-[`crate/fixtures/`](crate/fixtures/) — so the two can never read a
-document differently.
-
-```bash
-dates-le .                          # every date in the tree, as JSON
-dates-le --before 2026-01-01 .      # everything already in the past
-dates-le --sort --iso config/       # ordered by instant, in readable form
-dates-le mcp                        # the same extraction over MCP on stdio
-```
-
-**The instant is the point.** `2024-01-15`, `1705276800` and
-`Mon, 15 Jan 2024` are one moment written three ways, and resolving each
-to a number is what makes them sortable and comparable rather than three
-strings to read. Resolution matches `Date.parse` in V8 exactly — legacy
-parser included — against 178 cases taken from V8 itself.
-
-A date with no timezone resolves against the machine's, because that is
-the true answer and it genuinely differs by machine. `TZ` is honoured.
-
 ## More from the LE family
 
 Sixteen single-purpose tools for the work in front of every model. Each ships
@@ -278,6 +287,7 @@ Each stands on its own: no shared crate, no published core. Where two of them
 agree, it is because the same answer was right twice.
 
 **Contact** — [nolindnaidoo.com](https://nolindnaidoo.com) · [GitHub](https://github.com/nolindnaidoo) · [LinkedIn](https://www.linkedin.com/in/nolindnaidoo/)
+
 ## Also by nolindnaidoo
 
 **Rust** — pixelcoords and pixelactions are one loop: pixelcoords answers
