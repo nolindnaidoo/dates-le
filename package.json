@@ -3,7 +3,7 @@
 	"publisher": "nolindnaidoo",
 	"displayName": "Dates-LE",
 	"description": "Extract every date and timestamp, and the exact instant each one resolves to",
-	"version": "2.3.0",
+	"version": "2.3.1",
 	"license": "MIT",
 	"author": {
 		"name": "nolindnaidoo",
