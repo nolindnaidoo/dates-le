@@ -44,7 +44,7 @@ serde_json = { version = "1", features = ["preserve_order"] }
 # ported from a JavaScript implementation and must match the same text.
 # None of them nests a quantifier, so there is nothing here to backtrack
 # catastrophically over.
-fancy-regex = "0.14"
+fancy-regex = "0.19"
 # The walker. `ignore` is ripgrep's, so "what this tool walks" and "what
 # ripgrep walks" are the same answer — which is the answer a person
 # auditing a repository already has in their head.
