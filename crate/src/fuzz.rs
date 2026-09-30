@@ -276,6 +276,7 @@ fn the_scan_never_panics_or_hangs() {
     campaign("extract", move |input| {
         let language = LANGUAGES[next.get() % LANGUAGES.len()];
         next.set(next.get() + 1);
-        let _ = crate::extract::extract(input, language, 2026);
+        let _ =
+            crate::extract::extract(input, language, 2026, crate::extract::DateOrder::default());
     });
 }

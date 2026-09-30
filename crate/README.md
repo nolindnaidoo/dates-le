@@ -73,9 +73,9 @@ failure.
 
 **Every text file.** JSON, YAML, CSV, XML, log and plaintext,
 JavaScript, TypeScript, HTML, TOML and Markdown are names it knows;
-anything else — Python, Go, Rust, shell, SQL — is scanned with the nine
+anything else — Python, Go, Rust, shell, SQL — is scanned with the
 patterns every format shares. There is no parsing; the format only
-decides which extra patterns join the nine, so a malformed document
+decides which extra patterns join them, so a malformed document
 still yields its dates.
 
 | Notation | Example |
@@ -137,6 +137,9 @@ the hour that does not exist and the hour that happens twice.
 --format <format>    force a format instead of inferring it from the
                      file name; a name nothing recognises falls back to
                      the shared patterns rather than failing
+--date-order <order> how to read a numeric date whose day and month
+                     could be either way round: mdy (the default)
+                     reads 05/01/2024 as 1 May, dmy as 5 January
 --year <year>        the year a syslog line is assumed to be in, since
                      the line does not carry one. Defaults to this one,
                      which makes that answer move

@@ -20,7 +20,8 @@ const USAGE: &str = "usage: dates-le [options] <file|dir>...
 Finds every date and timestamp in a tree and puts them where a person
 can read them: ISO 8601 in every form it is written — extended, basic,
 week and ordinal — RFC 2822, Unix epochs from seconds to nanoseconds,
-US notations, log and syslog lines, Apache access logs, and the strings
+day-first and month-first numeric dates, dates with the month
+written out, log and syslog lines, Apache access logs, and the strings
 inside date constructors that nothing else would recognise as dates.
 
 Every file is read. A name that matches no format is scanned with the
@@ -42,6 +43,11 @@ Options:
   --format <format>    force a format instead of inferring it from the
                        file name; a name nothing recognises falls back
                        to the shared patterns rather than failing
+  --date-order <order> how to read a numeric date whose day and month
+                       could be either way round: mdy (the default)
+                       reads 05/01/2024 as 1 May, dmy as 5 January.
+                       15/01/2024 and 1/15/2024 are read the one way
+                       they can be, and 05.01.2024 is always day first
   --year <year>        the year a syslog line is assumed to be in,
                        since the line does not carry one. Defaults to
                        this one, which makes that answer move
@@ -71,7 +77,7 @@ question. Finding none is an answer, not an error.";
 /// Every flag the parser accepts. Held equal to the flags named in
 /// USAGE by a test, and consulted at runtime so the list is what the
 /// parser actually honours.
-const FLAGS: [&str; 14] = [
+const FLAGS: [&str; 15] = [
     "--strict",
     "--tz",
     "--after",
@@ -81,6 +87,7 @@ const FLAGS: [&str; 14] = [
     "--iso",
     "--format",
     "--year",
+    "--date-order",
     "--values",
     "--stdin",
     "--hidden",
@@ -188,6 +195,12 @@ fn parse_arguments(arguments: &[String]) -> Result<Invocation, String> {
                 invocation.scan.year = raw
                     .parse()
                     .map_err(|_| format!("--year needs a year, not {raw:?}"))?;
+                index += 1;
+            }
+            "--date-order" => {
+                let raw = value("--date-order")?;
+                invocation.scan.order = crate::extract::DateOrder::parse(&raw)
+                    .ok_or_else(|| format!("--date-order needs mdy or dmy, not {raw:?}"))?;
                 index += 1;
             }
             "--sort" => invocation.scan.sort = true,

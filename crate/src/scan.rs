@@ -22,6 +22,8 @@ pub(crate) struct ScanOptions {
     pub(crate) before: Option<i64>,
     /// The year a syslog line is assumed to be in.
     pub(crate) year: i64,
+    /// How an ambiguous numeric date such as `05/01/2024` is read.
+    pub(crate) order: extract::DateOrder,
 }
 
 impl Default for ScanOptions {
@@ -34,6 +36,7 @@ impl Default for ScanOptions {
             after: None,
             before: None,
             year: time::current_year(),
+            order: extract::DateOrder::default(),
         }
     }
 }
@@ -84,7 +87,7 @@ pub(crate) fn scan_text(
     language: &str,
     options: &ScanOptions,
 ) -> FileReport {
-    let found = extract::extract(content, language, options.year);
+    let found = extract::extract(content, language, options.year, options.order);
     FileReport {
         file: label.to_string(),
         file_type: language.to_string(),

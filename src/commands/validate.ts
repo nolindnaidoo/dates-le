@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { getConfiguration } from '../config/config';
 import { extractDates } from '../extraction/extract';
 import type { Telemetry } from '../telemetry/telemetry';
 import type { DateValue } from '../types';
@@ -67,7 +68,11 @@ export function registerValidateCommand(
 						});
 
 						// Extract dates first
-						const extractionResult = await extractDates(content, languageId);
+						const extractionResult = await extractDates(
+							content,
+							languageId,
+							getConfiguration().dateOrder,
+						);
 
 						if (token.isCancellationRequested) return;
 

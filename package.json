@@ -176,6 +176,19 @@
 					"default": false,
 					"description": "%manifest.settings.copy.clipboard.desc%"
 				},
+				"dates-le.dateOrder": {
+					"type": "string",
+					"default": "mdy",
+					"enum": [
+						"mdy",
+						"dmy"
+					],
+					"enumDescriptions": [
+						"%manifest.settings.dateOrder.option.mdy%",
+						"%manifest.settings.dateOrder.option.dmy%"
+					],
+					"description": "%manifest.settings.dateOrder.desc%"
+				},
 				"dates-le.notificationsLevel": {
 					"type": "string",
 					"default": "silent",

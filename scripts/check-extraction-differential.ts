@@ -196,6 +196,37 @@ function values(): string[] {
 		'Jan\u{85}15 10:30:47',
 		'2024-01-15\u{85}10:30:45',
 		'2024-01-15\u{feff}10:30:45',
+		// The regional shapes, which neither side hands to `Date.parse`:
+		// both orders, the ambiguous middle, every separator and clock, the
+		// calendar and year refusals, and the lookalikes either side of
+		// them.
+		'15/01/2024',
+		'05/01/2024',
+		'1/15/2024 3:30 PM',
+		'12/12/2024 12:00 am',
+		'15.01.2024 14:00',
+		'05.01.2024',
+		'15-01-2024 10:30:45',
+		'29/02/2024',
+		'29/02/2023',
+		'31/04/2024',
+		'13/13/2024',
+		'1/1/1899',
+		'1.2.3000',
+		'v1.2.2024.5',
+		'192.168.1.1',
+		'555-12-2024-01',
+		'15 January 2024',
+		'3rd Feb. 2024',
+		'Jan 15, 2024',
+		'September 1st 2024',
+		'1 Sept 2024',
+		'15-JAN-2024',
+		'31 Apr 2024',
+		'\u{212a}Jan 15 2024',
+		'1 Augu\u{17f}t 2024',
+		'15\u{85}Jan 2024',
+		'1/15/2024\u{feff}10:30',
 		// Nothing at all, so "found something" is not the only outcome
 		// exercised.
 		'not a date',
@@ -238,12 +269,17 @@ function documents(): Document[] {
 			// because the two servers resolve that from their own alias
 			// table and the tables have to agree.
 			const byFilename = random() < 0.25;
+			// Half ask for day-first, which only an ambiguous numeric date
+			// can answer differently — so both servers must read it the
+			// same way either side of the choice.
+			const dayFirst = random() < 0.5;
 			built.push({
-				name: `${format} / ${wrapper} / ${JSON.stringify(value)}`,
+				name: `${format} / ${wrapper} / ${JSON.stringify(value)}${dayFirst ? ' / dmy' : ''}`,
 				content: wrap(value),
-				arguments: byFilename
-					? { filename: `document.${format}` }
-					: { format },
+				arguments: {
+					...(byFilename ? { filename: `document.${format}` } : { format }),
+					...(dayFirst ? { dateOrder: 'dmy' } : {}),
+				},
 			});
 		}
 	}

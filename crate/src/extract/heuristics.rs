@@ -2,10 +2,10 @@
 //!
 //! There is no parsing here and none anywhere else in this crate: every
 //! format is this same scan over raw text, and the format only decides
-//! which extra patterns join the nine shared ones. That is why a
+//! which extra patterns join the shared ones. That is why a
 //! malformed JSON file still yields its dates instead of a parse error,
 //! why `.json` and `.csv` are read identically, and why a document whose
-//! format nothing recognises is read with the nine rather than skipped.
+//! format nothing recognises is read with those rather than skipped.
 //!
 //! Two things about the patterns are ported deliberately rather than
 //! transcribed.
@@ -29,6 +29,7 @@ use fancy_regex::{Regex, RegexBuilder};
 use super::extended;
 use super::js;
 use super::position::locate_all;
+use super::regional::{self, DateOrder};
 
 /// What a value was recognised as. These names reach the user as
 /// `format` in every answer, so they are a public contract.
@@ -80,6 +81,10 @@ enum Resolver {
     Week,
     Ordinal,
     Basic,
+    /// Day-first or month-first digits; see `regional.rs`.
+    Numeric(DateOrder),
+    /// A month written out; see `regional.rs`.
+    Written,
 }
 
 pub(crate) struct Pattern {
@@ -110,8 +115,98 @@ struct Candidate {
     order: usize,
 }
 
-/// The nine patterns every format is scanned with.
-fn base_patterns() -> Vec<Pattern> {
+/// Optional clock after a numeric date: `10:30`, `10:30:45`, `3:30 PM`.
+const CLOCK: &str = r"(?:\s[0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?(?:\s?[AaPp][Mm](?![A-Za-z]))?)?";
+
+const MONTH: &str = r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)(?![A-Za-z])\.?";
+
+/// Every format's patterns: the shared ones, then the regional ones.
+/// Nothing else can match a regional pattern's range, so their place
+/// changes no tie.
+fn base_patterns(order: DateOrder) -> Vec<Pattern> {
+    let mut patterns = shared_patterns();
+    patterns.extend(regional_patterns(order));
+    patterns
+}
+
+/// Day-first and month-first numeric dates, one pattern per separator
+/// so a value never mixes them, and dates with the month written out.
+/// All of them read as `local`: none carries a zone.
+///
+/// The written ones ignore case for ASCII letters only, which is what
+/// JavaScript's `i` flag does without `u`. `(?i)` here folds Unicode, so
+/// the Kelvin sign was a `K` and `ſ` an `s`, and `KJan 15 2024` was a
+/// date in one frontend and not the other; `fancy-regex` cannot turn
+/// Unicode off, so `ascii_case_insensitive` spells each letter out.
+fn regional_patterns(order: DateOrder) -> Vec<Pattern> {
+    let numeric = |regex: String| Pattern {
+        regex: build(&regex),
+        notation: Notation::Local,
+        resolver: Resolver::Numeric(order),
+    };
+    let written = |regex: String| Pattern {
+        regex: build(&ascii_case_insensitive(&regex)),
+        notation: Notation::Local,
+        resolver: Resolver::Written,
+    };
+    vec![
+        numeric(format!(
+            r"(?<![0-9])[0-9]{{1,2}}/[0-9]{{1,2}}/[0-9]{{4}}{CLOCK}(?![0-9])"
+        )),
+        numeric(format!(
+            r"(?<![0-9])(?<![0-9]\.)[0-9]{{1,2}}\.[0-9]{{1,2}}\.[0-9]{{4}}{CLOCK}(?![0-9])(?!\.[0-9])"
+        )),
+        numeric(format!(
+            r"(?<![0-9])(?<![0-9]-)[0-9]{{1,2}}-[0-9]{{1,2}}-[0-9]{{4}}{CLOCK}(?![0-9])(?!-[0-9])"
+        )),
+        written(format!(
+            r"(?<![0-9])[0-9]{{1,2}}(?:st|nd|rd|th)?[ -]{MONTH},?[ -][0-9]{{4}}(?![0-9])"
+        )),
+        written(format!(
+            r"(?<![A-Za-z]){MONTH} [0-9]{{1,2}}(?:st|nd|rd|th)?,? [0-9]{{4}}(?![0-9])"
+        )),
+    ]
+}
+
+/// Every ASCII letter outside a character class becomes a class of both
+/// cases: `Jan` is `[Jj][Aa][Nn]`. Only for patterns whose letters are all
+/// literals — an escape such as `\d` would be rewritten too.
+fn ascii_case_insensitive(pattern: &str) -> String {
+    let mut out = String::with_capacity(pattern.len() * 3);
+    let mut in_class = false;
+    let mut escaped = false;
+    for c in pattern.chars() {
+        match c {
+            _ if escaped => {
+                escaped = false;
+                out.push(c);
+            }
+            '\\' => {
+                escaped = true;
+                out.push(c);
+            }
+            '[' => {
+                in_class = true;
+                out.push(c);
+            }
+            ']' => {
+                in_class = false;
+                out.push(c);
+            }
+            _ if c.is_ascii_alphabetic() && !in_class => {
+                out.push('[');
+                out.push(c.to_ascii_uppercase());
+                out.push(c.to_ascii_lowercase());
+                out.push(']');
+            }
+            _ => out.push(c),
+        }
+    }
+    out
+}
+
+/// The patterns every format shares apart from the regional ones.
+fn shared_patterns() -> Vec<Pattern> {
     vec![
         Pattern {
             regex: build(
@@ -148,13 +243,6 @@ fn base_patterns() -> Vec<Pattern> {
                 r"[A-Za-z]{3}\s[A-Za-z]{3}\s[0-9]{2}\s[0-9]{4}\s[0-9]{2}:[0-9]{2}:[0-9]{2}\sGMT[+-][0-9]{4}",
             ),
             notation: Notation::Utc,
-            resolver: Resolver::DateParse,
-        },
-        Pattern {
-            regex: build(
-                r"(?<![0-9])[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}\s[0-9]{1,2}:[0-9]{2}:[0-9]{2}(?![0-9])",
-            ),
-            notation: Notation::Local,
             resolver: Resolver::DateParse,
         },
         Pattern {
@@ -298,8 +386,8 @@ fn build(pattern: &str) -> Regex {
 }
 
 /// Which extra patterns a language id brings, on top of the six.
-pub(crate) fn patterns_for(language: &str) -> Vec<Pattern> {
-    let mut patterns = base_patterns();
+pub(crate) fn patterns_for(language: &str, order: DateOrder) -> Vec<Pattern> {
+    let mut patterns = base_patterns(order);
     match language {
         "log" | "plaintext" => patterns.extend(log_patterns()),
         "javascript" | "typescript" => patterns.extend(javascript_patterns()),
@@ -384,6 +472,8 @@ fn resolve(value: &str, resolver: Resolver, year: i64) -> Option<i64> {
         Resolver::Week => extended::week_date(value),
         Resolver::Ordinal => extended::ordinal_date(value),
         Resolver::Basic => extended::basic_format(value),
+        Resolver::Numeric(order) => regional::numeric_date(value, order),
+        Resolver::Written => regional::written_date(value),
     }
 }
 
@@ -514,7 +604,12 @@ mod tests {
     use super::*;
 
     fn find(content: &str, language: &str) -> Vec<Found> {
-        scan(content, content, &patterns_for(language), 2026)
+        scan(
+            content,
+            content,
+            &patterns_for(language, DateOrder::default()),
+            2026,
+        )
     }
 
     fn values(content: &str, language: &str) -> Vec<String> {
@@ -698,10 +793,10 @@ mod tests {
     #[test]
     fn only_javascript_reads_a_constructor_argument() {
         assert_eq!(
-            values("new Date('March 5, 2024')", "typescript"),
-            ["March 5, 2024"]
+            values("new Date('2024/03/05')", "typescript"),
+            ["2024/03/05"]
         );
-        assert!(values("new Date('March 5, 2024')", "json").is_empty());
+        assert!(values("new Date('2024/03/05')", "json").is_empty());
     }
 
     /// Whole-content matching, which is what a per-line scan could not do.
@@ -746,14 +841,14 @@ mod tests {
         let found = scan(
             "Jan 15 10:30:47",
             "Jan 15 10:30:47",
-            &patterns_for("log"),
+            &patterns_for("log", DateOrder::default()),
             2026,
         );
         assert_eq!(found.len(), 1);
         let other = scan(
             "Jan 15 10:30:47",
             "Jan 15 10:30:47",
-            &patterns_for("log"),
+            &patterns_for("log", DateOrder::default()),
             2020,
         );
         assert_ne!(found[0].timestamp, other[0].timestamp);
@@ -783,23 +878,33 @@ mod tests {
     /// thing that makes the string a date. Where the whitespace is
     /// inside the value instead, V8 refuses the value and the answer is
     /// the same either way.
+    /// JavaScript's `i` flag without `u` folds ASCII only. Found by the
+    /// differential: Unicode folding read the Kelvin sign as a letter
+    /// before the month, and `ſ` as the `s` in `August`.
+    #[test]
+    fn a_written_month_folds_ascii_case_only() {
+        assert_eq!(values("x JAN 15, 2024", "unknown"), ["JAN 15, 2024"]);
+        assert_eq!(values("\u{212a}Jan 15 2024", "unknown"), ["Jan 15 2024"]);
+        assert!(values("1 Augu\u{17f}t 2024", "unknown").is_empty());
+    }
+
     #[test]
     fn the_separator_class_is_javascripts_whitespace() {
         // U+FEFF is whitespace to JavaScript and not to Rust, so the
         // extension read these and this did not.
         assert_eq!(
-            values("<time datetime\u{feff}=\"March 5, 2024\">x</time>", "html"),
-            ["March 5, 2024"]
+            values("<time datetime\u{feff}=\"2024/03/05\">x</time>", "html"),
+            ["2024/03/05"]
         );
         assert_eq!(
-            values("new\u{feff}Date('March 5, 2024')", "javascript"),
-            ["March 5, 2024"]
+            values("new\u{feff}Date('2024/03/05')", "javascript"),
+            ["2024/03/05"]
         );
         // U+0085 is whitespace to Rust and not to JavaScript, so it must
         // not separate anything: this read them and the extension did
         // not.
-        assert!(values("<time datetime\u{85}=\"March 5, 2024\">x</time>", "html").is_empty());
-        assert!(values("new\u{85}Date('March 5, 2024')", "javascript").is_empty());
+        assert!(values("<time datetime\u{85}=\"2024/03/05\">x</time>", "html").is_empty());
+        assert!(values("new\u{85}Date('2024/03/05')", "javascript").is_empty());
     }
 
     #[test]

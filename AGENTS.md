@@ -331,7 +331,10 @@ Order matters beyond this repo: npm must be published *before* any Zed registry 
 
 ## Known limitations (documented, not bugs)
 
-- `M/D/YYYY` local dates assume US ordering (`1/5/2024` is January 5).
+- An ambiguous numeric date (`05/01/2024`) follows `dateOrder`, month
+  first by default; a date with a number over 12 is read the one way it
+  can be, and dotted dates are always day first. Written-out months are
+  English only.
 - Syslog lines carry no year; the current year is assumed, so year-old
   logs get current-year timestamps.
 - Extraction is regex-based: date-shaped strings in comments or

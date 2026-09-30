@@ -11,7 +11,7 @@
 
 use serde_json::{Value, json};
 
-use crate::extract::{self, SUPPORTED_FORMATS, resolve_format, time};
+use crate::extract::{self, DateOrder, SUPPORTED_FORMATS, resolve_format, time};
 
 const DEFAULT_MAX_RESULTS: usize = 500;
 const MAX_MAX_RESULTS: usize = 5000;
@@ -24,8 +24,8 @@ pub(crate) fn definition() -> Value {
                         text: JSON, YAML, CSV, XML, log and plaintext, JavaScript, TypeScript, \
                         HTML, TOML and Markdown are named formats, and anything else is scanned \
                         with the patterns they share. Recognises ISO 8601 in extended, basic, \
-                        week and ordinal form, RFC formats, common regional notations and Unix \
-                        timestamps from seconds to nanoseconds.",
+                        week and ordinal form, RFC formats, day-first and month-first numeric \
+                        dates, dates with the month written out, and Unix timestamps from seconds to nanoseconds.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -46,6 +46,16 @@ pub(crate) fn definition() -> Value {
                     "type": "boolean",
                     "default": false,
                     "description": "Collapse repeated dates to their first occurrence.",
+                },
+                "dateOrder": {
+                    "type": "string",
+                    "enum": ["mdy", "dmy"],
+                    "default": "mdy",
+                    "description": "How to read a numeric date whose day and month could be either \
+                                    way round, such as 05/01/2024: \"mdy\" is 1 May, \"dmy\" is 5 \
+                                    January. A date that can only be read one way, such as \
+                                    15/01/2024, is read that way regardless, and dotted dates such \
+                                    as 05.01.2024 are always day first.",
                 },
                 "maxResults": {
                     "type": "integer",
@@ -70,6 +80,7 @@ pub(crate) fn run(arguments: &Value) -> Result<Value, String> {
         .and_then(Value::as_str)
         .ok_or_else(|| "content is required and must be a string".to_string())?;
     let max_results = read_max_results(arguments)?;
+    let order = read_date_order(arguments)?;
 
     // Never a refusal. An agent that knows nothing about a document
     // still gets its dates, and `fileType` in the answer says which
@@ -86,7 +97,7 @@ pub(crate) fn run(arguments: &Value) -> Result<Value, String> {
     // `--year`; this tool cannot, because the shared schema has no such
     // argument and adding one would make the two servers different
     // tools.
-    let mut values: Vec<Value> = extract::extract(content, language, time::current_year())
+    let mut values: Vec<Value> = extract::extract(content, language, time::current_year(), order)
         .into_iter()
         .map(|found| {
             json!({
@@ -118,6 +129,16 @@ pub(crate) fn run(arguments: &Value) -> Result<Value, String> {
         &[],
         truncated,
     ))
+}
+
+/// Absent is the default; anything else that is not an order is refused.
+fn read_date_order(arguments: &Value) -> Result<DateOrder, String> {
+    let Some(raw) = arguments.get("dateOrder") else {
+        return Ok(DateOrder::default());
+    };
+    raw.as_str()
+        .and_then(DateOrder::parse)
+        .ok_or_else(|| "dateOrder must be \"mdy\" or \"dmy\"".to_string())
 }
 
 /// Clamp quietly, reject loudly — the npm server's asymmetry.

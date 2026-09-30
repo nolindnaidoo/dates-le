@@ -1,6 +1,7 @@
 import type { DateValue } from '../../types';
 import { resolveInstant } from '../extended';
 import { type DatePatternSpec, scanDates } from '../heuristics';
+import type { DateOrder } from '../regional';
 
 /**
  * Log-specific patterns on top of the shared core:
@@ -30,8 +31,11 @@ const LOG_SPECS: readonly DatePatternSpec[] = [
 	},
 ];
 
-export function extractFromLog(content: string): readonly DateValue[] {
-	return scanDates(content, LOG_SPECS);
+export function extractFromLog(
+	content: string,
+	order?: DateOrder,
+): readonly DateValue[] {
+	return scanDates(content, LOG_SPECS, order);
 }
 
 function currentYear(): number {

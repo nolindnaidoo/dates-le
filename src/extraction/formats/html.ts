@@ -1,5 +1,6 @@
 import type { DateValue } from '../../types';
 import { type DatePatternSpec, scanDates } from '../heuristics';
+import type { DateOrder } from '../regional';
 
 /**
  * HTML-specific patterns: datetime attributes (covers <time> and any
@@ -27,6 +28,9 @@ const HTML_SPECS: readonly DatePatternSpec[] = [
 	},
 ];
 
-export function extractFromHtml(content: string): readonly DateValue[] {
-	return scanDates(content, HTML_SPECS);
+export function extractFromHtml(
+	content: string,
+	order?: DateOrder,
+): readonly DateValue[] {
+	return scanDates(content, HTML_SPECS, order);
 }

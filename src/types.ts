@@ -81,6 +81,7 @@ export type FileType =
 
 export interface Configuration {
 	readonly copyToClipboardEnabled: boolean;
+	readonly dateOrder: 'mdy' | 'dmy';
 	readonly notificationsLevel: 'all' | 'important' | 'silent';
 	readonly openResultsSideBySide: boolean;
 	readonly safetyEnabled: boolean;

@@ -1,5 +1,10 @@
 import { extractDates } from '../extraction/extract';
 import {
+	type DateOrder,
+	DEFAULT_DATE_ORDER,
+	isDateOrder,
+} from '../extraction/regional';
+import {
 	capped,
 	DEFAULT_MAX_RESULTS,
 	envelope,
@@ -44,6 +49,7 @@ const MAX_RESULTS_SCHEMA = {
 async function extract(args: Record<string, unknown>): Promise<unknown> {
 	const content = readString(args, 'content');
 	const maxResults = readMaxResults(args);
+	const order = readDateOrder(args);
 
 	const format = typeof args.format === 'string' ? args.format : undefined;
 	const filename =
@@ -54,7 +60,7 @@ async function extract(args: Record<string, unknown>): Promise<unknown> {
 	// read it — so an unrecognised format is visible in the result rather
 	// than hidden behind an error the agent has no way to satisfy.
 	const languageId = resolveFormat(format, filename);
-	const result = await extractDates(content, languageId);
+	const result = await extractDates(content, languageId, order);
 	const values = result.dates.map((date) => ({
 		value: date.value,
 		format: date.format,
@@ -83,11 +89,21 @@ async function extract(args: Record<string, unknown>): Promise<unknown> {
 	);
 }
 
+/** Absent is the default; anything else that is not an order is refused. */
+function readDateOrder(args: Record<string, unknown>): DateOrder {
+	const raw = args.dateOrder;
+	if (raw === undefined) return DEFAULT_DATE_ORDER;
+	if (!isDateOrder(raw)) {
+		throw new Error('dateOrder must be "mdy" or "dmy"');
+	}
+	return raw;
+}
+
 export const TOOLS: readonly ToolDefinition[] = Object.freeze([
 	Object.freeze({
 		name: 'extract_dates',
 		description:
-			'Extract every date and timestamp from a document, with its notation, epoch value where resolvable, and 1-based line and column. Reads any text: JSON, YAML, CSV, XML, log and plaintext, JavaScript, TypeScript, HTML, TOML and Markdown are named formats, and anything else is scanned with the patterns they share. Recognises ISO 8601 in extended, basic, week and ordinal form, RFC formats, common regional notations and Unix timestamps from seconds to nanoseconds.',
+			'Extract every date and timestamp from a document, with its notation, epoch value where resolvable, and 1-based line and column. Reads any text: JSON, YAML, CSV, XML, log and plaintext, JavaScript, TypeScript, HTML, TOML and Markdown are named formats, and anything else is scanned with the patterns they share. Recognises ISO 8601 in extended, basic, week and ordinal form, RFC formats, day-first and month-first numeric dates, dates with the month written out, and Unix timestamps from seconds to nanoseconds.',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -110,6 +126,13 @@ export const TOOLS: readonly ToolDefinition[] = Object.freeze([
 					type: 'boolean',
 					default: false,
 					description: 'Collapse repeated dates to their first occurrence.',
+				},
+				dateOrder: {
+					type: 'string',
+					enum: ['mdy', 'dmy'],
+					default: DEFAULT_DATE_ORDER,
+					description:
+						'How to read a numeric date whose day and month could be either way round, such as 05/01/2024: "mdy" is 1 May, "dmy" is 5 January. A date that can only be read one way, such as 15/01/2024, is read that way regardless, and dotted dates such as 05.01.2024 are always day first.',
 				},
 				maxResults: MAX_RESULTS_SCHEMA,
 			},

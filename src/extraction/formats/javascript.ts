@@ -1,5 +1,6 @@
 import type { DateValue } from '../../types';
 import { type DatePatternSpec, scanDates } from '../heuristics';
+import type { DateOrder } from '../regional';
 
 /**
  * JS/TS-specific patterns: date strings passed to date constructors —
@@ -35,6 +36,9 @@ const JS_SPECS: readonly DatePatternSpec[] = [
 	},
 ];
 
-export function extractFromJavaScript(content: string): readonly DateValue[] {
-	return scanDates(content, JS_SPECS);
+export function extractFromJavaScript(
+	content: string,
+	order?: DateOrder,
+): readonly DateValue[] {
+	return scanDates(content, JS_SPECS, order);
 }

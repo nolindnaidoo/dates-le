@@ -1,6 +1,6 @@
 // A date-constructor argument is a date even when the string alone
 // would not look like one.
-const written = new Date('March 5, 2024');
+const slashed = new Date('2024/03/05');
 const parsed = Date.parse('2024-01-15T10:30:45Z');
 const viaMoment = moment('2024-01-15');
 const viaDayjs = dayjs('1/15/2024 10:30:45');

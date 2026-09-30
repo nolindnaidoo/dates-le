@@ -108,16 +108,20 @@ describe('scanDates', () => {
 	});
 
 	it('matches format-specific specs across lines and lets base formats win at equal ranges', () => {
-		const content = "new Date(\n\t'March 5, 2024',\n)";
 		const spec = {
 			pattern: /\bnew\s+Date\s*\(\s*(['"`])([^'"`\n]+)\1\s*,?\s*\)/dg,
 			format: 'custom' as const,
 		};
-		const dates = scanDates(content, [spec]);
+		const dates = scanDates("new Date(\n\t'2024/03/05',\n)", [spec]);
 		expect(dates).toHaveLength(1);
-		expect(dates[0]?.value).toBe('March 5, 2024');
+		expect(dates[0]?.value).toBe('2024/03/05');
 		expect(dates[0]?.format).toBe('custom');
 		expect(dates[0]?.position).toEqual({ line: 2, column: 3 });
+
+		const written = scanDates("new Date('March 5, 2024')", [spec]);
+		expect(written.map((d) => [d.value, d.format])).toEqual([
+			['March 5, 2024', 'local'],
+		]);
 	});
 
 	it('emits results sorted by document position', () => {

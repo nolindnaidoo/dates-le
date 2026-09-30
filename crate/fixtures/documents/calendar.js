@@ -2,7 +2,7 @@
 // the two are read by exactly the same patterns and are two different
 // `fileType` keys, and a format the schema advertises with no document
 // behind it is a format the two frontends have never been compared on.
-const cutover = new Date('March 5, 2024');
+const cutover = new Date('2024/03/05');
 const opened = moment('15 Jan 2024 10:30:08 +0000');
 const shipped = dayjs('2024-01-15T10:30:45Z');
 const parsed = Date.parse('Mon, 15 Jan 2024 10:30:45 CEST');
