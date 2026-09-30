@@ -43,6 +43,7 @@ export function registerExtractCommand(
 				const result = await extractDates(
 					document.getText(),
 					document.languageId,
+					config.dateOrder,
 				);
 
 				if (!result.success) {

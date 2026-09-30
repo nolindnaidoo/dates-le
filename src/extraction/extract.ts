@@ -12,13 +12,19 @@ import { extractFromLog } from './formats/log';
 import { extractFromXml } from './formats/xml';
 import { extractFromYaml } from './formats/yaml';
 import { scanDates } from './heuristics';
+import type { DateOrder } from './regional';
 
 export async function extractDates(
 	content: string,
 	languageId: string,
+	order?: DateOrder,
 ): Promise<ExtractionResult> {
 	try {
-		const dates = extractByFileType(content, determineFileType(languageId));
+		const dates = extractByFileType(
+			content,
+			determineFileType(languageId),
+			order,
+		);
 		return createSuccessResult(dates);
 	} catch (error) {
 		return createErrorResult(error);
@@ -37,24 +43,25 @@ export async function extractDates(
 function extractByFileType(
 	content: string,
 	fileType: FileType,
+	order: DateOrder | undefined,
 ): readonly DateValue[] {
 	switch (fileType) {
 		case 'json':
-			return extractFromJson(content);
+			return extractFromJson(content, order);
 		case 'yaml':
-			return extractFromYaml(content);
+			return extractFromYaml(content, order);
 		case 'csv':
-			return extractFromCsv(content);
+			return extractFromCsv(content, order);
 		case 'xml':
-			return extractFromXml(content);
+			return extractFromXml(content, order);
 		case 'log':
-			return extractFromLog(content);
+			return extractFromLog(content, order);
 		case 'javascript':
-			return extractFromJavaScript(content);
+			return extractFromJavaScript(content, order);
 		case 'html':
-			return extractFromHtml(content);
+			return extractFromHtml(content, order);
 		default:
-			return scanDates(content);
+			return scanDates(content, [], order);
 	}
 }
 

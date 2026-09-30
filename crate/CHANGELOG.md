@@ -7,6 +7,38 @@ this repository release on their own cadence.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Day-first dates are read.** `15/01/2024`, `15.01.2024` and
+  `15-01-2024` were dropped, and slash dates without a time were not
+  found in either order. Numeric dates now match with `/`, `.` or `-`,
+  with or without a time (`10:30`, `10:30:45`, `3:30 PM`). A date with a
+  number over 12 is read the one way it can be, whatever the setting.
+- **Dates with the month written out**: `15 January 2024`,
+  `3rd Feb. 2024`, `Jan 15, 2024`, `15-JAN-2024`. English month names.
+- **A choice for the ambiguous case**, `--date-order mdy|dmy`, and `dateOrder` on
+  `dates_le_scan`. `mdy`, the default, keeps
+  reading `05/01/2024` as 1 May; `dmy` reads it as 5 January. Dotted dates
+  are always day first, because no convention writes them month first.
+  The shared `extract_dates` MCP tool takes the same choice as
+  `dateOrder`, on both servers.
+
+### Changed
+
+- **Numeric and written dates are checked against the calendar.**
+  `31/02/2024` is no longer a date, where `Date.parse` rolled it into
+  March, and a numeric year must fall within 1900–2099 so a version string
+  such as `1.2.3000` is not read as one.
+- **A date-constructor argument the shared patterns can read is reported
+  as they report it.** `new Date('March 5, 2024')` was `custom` and is now
+  `local`, the same instant: at an identical range the shared pattern
+  wins, as it already did for `moment('2024-01-15')`.
+- The corpus documents that pin the constructor, attribute and JSON-LD
+  rules now use `2024/03/05`, a shape only those rules read, so each still
+  tests what its name says.
+
 ## [0.2.2] - 2026-08-15
 
 ### Added

@@ -6,6 +6,12 @@ import {
 	resolveInstant,
 } from './extended';
 import { createPositionIndex } from './position';
+import {
+	type DateOrder,
+	DEFAULT_DATE_ORDER,
+	numericDate,
+	writtenDate,
+} from './regional';
 
 /**
  * The single date-matching core shared by every format extractor.
@@ -29,8 +35,11 @@ import { createPositionIndex } from './position';
  * - Values whose timestamp cannot be parsed are not emitted (v1.x
  *   emitted NaN timestamps for generic patterns).
  *
- * Known limitations, kept deliberately: M/D/YYYY 'local' dates assume US
- * ordering; syslog lines carry no year, so the current year is assumed.
+ * Numeric and written-out regional dates are resolved in `regional.ts`;
+ * an ambiguous numeric one follows the caller's `DateOrder`.
+ *
+ * Known limitation, kept deliberately: syslog lines carry no year, so the
+ * current year is assumed.
  */
 
 export interface DatePatternSpec {
@@ -42,7 +51,63 @@ export interface DatePatternSpec {
 	readonly toTimestamp?: (value: string) => number;
 }
 
-export const BASE_PATTERNS: readonly DatePatternSpec[] = [
+/** Optional clock after a numeric date: `10:30`, `10:30:45`, `3:30 PM`. */
+const CLOCK = String.raw`(?:\s\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AaPp][Mm](?![A-Za-z]))?)?`;
+
+const MONTH = String.raw`(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)(?![A-Za-z])\.?`;
+
+/**
+ * Day-first and month-first numeric dates, one pattern per separator so a
+ * value never mixes them, and dates with the month written out. All of
+ * them read as `local`: none carries a zone.
+ */
+function regionalPatterns(order: DateOrder): DatePatternSpec[] {
+	const numeric = (value: string) => numericDate(value, order);
+	return [
+		{
+			pattern: new RegExp(
+				String.raw`(?<!\d)\d{1,2}\/\d{1,2}\/\d{4}${CLOCK}(?!\d)`,
+				'dg',
+			),
+			format: 'local',
+			toTimestamp: numeric,
+		},
+		{
+			pattern: new RegExp(
+				String.raw`(?<!\d)(?<!\d\.)\d{1,2}\.\d{1,2}\.\d{4}${CLOCK}(?!\d)(?!\.\d)`,
+				'dg',
+			),
+			format: 'local',
+			toTimestamp: numeric,
+		},
+		{
+			pattern: new RegExp(
+				String.raw`(?<!\d)(?<!\d-)\d{1,2}-\d{1,2}-\d{4}${CLOCK}(?!\d)(?!-\d)`,
+				'dg',
+			),
+			format: 'local',
+			toTimestamp: numeric,
+		},
+		{
+			pattern: new RegExp(
+				String.raw`(?<!\d)\d{1,2}(?:st|nd|rd|th)?[ -]${MONTH},?[ -]\d{4}(?!\d)`,
+				'dgi',
+			),
+			format: 'local',
+			toTimestamp: writtenDate,
+		},
+		{
+			pattern: new RegExp(
+				String.raw`(?<![A-Za-z])${MONTH} \d{1,2}(?:st|nd|rd|th)?,? \d{4}(?!\d)`,
+				'dgi',
+			),
+			format: 'local',
+			toTimestamp: writtenDate,
+		},
+	];
+}
+
+const SHARED_PATTERNS: readonly DatePatternSpec[] = [
 	{
 		pattern:
 			/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})?/dg,
@@ -72,10 +137,6 @@ export const BASE_PATTERNS: readonly DatePatternSpec[] = [
 		format: 'utc',
 	},
 	{
-		pattern: /(?<!\d)\d{1,2}\/\d{1,2}\/\d{4}\s\d{1,2}:\d{2}:\d{2}(?!\d)/dg,
-		format: 'local',
-	},
-	{
 		pattern: /(?<!\d)\d{4}-\d{2}-\d{2}(?!\d)/dg,
 		format: 'simple',
 	},
@@ -103,6 +164,14 @@ export const BASE_PATTERNS: readonly DatePatternSpec[] = [
 	},
 ];
 
+/**
+ * Every format's patterns. The regional ones come last; nothing else can
+ * match their ranges, so their place changes no tie.
+ */
+export function basePatterns(order: DateOrder): DatePatternSpec[] {
+	return [...SHARED_PATTERNS, ...regionalPatterns(order)];
+}
+
 interface Candidate {
 	readonly value: string;
 	readonly format: DateFormat;
@@ -120,9 +189,10 @@ interface Candidate {
 export function scanDates(
 	content: string,
 	extraSpecs: readonly DatePatternSpec[] = [],
+	order: DateOrder = DEFAULT_DATE_ORDER,
 ): readonly DateValue[] {
 	const candidates: Candidate[] = [];
-	const specs = [...BASE_PATTERNS, ...extraSpecs];
+	const specs = [...basePatterns(order), ...extraSpecs];
 
 	for (const spec of specs) {
 		spec.pattern.lastIndex = 0;

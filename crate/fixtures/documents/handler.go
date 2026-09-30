@@ -11,4 +11,4 @@ const observedAt = 1705314645123456789
 
 // A constructor argument is a date in JavaScript and a string here, so
 // the fallback leaves it alone.
-var note = "new Date('March 5, 2024')"
+var note = "new Date('2024/03/05')"

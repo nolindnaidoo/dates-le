@@ -122,6 +122,14 @@ fn tool_definitions() -> Value {
                         "type": "string",
                         "description": "Keep only dates strictly before this instant.",
                     },
+                    "dateOrder": {
+                        "type": "string",
+                        "enum": ["mdy", "dmy"],
+                        "default": "mdy",
+                        "description": "How to read a numeric date whose day and month could be \
+                                        either way round, such as 05/01/2024: \"mdy\" is 1 May, \
+                                        \"dmy\" is 5 January.",
+                    },
                     "sort": {
                         "type": "boolean",
                         "default": false,
@@ -207,6 +215,13 @@ fn scan_tool(arguments: &Value) -> Result<Value, String> {
         after: boundary("after")?,
         before: boundary("before")?,
         year: crate::extract::time::current_year(),
+        order: match arguments.get("dateOrder") {
+            None => crate::extract::DateOrder::default(),
+            Some(raw) => raw
+                .as_str()
+                .and_then(crate::extract::DateOrder::parse)
+                .ok_or_else(|| "dateOrder must be \"mdy\" or \"dmy\"".to_string())?,
+        },
     };
     let walk_options = WalkOptions {
         hidden: flag("hidden"),

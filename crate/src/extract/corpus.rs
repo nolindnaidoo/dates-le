@@ -32,6 +32,7 @@ documents!(
     "notations.txt",
     "page.html",
     "project.toml",
+    "regional.md",
     "release-notes.md",
     "rows.csv",
     "schedule.yaml",

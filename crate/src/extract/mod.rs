@@ -11,6 +11,7 @@ pub(crate) mod heuristics;
 mod js;
 pub(crate) mod parse;
 pub(crate) mod position;
+pub(crate) mod regional;
 pub(crate) mod time;
 
 #[cfg(test)]
@@ -18,6 +19,7 @@ pub(crate) mod corpus;
 
 pub(crate) use format::{SUPPORTED_FORMATS, resolve_format};
 pub(crate) use heuristics::Found;
+pub(crate) use regional::DateOrder;
 
 /// Every date in a document, in the order they appear.
 ///
@@ -26,8 +28,8 @@ pub(crate) use heuristics::Found;
 /// read with the base patterns**, not skipped: a format only ever adds
 /// patterns to those, so the base scan is the honest answer for a `.py`
 /// or a `.toml` rather than a shrug. The extension does the same.
-pub(crate) fn extract(content: &str, language: &str, year: i64) -> Vec<Found> {
-    let patterns = heuristics::patterns_for(language);
+pub(crate) fn extract(content: &str, language: &str, year: i64, order: DateOrder) -> Vec<Found> {
+    let patterns = heuristics::patterns_for(language, order);
     match language {
         // XML comments are masked rather than removed, so a date inside
         // one is skipped without moving anything after it. Matched
@@ -101,7 +103,7 @@ mod tests {
     use super::*;
 
     fn values(content: &str, language: &str) -> Vec<String> {
-        extract(content, language, 2026)
+        extract(content, language, 2026, DateOrder::default())
             .into_iter()
             .map(|found| found.value)
             .collect()
@@ -142,7 +144,7 @@ mod tests {
     #[test]
     fn the_fallback_adds_no_format_specific_patterns() {
         assert!(values("Jan 15 10:30:47", FALLBACK_FORMAT).is_empty());
-        assert!(values("new Date('March 5, 2024')", FALLBACK_FORMAT).is_empty());
+        assert!(values("new Date('2024/03/05')", FALLBACK_FORMAT).is_empty());
     }
 
     #[test]
@@ -208,7 +210,12 @@ mod tests {
 
     #[test]
     fn a_date_after_a_multibyte_comment_keeps_its_column() {
-        let found = extract("<a><!-- café — naïve -->2024-01-15</a>", "xml", 2026);
+        let found = extract(
+            "<a><!-- café — naïve -->2024-01-15</a>",
+            "xml",
+            2026,
+            DateOrder::default(),
+        );
         assert_eq!(found.len(), 1);
         assert_eq!((found[0].line, found[0].column), (1, 25));
     }

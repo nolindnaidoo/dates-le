@@ -77,7 +77,7 @@ The name a caller sends is still reported back as `fileType`, so
 rather than silently as something else — the two servers must not
 disagree about what they just read.
 
-## The nine shared patterns
+## The shared patterns
 
 Matched over the whole document, not per line, so a construct spanning
 lines is still found.
@@ -88,11 +88,20 @@ lines is still found.
 | `rfc2822` | `Mon, 15 Jan 2024 10:30:45 GMT` |
 | `unix` | exactly 10, 13, 16 or 19 digits, no digit either side |
 | `utc` | `Mon Jan 15 2024 10:30:45 GMT+0000` |
-| `local` | `1/15/2024 10:30:45` |
+| `local` | `15/01/2024`, `1/15/2024 3:30 PM`, `15.01.2024 14:00`, `15-01-2024`, `15 January 2024`, `Jan 15, 2024` |
 | `simple` | `2024-01-15` |
 | `week` | `2024-W03`, `2024-W03-1` |
 | `ordinal` | `2024-015` |
 | `basic` | `20240115`, `20240115T103045Z` |
+
+A `local` numeric date is read the one way it can be when a number is
+over 12. When both numbers could be a month, `--date-order` (the MCP
+tools' `dateOrder`) decides, month first by default; dotted dates are
+always day first. These, and dates with an English month written out,
+are resolved by `extract/regional.rs` rather than `Date.parse`: every
+one is checked against the calendar, so `31/02/2024` is refused rather
+than rolled into March, a numeric year must fall within 1900–2099, and
+the instant is local time.
 
 A Unix timestamp must also land above 1e9 seconds / 1e12 milliseconds,
 so a 10-digit account number is not read as a date in 1970. Ten digits

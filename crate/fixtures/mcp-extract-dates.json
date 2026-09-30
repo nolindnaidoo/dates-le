@@ -178,7 +178,7 @@
 			"data": {
 				"dates": [
 					{
-						"value": "March 5, 2024",
+						"value": "2024/03/05",
 						"format": "custom",
 						"timestamp": 1709614800000,
 						"line": 3,
@@ -214,7 +214,7 @@
 					},
 					{
 						"value": "January 15 2024",
-						"format": "custom",
+						"format": "local",
 						"timestamp": 1705294800000,
 						"line": 11,
 						"column": 3
@@ -269,11 +269,25 @@
 						"column": 19
 					},
 					{
+						"value": "15 January 2024",
+						"format": "local",
+						"timestamp": 1705294800000,
+						"line": 4,
+						"column": 31
+					},
+					{
 						"value": "2024-06-01T00:00:00Z",
 						"format": "iso",
 						"timestamp": 1717200000000,
 						"line": 6,
 						"column": 15
+					},
+					{
+						"value": "1 June 2024",
+						"format": "local",
+						"timestamp": 1717214400000,
+						"line": 7,
+						"column": 4
 					},
 					{
 						"value": "2024-01-15",
@@ -297,7 +311,7 @@
 						"column": 23
 					},
 					{
-						"value": "March 5, 2024",
+						"value": "2024/03/05",
 						"format": "custom",
 						"timestamp": 1709614800000,
 						"line": 11,
@@ -309,7 +323,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 7,
+				"count": 9,
 				"truncated": false
 			}
 		}
@@ -993,5 +1007,168 @@
 			"format": "json"
 		},
 		"expectedError": "content is required and must be a string"
+	},
+	{
+		"name": "regional dates, month first by default",
+		"file": "regional.md",
+		"arguments": {
+			"format": "markdown"
+		},
+		"expected": {
+			"ok": true,
+			"data": {
+				"dates": [
+					{
+						"value": "15/01/2024",
+						"format": "local",
+						"timestamp": 1705294800000,
+						"line": 5,
+						"column": 14
+					},
+					{
+						"value": "05/01/2024 09:30",
+						"format": "local",
+						"timestamp": 1714570200000,
+						"line": 6,
+						"column": 12
+					},
+					{
+						"value": "15.01.2024 14:00",
+						"format": "local",
+						"timestamp": 1705345200000,
+						"line": 7,
+						"column": 12
+					},
+					{
+						"value": "15-01-2024",
+						"format": "local",
+						"timestamp": 1705294800000,
+						"line": 8,
+						"column": 11
+					},
+					{
+						"value": "15 January 2024",
+						"format": "local",
+						"timestamp": 1705294800000,
+						"line": 9,
+						"column": 13
+					},
+					{
+						"value": "Jan 16, 2024",
+						"format": "local",
+						"timestamp": 1705381200000,
+						"line": 9,
+						"column": 30
+					},
+					{
+						"value": "3rd Feb. 2024",
+						"format": "local",
+						"timestamp": 1706936400000,
+						"line": 9,
+						"column": 47
+					},
+					{
+						"value": "1/15/2024 3:30 PM",
+						"format": "local",
+						"timestamp": 1705350600000,
+						"line": 10,
+						"column": 13
+					}
+				],
+				"fileType": "markdown"
+			},
+			"diagnostics": [],
+			"meta": {
+				"tool": "extract_dates",
+				"count": 8,
+				"truncated": false
+			}
+		}
+	},
+	{
+		"name": "regional dates, day first on request",
+		"file": "regional.md",
+		"arguments": {
+			"format": "markdown",
+			"dateOrder": "dmy"
+		},
+		"expected": {
+			"ok": true,
+			"data": {
+				"dates": [
+					{
+						"value": "15/01/2024",
+						"format": "local",
+						"timestamp": 1705294800000,
+						"line": 5,
+						"column": 14
+					},
+					{
+						"value": "05/01/2024 09:30",
+						"format": "local",
+						"timestamp": 1704465000000,
+						"line": 6,
+						"column": 12
+					},
+					{
+						"value": "15.01.2024 14:00",
+						"format": "local",
+						"timestamp": 1705345200000,
+						"line": 7,
+						"column": 12
+					},
+					{
+						"value": "15-01-2024",
+						"format": "local",
+						"timestamp": 1705294800000,
+						"line": 8,
+						"column": 11
+					},
+					{
+						"value": "15 January 2024",
+						"format": "local",
+						"timestamp": 1705294800000,
+						"line": 9,
+						"column": 13
+					},
+					{
+						"value": "Jan 16, 2024",
+						"format": "local",
+						"timestamp": 1705381200000,
+						"line": 9,
+						"column": 30
+					},
+					{
+						"value": "3rd Feb. 2024",
+						"format": "local",
+						"timestamp": 1706936400000,
+						"line": 9,
+						"column": 47
+					},
+					{
+						"value": "1/15/2024 3:30 PM",
+						"format": "local",
+						"timestamp": 1705350600000,
+						"line": 10,
+						"column": 13
+					}
+				],
+				"fileType": "markdown"
+			},
+			"diagnostics": [],
+			"meta": {
+				"tool": "extract_dates",
+				"count": 8,
+				"truncated": false
+			}
+		}
+	},
+	{
+		"name": "an order that is neither is refused",
+		"content": "05/01/2024",
+		"arguments": {
+			"dateOrder": "ymd"
+		},
+		"expectedError": "dateOrder must be \"mdy\" or \"dmy\""
 	}
 ]

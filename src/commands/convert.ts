@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { getConfiguration } from '../config/config';
 import {
 	convertDatesWithSkipped,
 	type DateConversionOptions,
@@ -48,7 +49,11 @@ export function registerConvertCommand(
 						});
 
 						// Extract dates first
-						const extractionResult = await extractDates(content, languageId);
+						const extractionResult = await extractDates(
+							content,
+							languageId,
+							getConfiguration().dateOrder,
+						);
 
 						if (token.isCancellationRequested) return;
 

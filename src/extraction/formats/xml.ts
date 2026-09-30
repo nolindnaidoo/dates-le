@@ -1,5 +1,6 @@
 import type { DateValue } from '../../types';
 import { scanDates } from '../heuristics';
+import type { DateOrder } from '../regional';
 
 /**
  * XML comments are masked (not removed) before scanning, so dates inside
@@ -9,8 +10,11 @@ import { scanDates } from '../heuristics';
  * and misreported every subsequent line number by the number of comment
  * lines above it.
  */
-export function extractFromXml(content: string): readonly DateValue[] {
-	return scanDates(maskXmlComments(content));
+export function extractFromXml(
+	content: string,
+	order?: DateOrder,
+): readonly DateValue[] {
+	return scanDates(maskXmlComments(content), [], order);
 }
 
 function maskXmlComments(content: string): string {

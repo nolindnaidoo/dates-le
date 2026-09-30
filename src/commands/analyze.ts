@@ -4,6 +4,7 @@ import {
 	type DateAnalysis,
 	type DateAnomaly,
 } from '../analysis/statistics';
+import { getConfiguration } from '../config/config';
 import { extractDates } from '../extraction/extract';
 import type { Telemetry } from '../telemetry/telemetry';
 import type { Notifier } from '../ui/notifier';
@@ -66,6 +67,7 @@ async function performAnalysis(
 			const extractionResult = await extractDates(
 				document.getText(),
 				document.languageId,
+				getConfiguration().dateOrder,
 			);
 
 			if (token.isCancellationRequested) {

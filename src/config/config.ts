@@ -1,4 +1,9 @@
 import * as vscode from 'vscode';
+import {
+	type DateOrder,
+	DEFAULT_DATE_ORDER,
+	isDateOrder,
+} from '../extraction/regional';
 import type { Configuration } from '../types';
 
 /**
@@ -10,6 +15,7 @@ import type { Configuration } from '../types';
  */
 export const CONFIG_DEFAULTS = Object.freeze({
 	copyToClipboardEnabled: false,
+	dateOrder: DEFAULT_DATE_ORDER,
 	notificationsLevel: 'silent' as const,
 	openResultsSideBySide: true,
 	safetyEnabled: true,
@@ -27,6 +33,7 @@ export function getConfiguration(): Configuration {
 			'copyToClipboardEnabled',
 			CONFIG_DEFAULTS.copyToClipboardEnabled,
 		),
+		dateOrder: readDateOrder(config),
 		notificationsLevel: readNotificationLevel(config),
 		openResultsSideBySide: readBoolean(
 			config,
@@ -95,4 +102,9 @@ function readNotificationLevel(
 	return isValidNotificationLevel(raw)
 		? raw
 		: CONFIG_DEFAULTS.notificationsLevel;
+}
+
+function readDateOrder(config: vscode.WorkspaceConfiguration): DateOrder {
+	const raw = config.get<string>('dateOrder', CONFIG_DEFAULTS.dateOrder);
+	return isDateOrder(raw) ? raw : CONFIG_DEFAULTS.dateOrder;
 }

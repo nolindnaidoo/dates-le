@@ -20,6 +20,7 @@ describe('config defaults parity with package.json', () => {
 
 	const KEY_MAP: Record<string, keyof typeof CONFIG_DEFAULTS> = {
 		'dates-le.copyToClipboardEnabled': 'copyToClipboardEnabled',
+		'dates-le.dateOrder': 'dateOrder',
 		'dates-le.notificationsLevel': 'notificationsLevel',
 		'dates-le.openResultsSideBySide': 'openResultsSideBySide',
 		'dates-le.safety.enabled': 'safetyEnabled',
