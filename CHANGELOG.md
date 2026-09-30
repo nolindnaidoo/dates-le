@@ -9,6 +9,14 @@ This file covers the **VS Code extension**. The Rust CLI in `crate/` is a
 separate product on its own cadence and keeps its own
 [CHANGELOG](crate/CHANGELOG.md).
 
+## [Unreleased]
+
+### Fixed
+
+- **The Italian interface was in Indonesian.** Eighteen of the twenty-six
+  Italian settings and command titles, and eleven Italian messages, had been
+  copied from the Indonesian catalogue. They are now Italian.
+
 ## [2.4.0] - 2026-09-30
 
 ### Added
