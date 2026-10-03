@@ -15,8 +15,8 @@
   </a>
 </p>
 
-An [MCP](https://modelcontextprotocol.io) server that extracts URLs from
-documentation, configuration and code — the extraction engine behind the
+An [MCP](https://modelcontextprotocol.io) server that extracts dates and timestamps from
+logs, data files and code — the extraction engine behind the
 [Dates-LE](https://letools.dev/tools/dates-le)
 editor extension, exposed as a tool an agent can call.
 
@@ -50,7 +50,15 @@ claude mcp add dates-le -- npx -y dates-le-mcp
 carries this server and registers it for you:
 [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le)
 · [Open VSX](https://open-vsx.org/extension/OffensiveEdge/dates-le)
-· [Zed](https://github.com/zed-industries/extensions/pull/7079) *(pending review)*
+· [Zed](https://zed.dev/docs/ai/mcp) *(no listing yet — add it by hand)*
+
+**No Node?** The same `extract_dates` tool ships in a static Rust binary:
+`cargo install dates-le`, then `dates-le mcp`
+([crates.io](https://crates.io/crates/dates-le)). The two servers answer
+identically — one fixture corpus runs against both and CI fails if they
+diverge. The binary additionally offers `dates_le_scan`, which walks a
+tree; **this server reads no files**, which is what lets an agent call it
+anywhere.
 
 Prefer a global install to `npx` on every launch:
 
@@ -81,24 +89,35 @@ If that prints the tool name, the server works.
 
 | argument | type | |
 |---|---|---|
-| `content` | string | **required.** The text to scan. |
-| `format` | string | The language: `markdown`, `yaml`, `json`, `typescript`… Required unless `filename` is given. |
-| `filename` | string | Used to infer `format` when it is absent — `README.md` resolves to `markdown`. |
-| `dedupe` | boolean | Collapse repeats. Default `false`. |
+| `content` | string | **required.** The document text to scan. |
+| `format` | string | `json`, `yaml`, `csv`, `xml`, `log`, `plaintext`, `javascript`, `typescript`, `html`, `toml` or `markdown`; common extensions and aliases are accepted. Optional — with neither this nor `filename`, the text is scanned with the patterns every format shares. |
+| `filename` | string | Used to infer `format` when it is absent — `app.log` resolves to `log`. |
+| `dedupe` | boolean | Collapse repeated dates to their first occurrence. Default `false`. |
+| `dateOrder` | string | `mdy` (the default) or `dmy`: how to read a numeric date whose day and month could be either way round, such as `05/01/2024`. A date that can only be read one way, such as `15/01/2024`, is read that way regardless, and dotted dates such as `05.01.2024` are always day first. |
 | `maxResults` | number | Default `500`, ceiling `5000`. |
 
-Returns each URL with its protocol and 1-based line and column, plus
-`meta.truncated` so a capped result is never mistaken for a complete one.
+Returns each date as written, with its notation, the epoch milliseconds
+it resolves to where it can (`timestamp`), and 1-based line and column, plus
+`meta.truncated` so a capped result is never mistaken for a complete one. A
+date written without a time zone resolves in the time zone the server runs
+in.
 
 ```json
 {
   "ok": true,
   "data": {
     "dates": [
-      { "value": "https://example.com/guide", "protocol": "https", "line": 2, "column": 15 }
-    ]
+      {"value": "2024-03-15T09:30:00Z", "format": "iso", "timestamp": 1710495000000, "line": 1, "column": 11},
+      {"value": "1710495000", "format": "unix", "timestamp": 1710495000000, "line": 2, "column": 11}
+    ],
+    "fileType": "yaml"
   },
-  "meta": { "count": 1, "truncated": false }
+  "diagnostics": [],
+  "meta": {
+    "tool": "extract_dates",
+    "count": 2,
+    "truncated": false
+  }
 }
 ```
 
@@ -142,7 +161,7 @@ Architecture. [nolindnaidoo.com](https://nolindnaidoo.com) ·
 
 Twelve Rust tools built the same way: small, single-purpose, and driven by a
 machine rather than a person. pixelcoords and pixelactions make up one loop —
-pixelcoords answers *where*, pixelactions *acts* there. The nine LE crates are
+pixelcoords answers *where*, pixelactions *acts* there. The ten LE crates are
 the terminal half of the extensions they sit in: the same detection, held to
 the extension's own corpus, and an exit code instead of a results editor.
 
@@ -158,6 +177,7 @@ the extension's own corpus, and an exit code instead of a results editor.
 | **[numbers-le](https://github.com/nolindnaidoo/numbers-le/tree/main/crate)** | Find every hardcoded number in a codebase so a person can check them | [crates.io](https://crates.io/crates/numbers-le) |
 | **[envsync-le](https://github.com/nolindnaidoo/envsync-le/tree/main/crate)** | Compare the dotenv files in a tree and say which keys are missing from which | [crates.io](https://crates.io/crates/envsync-le) |
 | **[colors-le](https://github.com/nolindnaidoo/colors-le/tree/main/crate)** | Find every colour in a codebase, and say which are not in your palette | [crates.io](https://crates.io/crates/colors-le) |
+| **[dates-le](https://github.com/nolindnaidoo/dates-le/tree/main/crate)** | Extract every date and timestamp, and the exact instant each one resolves to | [crates.io](https://crates.io/crates/dates-le) |
 | **[scrape-le](https://github.com/nolindnaidoo/scrape-le/tree/main/crate)** | Check whether a page is scrapeable before the scraper is written | [crates.io](https://crates.io/crates/scrape-le) |
 
 ## Licence
