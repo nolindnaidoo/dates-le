@@ -1,6 +1,6 @@
 {
 	"name": "dates-le-mcp",
-	"version": "2.4.1",
+	"version": "2.4.2",
 	"mcpName": "io.github.nolindnaidoo/dates-le",
 	"description": "Extract dates and timestamps from logs, data files and code, with their format and position.",
 	"keywords": [
