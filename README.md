@@ -52,7 +52,7 @@ Open a file, press `Ctrl+Alt+D` (`Cmd+Alt+D` on Mac), and every date in the docu
 | **Cursor, VSCodium, Windsurf** | The same extension | [Open VSX](https://open-vsx.org/extension/OffensiveEdge/dates-le) |
 | **A terminal or a CI step** | The same run over a whole tree, with exit codes | `cargo install dates-le` · [crates.io](https://crates.io/crates/dates-le) |
 | **Any MCP agent, via Node** | `extract_dates` over stdio | `npx dates-le-mcp` · [npm](https://www.npmjs.com/package/dates-le-mcp) |
-| **Zed** | The MCP server as a context server | [zed-industries/extensions#7079](https://github.com/zed-industries/extensions/pull/7079) *(pending review)* |
+| **Zed** | The MCP server as a context server | [add it by hand](https://zed.dev/docs/ai/mcp) *(no listing yet)* |
 
 ## Use it from an AI agent
 
@@ -61,7 +61,7 @@ The same engine runs as an [MCP](https://modelcontextprotocol.io) server, so an 
 | Editor | How |
 |---|---|
 | **VS Code** 1.101+ | Nothing to install — the extension registers `extract_dates` with agent mode |
-| **Zed** | [Dates-LE](https://github.com/zed-industries/extensions/pull/7079) — *pending review* |
+| **Zed** | No listing yet — [add the MCP server by hand](https://zed.dev/docs/ai/mcp) |
 | **Claude Code** | `claude mcp add dates-le -- npx -y dates-le-mcp` |
 | **Cursor, Windsurf, anything else** | point it at `npx dates-le-mcp` |
 
@@ -244,7 +244,7 @@ a build only tells you how busy the runner was.
 | Functions | 96.46% |
 | Lines | 93.03% |
 
-240 test cases across 20 files, plus an integration suite that runs
+245 test cases across 21 files, plus an integration suite that runs
 in a real VS Code extension host and an end-to-end test that installs the
 built `.vsix` into a clean profile.
 
