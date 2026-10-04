@@ -11,8 +11,8 @@
   <a href="https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le">
     <img src="https://img.shields.io/badge/Install%20from-VS%20Code-blue?style=for-the-badge&logo=visualstudiocode" alt="Install from VS Code Marketplace" />
   </a>
-  <a href="https://open-vsx.org/extension/OffensiveEdge/dates-le">
-    <img src="https://img.shields.io/open-vsx/dt/OffensiveEdge/dates-le?style=for-the-badge&label=Open%20VSX&color=blue" alt="Open VSX downloads" />
+  <a href="https://open-vsx.org/extension/nolindnaidoo/dates-le">
+    <img src="https://img.shields.io/open-vsx/dt/nolindnaidoo/dates-le?style=for-the-badge&label=Open%20VSX&color=blue" alt="Open VSX downloads" />
   </a>
   <a href="https://www.npmjs.com/package/dates-le-mcp">
     <img src="https://img.shields.io/npm/v/dates-le-mcp?style=for-the-badge&label=MCP%20server&color=blue&logo=npm" alt="dates-le-mcp on npm" />
@@ -33,7 +33,7 @@
 
 > **Useful?** A star or rating is how other developers find it —
 > [★ GitHub](https://github.com/nolindnaidoo/dates-le) ·
-> [★ Open VSX](https://open-vsx.org/extension/OffensiveEdge/dates-le/reviews) ·
+> [★ Open VSX](https://open-vsx.org/extension/nolindnaidoo/dates-le/reviews) ·
 > [★ Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le&ssr=false#review-details)
 
 ## What it does
@@ -49,7 +49,7 @@ Open a file, press `Ctrl+Alt+D` (`Cmd+Alt+D` on Mac), and every date in the docu
 | Where | What you get | Install |
 |---|---|---|
 | **VS Code** | The extraction, in your editor, on a keystroke | [Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le) |
-| **Cursor, VSCodium, Windsurf** | The same extension | [Open VSX](https://open-vsx.org/extension/OffensiveEdge/dates-le) |
+| **Cursor, VSCodium, Windsurf** | The same extension | [Open VSX](https://open-vsx.org/extension/nolindnaidoo/dates-le) |
 | **A terminal or a CI step** | The same run over a whole tree, with exit codes | `cargo install dates-le` · [crates.io](https://crates.io/crates/dates-le) |
 | **Any MCP agent, via Node** | `extract_dates` over stdio | `npx dates-le-mcp` · [npm](https://www.npmjs.com/package/dates-le-mcp) |
 | **Zed** | The MCP server as a context server | [add it by hand](https://zed.dev/docs/ai/mcp) *(no listing yet)* |
