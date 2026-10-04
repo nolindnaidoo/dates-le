@@ -4,8 +4,8 @@
   <a href="https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le">
     <img src="https://img.shields.io/badge/Install%20from-VS%20Code-blue?style=for-the-badge&logo=visualstudiocode" alt="Install from VS Code Marketplace" />
   </a>
-  <a href="https://open-vsx.org/extension/OffensiveEdge/dates-le">
-    <img src="https://img.shields.io/open-vsx/dt/OffensiveEdge/dates-le?style=for-the-badge&label=Open%20VSX&color=blue" alt="Open VSX downloads" />
+  <a href="https://open-vsx.org/extension/nolindnaidoo/dates-le">
+    <img src="https://img.shields.io/open-vsx/dt/nolindnaidoo/dates-le?style=for-the-badge&label=Open%20VSX&color=blue" alt="Open VSX downloads" />
   </a>
   <a href="https://www.npmjs.com/package/dates-le-mcp">
     <img src="https://img.shields.io/npm/v/dates-le-mcp?style=for-the-badge&label=MCP%20server&color=blue&logo=npm" alt="dates-le-mcp on npm" />
@@ -49,7 +49,7 @@ claude mcp add dates-le -- npx -y dates-le-mcp
 **VS Code and Zed** need nothing here. Install the extension instead — it
 carries this server and registers it for you:
 [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le)
-· [Open VSX](https://open-vsx.org/extension/OffensiveEdge/dates-le)
+· [Open VSX](https://open-vsx.org/extension/nolindnaidoo/dates-le)
 · [Zed](https://zed.dev/docs/ai/mcp) *(no listing yet — add it by hand)*
 
 **No Node?** The same `extract_dates` tool ships in a static Rust binary:
