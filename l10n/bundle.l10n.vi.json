@@ -1,5 +1,9 @@
 {
 	"No active editor found": "Không tìm thấy trình chỉnh sửa hoạt động",
+	"Enjoying {0}? A rating helps other developers find it.": "Bạn thích {0}? Một lượt đánh giá giúp các nhà phát triển khác tìm thấy tiện ích này.",
+	"Rate": "Đánh giá",
+	"Later": "Để sau",
+	"Don't Ask Again": "Không hỏi lại",
 	"Validating dates...": "Xác thực ngày...",
 	"No dates found to validate": "Không tìm thấy ngày nào để xác thực",
 	"Ensure dates are in valid format and can be parsed": "Đảm bảo các ngày tháng có định dạng hợp lệ và có thể được phân tích",

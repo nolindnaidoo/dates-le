@@ -1,5 +1,9 @@
 {
 	"No active editor found": "활성 편집기 없음",
+	"Enjoying {0}? A rating helps other developers find it.": "{0}이(가) 마음에 드시나요? 평점을 남기면 다른 개발자가 찾는 데 도움이 됩니다.",
+	"Rate": "평가하기",
+	"Later": "나중에",
+	"Don't Ask Again": "다시 묻지 않기",
 	"Validating dates...": "날짜 검증 중...",
 	"No dates found to validate": "확인할 날짜가 없습니다.",
 	"Ensure dates are in valid format and can be parsed": "날짜가 유효한 형식인지, 그리고 파싱이 가능한지 확인하십시오",

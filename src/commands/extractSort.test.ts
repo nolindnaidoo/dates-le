@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
 	_clipboardText,
 	_createDocument,
+	_createExtensionContext,
 	_registeredCommands,
 	_resetMockState,
 	_respondToQuickPick,
@@ -51,6 +52,7 @@ function makeDeps(events: string[] = []) {
 			hideProgress: () => {},
 			dispose: () => {},
 		} as unknown as StatusBar,
+		ratingPrompt: { recordSuccess: async () => {} },
 	};
 }
 
@@ -219,7 +221,7 @@ describe('sort: every mode', () => {
 
 describe('activation', () => {
 	it('registers every declared command', () => {
-		activate(makeContext());
+		activate(_createExtensionContext() as never);
 		for (const command of [
 			'dates-le.extractDates',
 			'dates-le.postProcess.dedupe',

@@ -4,6 +4,7 @@ import { extractDates } from '../extraction/extract';
 import type { Telemetry } from '../telemetry/telemetry';
 import type { Configuration } from '../types';
 import type { Notifier } from '../ui/notifier';
+import type { RatingPrompt } from '../ui/ratingPrompt';
 import type { StatusBar } from '../ui/statusBar';
 import { fullDocumentRange } from '../utils/document';
 import { sanitizeErrorMessage } from '../utils/errors';
@@ -16,6 +17,7 @@ export function registerExtractCommand(
 		telemetry: Telemetry;
 		notifier: Notifier;
 		statusBar: StatusBar;
+		ratingPrompt: RatingPrompt;
 	}>,
 ): void {
 	const command = vscode.commands.registerCommand(
@@ -91,6 +93,9 @@ export function registerExtractCommand(
 				);
 
 				deps.telemetry.event('extract-success', { count: result.dates.length });
+				// Not awaited: it resolves when the toast is answered, and a command that
+				// waited on that would stay pending for as long as the toast is ignored.
+				void deps.ratingPrompt.recordSuccess();
 			} catch (error) {
 				const message =
 					error instanceof Error ? error.message : 'Unknown error occurred';
