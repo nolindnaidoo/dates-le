@@ -1,5 +1,9 @@
 {
 	"No active editor found": "Не знайдено активного редактора",
+	"Enjoying {0}? A rating helps other developers find it.": "Подобається {0}? Оцінка допомагає іншим розробникам знайти це розширення.",
+	"Rate": "Оцінити",
+	"Later": "Пізніше",
+	"Don't Ask Again": "Більше не питати",
 	"Validating dates...": "Перевірка дат...",
 	"No dates found to validate": "Не знайдено дат для перевірки",
 	"Ensure dates are in valid format and can be parsed": "Переконайтеся, що дати мають правильний формат і їх можна обробити",

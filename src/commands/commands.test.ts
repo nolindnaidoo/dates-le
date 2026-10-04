@@ -33,6 +33,7 @@ interface RecordedDeps {
 		telemetry: Telemetry;
 		notifier: Notifier;
 		statusBar: StatusBar;
+		ratingPrompt: { recordSuccess(): Promise<void> };
 	};
 }
 
@@ -63,6 +64,7 @@ function makeDeps(): RecordedDeps {
 				hideProgress: () => {},
 				dispose: () => {},
 			},
+			ratingPrompt: { recordSuccess: async () => {} },
 		},
 	};
 }

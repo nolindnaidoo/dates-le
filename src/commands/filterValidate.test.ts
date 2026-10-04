@@ -52,6 +52,7 @@ function makeDeps() {
 			hideProgress: () => {},
 			dispose: () => {},
 		} as unknown as StatusBar,
+		ratingPrompt: { recordSuccess: async () => {} },
 	};
 	return { events, deps };
 }

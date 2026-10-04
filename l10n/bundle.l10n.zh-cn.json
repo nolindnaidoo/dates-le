@@ -1,5 +1,9 @@
 {
 	"No active editor found": "未检测到活动编辑器",
+	"Enjoying {0}? A rating helps other developers find it.": "喜欢 {0} 吗？评分可以帮助其他开发者发现它。",
+	"Rate": "评分",
+	"Later": "稍后",
+	"Don't Ask Again": "不再询问",
 	"Validating dates...": "验证日期中...",
 	"No dates found to validate": "未找到可验证的日期",
 	"Ensure dates are in valid format and can be parsed": "确保日期格式正确且可解析",

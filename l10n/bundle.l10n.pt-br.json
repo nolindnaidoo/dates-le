@@ -1,5 +1,9 @@
 {
 	"No active editor found": "Nenhum editor ativo encontrado",
+	"Enjoying {0}? A rating helps other developers find it.": "Gostando do {0}? Uma avaliação ajuda outros desenvolvedores a encontrá-lo.",
+	"Rate": "Avaliar",
+	"Later": "Mais tarde",
+	"Don't Ask Again": "Não perguntar novamente",
 	"Validating dates...": "Validando datas...",
 	"No dates found to validate": "Não foram encontradas datas para validação",
 	"Ensure dates are in valid format and can be parsed": "Verifique se as datas estão no formato válido e se podem ser analisadas",
