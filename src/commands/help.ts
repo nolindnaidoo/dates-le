@@ -18,7 +18,7 @@ export function registerHelpCommand(
 # Dates-LE Help & Troubleshooting
 
 ## Commands
-- **Extract Dates** (Ctrl+Alt+D / Cmd+Alt+D): Extract dates from the current document
+- **Extract Dates**: Extract dates from the current document
 - **Analyze Dates**: Statistics, patterns, clusters, and anomalies for extracted dates
 - **Convert Dates**: Convert dates in the document to another format
 - **Filter Dates**: Extract dates matching a range or condition

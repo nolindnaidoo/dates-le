@@ -38,7 +38,7 @@
 
 ## What it does
 
-Open a file, press `Ctrl+Alt+D` (`Cmd+Alt+D` on Mac), and every date in the document lands in a new editor — deduplicate, sort, analyze, convert, filter, or validate it from there. Works in VS Code and in VS Code–based editors like Cursor and VSCodium (installable from Open VSX).
+Open a file, run `Dates-LE: Extract Dates`, and every date in the document lands in a new editor — deduplicate, sort, analyze, convert, filter, or validate it from there. Works in VS Code and in VS Code–based editors like Cursor and VSCodium (installable from Open VSX).
 
 - **Log analysis** — timestamps from server logs: ISO, syslog, and Apache access-log formats
 - **Data review** — dates and epochs from JSON, YAML, CSV, and XML
@@ -163,7 +163,7 @@ the true answer and it genuinely differs by machine. `TZ` is honoured.
 
 | Command | Description |
 |---|---|
-| `Dates-LE: Extract Dates` (`Ctrl+Alt+D` / `Cmd+Alt+D`) | Extract all dates from the active document |
+| `Dates-LE: Extract Dates` | Extract all dates from the active document |
 | `Dates-LE: Analyze Dates` | Statistics, patterns, clusters, gaps, and anomalies |
 | `Dates-LE: Convert Dates` | Convert extracted dates to ISO, RFC 2822, Unix, UTC, local, simple, or a custom format |
 | `Dates-LE: Filter Dates` | Filter by range, format, duplicates, future/past |
@@ -172,6 +172,8 @@ the true answer and it genuinely differs by machine. `TZ` is honoured.
 | `Dates-LE: Sort Dates` | Sort results chronologically or alphabetically |
 | `Dates-LE: Open Settings` | Open Dates-LE settings |
 | `Dates-LE: Help` | Built-in documentation |
+
+No command is bound to a key by default. Give any of them one under **Keyboard Shortcuts** in the editor.
 
 ## Settings
 

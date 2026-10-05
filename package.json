@@ -122,14 +122,6 @@
 				"category": "%manifest.command.category%"
 			}
 		],
-		"keybindings": [
-			{
-				"command": "dates-le.extractDates",
-				"key": "ctrl+alt+d",
-				"mac": "cmd+alt+d",
-				"when": "editorTextFocus"
-			}
-		],
 		"menus": {
 			"editor/context": [
 				{
