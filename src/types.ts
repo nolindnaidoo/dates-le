@@ -80,12 +80,16 @@ export type FileType =
 	| 'unknown';
 
 export interface Configuration {
+	/** Whether the copy on the clipboard carries positions, whatever the screen shows. */
+	readonly clipboardIncludesPositions: boolean;
 	readonly copyToClipboardEnabled: boolean;
 	readonly dateOrder: 'mdy' | 'dmy';
 	readonly notificationsLevel: 'all' | 'important' | 'silent';
 	readonly openResultsSideBySide: boolean;
 	readonly safetyEnabled: boolean;
 	readonly safetyFileSizeWarnBytes: number;
+	/** Whether the output gives the line and column of each date. */
+	readonly showPositions: boolean;
 	readonly statusBarEnabled: boolean;
 	readonly telemetryEnabled: boolean;
 }

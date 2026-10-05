@@ -106,6 +106,25 @@ describe('dates-le.postProcess.dedupe', () => {
 		);
 	});
 
+	it('dedupes by date when positions are shown, keeping the first, and says so', async () => {
+		_setConfig('dates-le.notificationsLevel', 'all');
+		registerDedupeCommand(makeContext(), createNotifier());
+		_setActiveEditor(
+			_createDocument({
+				content: '1:1\t2024-01-15\n2:1\t2024-01-16\n9:4\t2024-01-15\n',
+			}),
+		);
+		await runCommand('dates-le.postProcess.dedupe');
+
+		// Whole lines all differ here. Only by date is there a duplicate at all.
+		expect(appliedEdits[0]?.replacements[0]?.newText).toBe(
+			'1:1\t2024-01-15\n2:1\t2024-01-16',
+		);
+		expect(_shownMessages()[0]?.message).toBe(
+			'Removed 1 duplicate dates (2 remaining). Each date shows its first position only.',
+		);
+	});
+
 	it('suppresses the success toast at the default silent level', async () => {
 		registerDedupeCommand(makeContext(), createNotifier());
 		_setActiveEditor(_createDocument({ content: '2024-01-15\n2024-01-15' }));
@@ -132,6 +151,24 @@ describe('dates-le.postProcess.sort', () => {
 			'2024-01-15\n2024-02-02\n2024-03-01',
 		);
 		expect(_shownMessages()[0]?.message).toContain('Sorted 3 dates');
+	});
+
+	it('sorts by date when positions are shown, and each keeps its own', async () => {
+		registerSortCommand(makeContext(), createNotifier());
+		_setActiveEditor(
+			_createDocument({
+				content: '1:1\t2024-03-01\n2:1\t2024-01-15\n10:1\t2024-02-02',
+			}),
+		);
+		_respondToQuickPick((items) =>
+			(items as Array<{ value: string }>).find((item) => item.value === 'asc'),
+		);
+		await runCommand('dates-le.postProcess.sort');
+
+		// A line that began with a position used to be an unparseable date.
+		expect(appliedEdits[0]?.replacements[0]?.newText).toBe(
+			'2:1\t2024-01-15\n10:1\t2024-02-02\n1:1\t2024-03-01',
+		);
 	});
 
 	it('sorts unparseable lines to the end', async () => {
@@ -177,6 +214,28 @@ describe('dates-le.extractDates', () => {
 		expect(events).toContain('info:Extracted 1 dates from document');
 		const { _clipboardText } = await import('../__mocks__/vscode');
 		expect(_clipboardText()).toBe('2024-01-15T10:30:00Z');
+	});
+
+	it('copies each date with its position only when the clipboard setting says so', async () => {
+		const { deps } = makeDeps();
+		registerExtractCommand(makeContext(), deps);
+		const { _clipboardText } = await import('../__mocks__/vscode');
+		const document = {
+			content: '{ "created": "2024-01-15T10:30:00Z" }',
+			languageId: 'json',
+		};
+		_setConfig('dates-le.copyToClipboardEnabled', true);
+		_setConfig('dates-le.showPositions', true);
+
+		// Shown on screen is one setting. Copied is another, and it is still off.
+		_setActiveEditor(_createDocument(document));
+		await runCommand('dates-le.extractDates');
+		expect(_clipboardText()).toBe('2024-01-15T10:30:00Z');
+
+		_setConfig('dates-le.clipboardIncludesPositions', true);
+		_setActiveEditor(_createDocument(document));
+		await runCommand('dates-le.extractDates');
+		expect(_clipboardText()).toMatch(/^1:\d+\t2024-01-15T10:30:00Z$/);
 	});
 
 	it('reports empty documents as info, not error', async () => {
