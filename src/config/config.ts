@@ -14,12 +14,14 @@ import type { Configuration } from '../types';
  * two drifting apart. The export is the seam that test needs.
  */
 export const CONFIG_DEFAULTS = Object.freeze({
+	clipboardIncludesPositions: false,
 	copyToClipboardEnabled: false,
 	dateOrder: DEFAULT_DATE_ORDER,
 	notificationsLevel: 'silent' as const,
 	openResultsSideBySide: true,
 	safetyEnabled: true,
 	safetyFileSizeWarnBytes: 1_000_000,
+	showPositions: false,
 	statusBarEnabled: true,
 	telemetryEnabled: false,
 });
@@ -28,6 +30,11 @@ export function getConfiguration(): Configuration {
 	const config = vscode.workspace.getConfiguration('dates-le');
 
 	return Object.freeze({
+		clipboardIncludesPositions: readBoolean(
+			config,
+			'clipboardIncludesPositions',
+			CONFIG_DEFAULTS.clipboardIncludesPositions,
+		),
 		copyToClipboardEnabled: readBoolean(
 			config,
 			'copyToClipboardEnabled',
@@ -50,6 +57,11 @@ export function getConfiguration(): Configuration {
 			'safety.fileSizeWarnBytes',
 			CONFIG_DEFAULTS.safetyFileSizeWarnBytes,
 			1000,
+		),
+		showPositions: readBoolean(
+			config,
+			'showPositions',
+			CONFIG_DEFAULTS.showPositions,
 		),
 		statusBarEnabled: readBoolean(
 			config,

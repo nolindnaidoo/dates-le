@@ -180,7 +180,9 @@ No command is bound to a key by default. Give any of them one under **Keyboard S
 | Setting | Default | Description |
 |---|---|---|
 | `dates-le.openResultsSideBySide` | `true` | Open results beside the current editor |
+| `dates-le.showPositions` | `false` | Show the line and column of each date |
 | `dates-le.copyToClipboardEnabled` | `false` | Also copy results to the clipboard |
+| `dates-le.clipboardIncludesPositions` | `false` | Include the line and column in that copy |
 | `dates-le.dateOrder` | `mdy` | How to read a numeric date that could be either way round: `mdy` reads `05/01/2024` as 1 May, `dmy` as 5 January |
 | `dates-le.notificationsLevel` | `silent` | `all` = every notification, `important` = warnings + errors, `silent` = errors only |
 | `dates-le.safety.enabled` | `true` | Guardrails for very large files |
@@ -239,12 +241,12 @@ a build only tells you how busy the runner was.
 <!-- coverage:start -->
 | Metric | Coverage |
 | --- | --- |
-| Statements | 91.69% |
-| Branches | 81.85% |
-| Functions | 96.46% |
-| Lines | 93.03% |
+| Statements | 91.81% |
+| Branches | 82.24% |
+| Functions | 96.56% |
+| Lines | 93.12% |
 
-246 test cases across 21 files, plus an integration suite that runs
+258 test cases across 22 files, plus an integration suite that runs
 in a real VS Code extension host and an end-to-end test that installs the
 built `.vsix` into a clean profile.
 

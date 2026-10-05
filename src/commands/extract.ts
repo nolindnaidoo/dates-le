@@ -7,6 +7,7 @@ import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
 import { fullDocumentRange } from '../utils/document';
 import { sanitizeErrorMessage } from '../utils/errors';
+import { bareValue, withPosition } from '../utils/positions';
 import { handleSafetyChecks } from '../utils/safety';
 
 export function registerExtractCommand(
@@ -61,7 +62,14 @@ export function registerExtractCommand(
 					return;
 				}
 
-				const dateValues = result.dates.map((date) => date.value);
+				// Each date with where it was found. The screen and the clipboard
+				// are each asked separately whether they want that.
+				const dateLines = result.dates.map((date) =>
+					withPosition(date.value, date.position),
+				);
+				const dateValues = config.showPositions
+					? dateLines
+					: dateLines.map(bareValue);
 
 				const opened = await openResults(document, dateValues, config);
 				if (!opened) {
@@ -70,7 +78,9 @@ export function registerExtractCommand(
 				}
 
 				await handleClipboard(
-					dateValues,
+					config.clipboardIncludesPositions
+						? dateLines
+						: dateLines.map(bareValue),
 					config.copyToClipboardEnabled,
 					deps.notifier,
 				);

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import type { Notifier } from '../ui/notifier';
 import { replaceDocumentContent } from '../utils/document';
 import { sanitizeErrorMessage } from '../utils/errors';
+import { hasPosition, onValues } from '../utils/positions';
 
 export function registerDedupeCommand(
 	context: vscode.ExtensionContext,
@@ -24,7 +25,9 @@ export function registerDedupeCommand(
 					.map((line) => line.trim())
 					.filter((line) => line.length > 0);
 
-				const deduped = deduplicateLines(lines);
+				// By date: with positions shown every line is different, and a
+				// dedupe over whole lines would remove nothing.
+				const deduped = onValues(lines, deduplicateLines);
 				const removedCount = lines.length - deduped.length;
 
 				const replaced = await replaceDocumentContent(document, deduped);
@@ -35,8 +38,12 @@ export function registerDedupeCommand(
 					return;
 				}
 
+				// A date found five times has five positions, and only one can stay.
+				const firstOnly = lines.some(hasPosition)
+					? '. Each date shows its first position only.'
+					: '';
 				notifier.showInfo(
-					`Removed ${removedCount} duplicate dates (${deduped.length} remaining)`,
+					`Removed ${removedCount} duplicate dates (${deduped.length} remaining)${firstOnly}`,
 				);
 			} catch (error) {
 				const message =
