@@ -535,7 +535,9 @@ fn unix_timestamp(value: &str) -> Option<i64> {
     match value.len() {
         10 => {
             let number: i64 = value.parse().ok()?;
-            (number > 1_000_000_000).then_some(number * 1000)
+            let milliseconds = number * 1000;
+            (milliseconds > PLAUSIBLE_FROM && milliseconds < PLAUSIBLE_UNTIL)
+                .then_some(milliseconds)
         }
         13 | 16 | 19 => {
             let milliseconds: i64 = value.get(..13)?.parse().ok()?;
@@ -726,12 +728,21 @@ mod tests {
         }
     }
 
-    /// A ten-digit phone number is inside the plausible range and cannot
-    /// be told apart by shape or by instant. Pinned so the limitation is
-    /// visible rather than discovered.
+    /// Ten digits share the window the wider forms have. A phone number
+    /// past it, which read as the year 2145, is no longer a date.
     #[test]
-    fn a_ten_digit_phone_number_is_a_false_positive() {
-        assert_eq!(values("5551234567", "json"), ["5551234567"]);
+    fn ten_digits_past_2100_are_not_an_epoch() {
+        assert!(values("5551234567", "json").is_empty(), "the year 2145");
+        assert!(values("4102444800", "json").is_empty(), "2100 exactly");
+        assert_eq!(values("4102444799", "json"), ["4102444799"]);
+    }
+
+    /// A ten-digit number inside the window cannot be told from a moment
+    /// by shape or by instant. Pinned so the limitation is visible rather
+    /// than discovered.
+    #[test]
+    fn a_ten_digit_number_inside_the_window_is_a_false_positive() {
+        assert_eq!(values("2025550123", "json"), ["2025550123"]);
     }
 
     /// The window is what separates a microsecond epoch from a number

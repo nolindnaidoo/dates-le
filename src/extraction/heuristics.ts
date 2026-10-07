@@ -256,8 +256,9 @@ const PLAUSIBLE_UNTIL = 4_102_444_800_000;
 /**
  * Seconds, milliseconds, microseconds or nanoseconds.
  *
- * 10 digits is the one width where the digit count is its own ceiling;
- * every wider form shares one window (see PLAUSIBLE_UNTIL).
+ * Every width shares one window (see PLAUSIBLE_UNTIL). Ten digits used to
+ * be left to their own ceiling, the year 2286, and that let through every
+ * ten-digit number from 4102444800 up: a phone number read as 2145.
  *
  * The wider forms are truncated by CHARACTER, not divided: 19 digits do
  * not fit a double, so dividing one would round it — and the Rust CLI,
@@ -266,8 +267,10 @@ const PLAUSIBLE_UNTIL = 4_102_444_800_000;
  */
 function unixToTimestamp(value: string): number {
 	if (value.length === 10) {
-		const raw = Number.parseInt(value, 10);
-		return raw > 1_000_000_000 ? raw * 1000 : Number.NaN;
+		const milliseconds = Number.parseInt(value, 10) * 1000;
+		return milliseconds > PLAUSIBLE_FROM && milliseconds < PLAUSIBLE_UNTIL
+			? milliseconds
+			: Number.NaN;
 	}
 	if (value.length === 13 || value.length === 16 || value.length === 19) {
 		const milliseconds = Number.parseInt(value.slice(0, 13), 10);

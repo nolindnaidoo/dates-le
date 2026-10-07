@@ -58,6 +58,14 @@ describe('scanDates', () => {
 		expect(scanDates('1705314645123456')).toHaveLength(1);
 	});
 
+	it('holds ten digits to the window the wider forms have', () => {
+		// A phone number read as the year 2145.
+		expect(scanDates('phone: 5551234567')).toHaveLength(0);
+		expect(scanDates('4102444800')).toHaveLength(0);
+		expect(scanDates('4102444799').map((d) => d.value)).toEqual(['4102444799']);
+		expect(scanDates('1000000000')).toHaveLength(0);
+	});
+
 	it('does not read ten digits inside a longer word as an epoch', () => {
 		// A pinned GitHub Action: the digits are part of the commit hash.
 		expect(

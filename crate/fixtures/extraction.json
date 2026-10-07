@@ -44,13 +44,6 @@
 					"column": 18
 				},
 				{
-					"value": "5551234567",
-					"format": "unix",
-					"timestamp": 5551234567000,
-					"line": 8,
-					"column": 13
-				},
-				{
 					"value": "1705314645",
 					"format": "unix",
 					"timestamp": 1705314645000,
