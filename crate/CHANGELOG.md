@@ -11,6 +11,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **A ten-digit number past the year 2100 is no longer a Unix time.** The
+  wider forms were already held to 2001–2100. Ten digits were left to run to
+  2286, so a phone number such as `5551234567` was read as a moment in 2145.
+  A ten-digit number inside the window still cannot be told from one.
 - **Ten digits inside a longer word are no longer a Unix time.** A pinned
   GitHub Action such as `lychee-action@e7477775783ea55…` carries a commit
   hash, and the ten digits in a row inside it were read as a moment in 2206.
