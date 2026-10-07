@@ -233,8 +233,14 @@ fn shared_patterns() -> Vec<Pattern> {
         // part of a float is a digit run of any length, and once
         // sixteen of them are microseconds, `RATIO = 1.2345678901234567`
         // is a timestamp in 2044.
+        //
+        // **So does a letter, on either side.** Ten digits in a row
+        // inside a commit hash, `e7477775783ea55`, are part of the hash,
+        // and read alone they are a moment in 2206.
         Pattern {
-            regex: build(r"(?<![0-9.])(?:[0-9]{19}|[0-9]{16}|[0-9]{13}|[0-9]{10})(?![0-9])"),
+            regex: build(
+                r"(?<![0-9A-Za-z.])(?:[0-9]{19}|[0-9]{16}|[0-9]{13}|[0-9]{10})(?![0-9A-Za-z])",
+            ),
             notation: Notation::Unix,
             resolver: Resolver::Unix,
         },
@@ -698,6 +704,26 @@ mod tests {
             values("12345678901234567", "json").is_empty(),
             "seventeen digits is no unit at all"
         );
+    }
+
+    /// A pinned GitHub Action carries a commit hash, and ten digits in a
+    /// row inside one are part of the hash.
+    #[test]
+    fn ten_digits_inside_a_longer_word_are_not_an_epoch() {
+        assert!(
+            values(
+                "uses: lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8",
+                "yaml"
+            )
+            .is_empty(),
+            "inside a hash"
+        );
+        assert!(values("usr1705314645x", "json").is_empty(), "inside an id");
+        assert!(values("1705314645ms", "json").is_empty(), "a unit suffix");
+        // Punctuation and an underscore still bound one.
+        for text in ["at=1705314645", "backup_1705314645.sql"] {
+            assert_eq!(values(text, "plaintext"), ["1705314645"], "{text}");
+        }
     }
 
     /// A ten-digit phone number is inside the plausible range and cannot

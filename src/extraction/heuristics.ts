@@ -24,8 +24,8 @@ import {
  * Rules:
  * - Whole-content matching with the `d` flag; positions are real
  *   line/column derived from match offsets.
- * - Unix timestamps must be exactly 10 or 13 digits with no digit
- *   neighbors, and must land in a plausible epoch range (~2001–2286).
+ * - Unix timestamps must be exactly 10 or 13 digits with no digit or
+ *   letter neighbors, and must land in a plausible epoch range (~2001–2286).
  * - Overlap dedupe is by offset containment: a match whose range lies
  *   inside another match's range is dropped (the ISO wins over the bare
  *   date inside it), but an identical string elsewhere on the line is a
@@ -127,7 +127,11 @@ const SHARED_PATTERNS: readonly DatePatternSpec[] = [
 		// fractional part of a float is a digit run of any length, and
 		// once 16 of them are microseconds, `RATIO = 1.2345678901234567`
 		// is a timestamp in 2044.
-		pattern: /(?<![\d.])(?:\d{19}|\d{16}|\d{13}|\d{10})(?!\d)/dg,
+		//
+		// A letter on either side rules the run out too. Ten digits in a
+		// row inside a commit hash, `e7477775783ea55`, are part of the
+		// hash, and read alone they are a moment in 2206.
+		pattern: /(?<![\dA-Za-z.])(?:\d{19}|\d{16}|\d{13}|\d{10})(?![\dA-Za-z])/dg,
 		format: 'unix',
 		toTimestamp: unixToTimestamp,
 	},

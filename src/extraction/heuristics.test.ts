@@ -58,6 +58,25 @@ describe('scanDates', () => {
 		expect(scanDates('1705314645123456')).toHaveLength(1);
 	});
 
+	it('does not read ten digits inside a longer word as an epoch', () => {
+		// A pinned GitHub Action: the digits are part of the commit hash.
+		expect(
+			scanDates('uses: lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8'),
+		).toHaveLength(0);
+		expect(scanDates('usr1705314645x')).toHaveLength(0);
+		expect(scanDates('1705314645ms')).toHaveLength(0);
+		// Punctuation and an underscore still bound one.
+		for (const text of [
+			'at=1705314645',
+			'backup_1705314645.sql',
+			'"1705314645"',
+		])
+			expect(
+				scanDates(text).map((d) => d.value),
+				text,
+			).toEqual(['1705314645']);
+	});
+
 	// The window is what separates an epoch from a number that merely has
 	// 13, 16 or 19 digits. Every one of these was a date before it,
 	// between 2113 and 2286.
