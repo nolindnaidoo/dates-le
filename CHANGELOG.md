@@ -94,6 +94,7 @@ separate product on its own cadence and keeps its own
   description or any part of its schema. Six of the ten had drifted.
 - The npm README test also checks that every value an argument offers is
   named in that argument's row.
+
 ### Fixed
 
 - The Open VSX links and the Open VSX downloads badge in the README, the npm
