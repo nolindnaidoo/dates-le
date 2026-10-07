@@ -19,3 +19,5 @@ not a week          2024-W99
 not a year          98765432
 not a month         12345678
 not any epoch unit  12345678901234567
+inside a hash       e7477775783ea5526144ba13e8db5eec57747ce8
+inside an id        usr1705314645x
