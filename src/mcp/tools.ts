@@ -1,9 +1,11 @@
 import { extractDates } from '../extraction/extract';
+import { DATE_KINDS, DEFAULT_KINDS, isDateKind } from '../extraction/kinds';
 import {
 	type DateOrder,
 	DEFAULT_DATE_ORDER,
 	isDateOrder,
 } from '../extraction/regional';
+import type { DateFormat } from '../types';
 import {
 	capped,
 	DEFAULT_MAX_RESULTS,
@@ -50,6 +52,7 @@ async function extract(args: Record<string, unknown>): Promise<unknown> {
 	const content = readString(args, 'content');
 	const maxResults = readMaxResults(args);
 	const order = readDateOrder(args);
+	const kinds = readKinds(args);
 
 	const format = typeof args.format === 'string' ? args.format : undefined;
 	const filename =
@@ -60,7 +63,7 @@ async function extract(args: Record<string, unknown>): Promise<unknown> {
 	// read it — so an unrecognised format is visible in the result rather
 	// than hidden behind an error the agent has no way to satisfy.
 	const languageId = resolveFormat(format, filename);
-	const result = await extractDates(content, languageId, order);
+	const result = await extractDates(content, languageId, order, kinds);
 	const values = result.dates.map((date) => ({
 		value: date.value,
 		format: date.format,
@@ -89,6 +92,20 @@ async function extract(args: Record<string, unknown>): Promise<unknown> {
 	);
 }
 
+/**
+ * Absent is the default. Anything that is not a list of kinds is refused: a
+ * misspelt kind read as "no such kind" would return fewer dates than were
+ * asked for and say nothing.
+ */
+function readKinds(args: Record<string, unknown>): readonly DateFormat[] {
+	const raw = args.kinds;
+	if (raw === undefined) return DEFAULT_KINDS;
+	if (!Array.isArray(raw) || !raw.every(isDateKind)) {
+		throw new Error(`kinds must be a list of: ${DATE_KINDS.join(', ')}`);
+	}
+	return raw;
+}
+
 /** Absent is the default; anything else that is not an order is refused. */
 function readDateOrder(args: Record<string, unknown>): DateOrder {
 	const raw = args.dateOrder;
@@ -103,7 +120,7 @@ export const TOOLS: readonly ToolDefinition[] = Object.freeze([
 	Object.freeze({
 		name: 'extract_dates',
 		description:
-			'Extract every date and timestamp from a document, with its notation, epoch value where resolvable, and 1-based line and column. Reads any text: JSON, YAML, CSV, XML, log and plaintext, JavaScript, TypeScript, HTML, TOML and Markdown are named formats, and anything else is scanned with the patterns they share. Recognises ISO 8601 in extended, basic, week and ordinal form, RFC formats, day-first and month-first numeric dates, dates with the month written out, and Unix timestamps from seconds to nanoseconds.',
+			'Extract every date and timestamp from a document, with its notation, epoch value where resolvable, and 1-based line and column. Reads any text: JSON, YAML, CSV, XML, log and plaintext, JavaScript, TypeScript, HTML, TOML and Markdown are named formats, and anything else is scanned with the patterns they share. Recognises ISO 8601 in extended, basic, week and ordinal form, RFC formats, day-first and month-first numeric dates, dates with the month written out, and, when `kinds` includes "unix", Unix timestamps from seconds to nanoseconds.',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -133,6 +150,13 @@ export const TOOLS: readonly ToolDefinition[] = Object.freeze([
 					default: DEFAULT_DATE_ORDER,
 					description:
 						'How to read a numeric date whose day and month could be either way round, such as 05/01/2024: "mdy" is 1 May, "dmy" is 5 January. A date that can only be read one way, such as 15/01/2024, is read that way regardless, and dotted dates such as 05.01.2024 are always day first.',
+				},
+				kinds: {
+					type: 'array',
+					items: { type: 'string', enum: DATE_KINDS },
+					default: DEFAULT_KINDS,
+					description:
+						'The kinds of date to return, by the name each carries as `format` in the answer. Defaults to every kind except "unix": a bare number such as 1705314645 is only read as a date when "unix" is listed.',
 				},
 				maxResults: MAX_RESULTS_SCHEMA,
 			},

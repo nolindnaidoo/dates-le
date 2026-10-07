@@ -85,7 +85,7 @@ export interface Configuration {
 	readonly copyToClipboardEnabled: boolean;
 	readonly dateOrder: 'mdy' | 'dmy';
 	/** The kinds of date the commands extract. */
-	readonly formats: readonly DateFormat[];
+	readonly kinds: readonly DateFormat[];
 	readonly notificationsLevel: 'all' | 'important' | 'silent';
 	readonly openResultsSideBySide: boolean;
 	readonly safetyEnabled: boolean;

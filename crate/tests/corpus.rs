@@ -42,6 +42,10 @@ fn run(document: &str, format: &str, year: i64, timezone: &str) -> Value {
             &year.to_string(),
             "--tz",
             timezone,
+            // The corpus is what the engine reads, every kind of it. The
+            // CLI leaves the Unix time out unless it is asked for.
+            "--kinds",
+            "iso,simple,local,rfc2822,utc,week,ordinal,basic,custom,unix",
         ])
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped());

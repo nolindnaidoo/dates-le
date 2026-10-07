@@ -325,6 +325,13 @@ sits at 2.x is intended.
 
 ## Known limitations (documented, not bugs)
 
+- Which kinds of date are reported is one list with one default, in three
+  places: the `dates-le.kinds` setting, the MCP tool's `kinds` argument and
+  the crate's `--kinds` flag. `src/extraction/kinds.ts` holds the names and
+  the default for the extension, `Notation::ALL` and `Notation::defaults()`
+  for the crate, and the shared MCP cases hold the two equal. `unix` is
+  left out by default everywhere. The engine still finds every kind: the
+  list decides what is reported.
 - An ambiguous numeric date (`05/01/2024`) follows `dateOrder`, month
   first by default; a date with a number over 12 is read the one way it
   can be, and dotted dates are always day first. Written-out months are

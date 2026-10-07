@@ -45,7 +45,7 @@ export function registerExtractCommand(
 					document.getText(),
 					document.languageId,
 					config.dateOrder,
-					config.formats,
+					config.kinds,
 				);
 
 				if (!result.success) {

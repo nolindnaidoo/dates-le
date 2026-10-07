@@ -408,6 +408,7 @@ fn only_a_malformed_question_exits_two() {
         ["--nope", "--iso"],
         ["--after", "soon"],
         ["--tz", "Mars/Olympus"],
+        ["--kinds", "epoch"],
     ] {
         let run = run(sandbox.path(), &arguments);
         survives(&run, &format!("a malformed question: {arguments:?}"));

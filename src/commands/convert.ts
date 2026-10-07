@@ -53,7 +53,7 @@ export function registerConvertCommand(
 							content,
 							languageId,
 							getConfiguration().dateOrder,
-							getConfiguration().formats,
+							getConfiguration().kinds,
 						);
 
 						if (token.isCancellationRequested) return;

@@ -130,6 +130,17 @@ fn tool_definitions() -> Value {
                                         either way round, such as 05/01/2024: \"mdy\" is 1 May, \
                                         \"dmy\" is 5 January.",
                     },
+                    "kinds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": crate::extract::Notation::ALL
+                                .map(crate::extract::Notation::as_str),
+                        },
+                        "description": "The kinds of date to report. Defaults to every kind \
+                                        except \"unix\": a bare number such as 1705314645 is \
+                                        only read as a date when \"unix\" is listed.",
+                    },
                     "sort": {
                         "type": "boolean",
                         "default": false,
@@ -222,6 +233,7 @@ fn scan_tool(arguments: &Value) -> Result<Value, String> {
                 .and_then(crate::extract::DateOrder::parse)
                 .ok_or_else(|| "dateOrder must be \"mdy\" or \"dmy\"".to_string())?,
         },
+        kinds: extract::read_kinds(arguments)?,
     };
     let walk_options = WalkOptions {
         hidden: flag("hidden"),

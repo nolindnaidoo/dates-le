@@ -18,7 +18,7 @@ pub(crate) mod time;
 pub(crate) mod corpus;
 
 pub(crate) use format::{SUPPORTED_FORMATS, resolve_format};
-pub(crate) use heuristics::Found;
+pub(crate) use heuristics::{Found, Notation};
 pub(crate) use regional::DateOrder;
 
 /// Every date in a document, in the order they appear.

@@ -238,7 +238,7 @@ describe('dates-le.extractDates', () => {
 		expect(_clipboardText()).toMatch(/^1:\d+\t2024-01-15T10:30:00Z$/);
 	});
 
-	it('leaves a Unix time out unless the formats setting asks for it', async () => {
+	it('leaves a Unix time out unless the kinds setting asks for it', async () => {
 		const { deps } = makeDeps();
 		registerExtractCommand(makeContext(), deps);
 		const { _clipboardText } = await import('../__mocks__/vscode');
@@ -255,12 +255,12 @@ describe('dates-le.extractDates', () => {
 		await runCommand('dates-le.extractDates');
 		expect(_clipboardText()).toBe('2024-01-15T10:30:00Z');
 
-		_setConfig('dates-le.formats', ['iso', 'unix']);
+		_setConfig('dates-le.kinds', ['iso', 'unix']);
 		open();
 		await runCommand('dates-le.extractDates');
 		expect(_clipboardText()).toBe('1705314645\n2024-01-15T10:30:00Z');
 
-		_setConfig('dates-le.formats', ['unix']);
+		_setConfig('dates-le.kinds', ['unix']);
 		open();
 		await runCommand('dates-le.extractDates');
 		expect(_clipboardText()).toBe('1705314645');

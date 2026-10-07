@@ -11,7 +11,7 @@
 
 use serde_json::{Value, json};
 
-use crate::extract::{self, DateOrder, SUPPORTED_FORMATS, resolve_format, time};
+use crate::extract::{self, DateOrder, Notation, SUPPORTED_FORMATS, resolve_format, time};
 
 const DEFAULT_MAX_RESULTS: usize = 500;
 const MAX_MAX_RESULTS: usize = 5000;
@@ -25,7 +25,7 @@ pub(crate) fn definition() -> Value {
                         HTML, TOML and Markdown are named formats, and anything else is scanned \
                         with the patterns they share. Recognises ISO 8601 in extended, basic, \
                         week and ordinal form, RFC formats, day-first and month-first numeric \
-                        dates, dates with the month written out, and Unix timestamps from seconds to nanoseconds.",
+                        dates, dates with the month written out, and, when `kinds` includes \"unix\", Unix timestamps from seconds to nanoseconds.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -57,6 +57,15 @@ pub(crate) fn definition() -> Value {
                                     15/01/2024, is read that way regardless, and dotted dates such \
                                     as 05.01.2024 are always day first.",
                 },
+                "kinds": {
+                    "type": "array",
+                    "items": { "type": "string", "enum": Notation::ALL.map(Notation::as_str) },
+                    "default": Notation::defaults().into_iter().map(Notation::as_str).collect::<Vec<_>>(),
+                    "description": "The kinds of date to return, by the name each carries as \
+                                    `format` in the answer. Defaults to every kind except \
+                                    \"unix\": a bare number such as 1705314645 is only read as a \
+                                    date when \"unix\" is listed.",
+                },
                 "maxResults": {
                     "type": "integer",
                     "minimum": 1,
@@ -81,6 +90,7 @@ pub(crate) fn run(arguments: &Value) -> Result<Value, String> {
         .ok_or_else(|| "content is required and must be a string".to_string())?;
     let max_results = read_max_results(arguments)?;
     let order = read_date_order(arguments)?;
+    let kinds = read_kinds(arguments)?;
 
     // Never a refusal. An agent that knows nothing about a document
     // still gets its dates, and `fileType` in the answer says which
@@ -99,6 +109,7 @@ pub(crate) fn run(arguments: &Value) -> Result<Value, String> {
     // tools.
     let mut values: Vec<Value> = extract::extract(content, language, time::current_year(), order)
         .into_iter()
+        .filter(|found| kinds.contains(&found.notation))
         .map(|found| {
             json!({
                 "value": found.value,
@@ -129,6 +140,23 @@ pub(crate) fn run(arguments: &Value) -> Result<Value, String> {
         &[],
         truncated,
     ))
+}
+
+/// Absent is the default. Anything that is not a list of kinds is
+/// refused: a misspelt kind read as "no such kind" would return fewer
+/// dates than were asked for and say nothing.
+pub(super) fn read_kinds(arguments: &Value) -> Result<Vec<Notation>, String> {
+    let Some(raw) = arguments.get("kinds") else {
+        return Ok(Notation::defaults());
+    };
+    raw.as_array()
+        .and_then(|names| {
+            names
+                .iter()
+                .map(|name| name.as_str().and_then(Notation::parse))
+                .collect::<Option<Vec<Notation>>>()
+        })
+        .ok_or_else(|| format!("kinds must be a list of: {}", Notation::names()))
 }
 
 /// Absent is the default; anything else that is not an order is refused.

@@ -145,13 +145,13 @@ describe('dates-le.extractWorkspace and dates-le.extractFolder', () => {
 		expect(report()).toContain('| `2024-04-03` | `03/04/2024` |');
 	});
 
-	it('extracts only the kinds the formats setting names', async () => {
+	it('extracts only the kinds the kinds setting names', async () => {
 		open({ '/w/a.log': 'at 1705314645 on 2024-01-15\n' });
 		await runCommand('dates-le.extractWorkspace');
 		expect(report()).toContain('1 distinct date(s), 1 occurrence(s)');
 		expect(report()).not.toContain('1705314645');
 
-		_setConfig('dates-le.formats', ['simple', 'unix']);
+		_setConfig('dates-le.kinds', ['simple', 'unix']);
 		await runCommand('dates-le.extractWorkspace');
 		expect(report()).toContain('| `2024-01-15T10:30:45Z` | `1705314645` |');
 		expect(report()).toContain('2 distinct date(s), 2 occurrence(s)');

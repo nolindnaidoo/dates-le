@@ -13,11 +13,13 @@ separate product on its own cadence and keeps its own
 
 ### Added
 
-- Choose which kinds of date are extracted. `dates-le.formats` is a
+- Choose which kinds of date are extracted. `dates-le.kinds` is a
   checklist of the kinds every command picks up: `iso`, `simple`, `local`,
   `rfc2822`, `utc`, `week`, `ordinal`, `basic`, `custom` and `unix`. A kind
   left out is not reported, in Extract, in a folder or workspace scan, and
-  in Analyze, Convert, Filter and Validate.
+  in Analyze, Convert, Filter and Validate. The bundled MCP
+  server's `extract_dates` takes the same list as a `kinds` argument, with
+  the same default.
 - Extract across a folder or the whole workspace.
   `Dates-LE: Extract Dates from Workspace` reads every file in the workspace
   from disk, and `Dates-LE: Extract Dates from Folder` does the same for one
@@ -55,8 +57,8 @@ separate product on its own cadence and keeps its own
 - **A Unix time is no longer extracted unless you ask for it.** A bare
   number such as `1705314645` is the one kind that does not look like a
   date, and an id or a phone number of the same length was read as one.
-  `unix` is left out of `dates-le.formats` by default. Add it to read them
-  as before.
+  `unix` is left out of `dates-le.kinds` by default, and out of the MCP
+  tool's `kinds`. Add it to read them as before.
 - No command is bound to a key by default any more. The one default this
   extension shipped sat on a key the editor, the system or another LE
   extension already used. Every command can still be given a key under

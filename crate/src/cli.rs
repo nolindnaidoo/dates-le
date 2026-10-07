@@ -48,6 +48,11 @@ Options:
                        reads 05/01/2024 as 1 May, dmy as 5 January.
                        15/01/2024 and 1/15/2024 are read the one way
                        they can be, and 05.01.2024 is always day first
+  --kinds <kinds>      the kinds of date to report, separated by commas:
+                       iso, simple, local, rfc2822, utc, week, ordinal,
+                       basic, custom, unix. Defaults to every kind but
+                       unix: a bare number such as 1705314645 is only
+                       read as a date when unix is listed
   --year <year>        the year a syslog line is assumed to be in,
                        since the line does not carry one. Defaults to
                        this one, which makes that answer move
@@ -77,7 +82,7 @@ question. Finding none is an answer, not an error.";
 /// Every flag the parser accepts. Held equal to the flags named in
 /// USAGE by a test, and consulted at runtime so the list is what the
 /// parser actually honours.
-const FLAGS: [&str; 15] = [
+const FLAGS: [&str; 16] = [
     "--strict",
     "--tz",
     "--after",
@@ -88,6 +93,7 @@ const FLAGS: [&str; 15] = [
     "--format",
     "--year",
     "--date-order",
+    "--kinds",
     "--values",
     "--stdin",
     "--hidden",
@@ -201,6 +207,20 @@ fn parse_arguments(arguments: &[String]) -> Result<Invocation, String> {
                 let raw = value("--date-order")?;
                 invocation.scan.order = crate::extract::DateOrder::parse(&raw)
                     .ok_or_else(|| format!("--date-order needs mdy or dmy, not {raw:?}"))?;
+                index += 1;
+            }
+            "--kinds" => {
+                let raw = value("--kinds")?;
+                invocation.scan.kinds = raw
+                    .split(',')
+                    .map(|name| crate::extract::Notation::parse(name.trim()))
+                    .collect::<Option<Vec<_>>>()
+                    .ok_or_else(|| {
+                        format!(
+                            "--kinds needs a comma-separated list of: {}, not {raw:?}",
+                            crate::extract::Notation::names()
+                        )
+                    })?;
                 index += 1;
             }
             "--sort" => invocation.scan.sort = true,
@@ -443,6 +463,27 @@ mod tests {
                 .contains("--after")
         );
         assert!(parse(&["--year"]).expect_err("refuses").contains("--year"));
+    }
+
+    #[test]
+    fn the_unix_time_is_left_out_unless_kinds_names_it() {
+        use crate::extract::Notation;
+        let default = parse(&["."]).expect("parses");
+        assert!(!default.scan.kinds.contains(&Notation::Unix));
+        assert_eq!(default.scan.kinds.len(), Notation::ALL.len() - 1);
+
+        let asked = parse(&["--kinds", "iso, unix", "."]).expect("parses");
+        assert_eq!(asked.scan.kinds, [Notation::Iso, Notation::Unix]);
+    }
+
+    #[test]
+    fn a_kind_that_is_not_one_is_refused_and_the_refusal_names_them() {
+        let error = parse(&["--kinds", "iso,epoch", "."]).expect_err("refuses");
+        assert!(error.contains("--kinds"), "{error}");
+        assert!(
+            error.contains("rfc2822") && error.contains("unix"),
+            "{error}"
+        );
     }
 
     #[test]
