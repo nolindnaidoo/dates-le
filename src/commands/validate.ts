@@ -72,6 +72,7 @@ export function registerValidateCommand(
 							content,
 							languageId,
 							getConfiguration().dateOrder,
+							getConfiguration().formats,
 						);
 
 						if (token.isCancellationRequested) return;

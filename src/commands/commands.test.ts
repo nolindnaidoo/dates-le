@@ -238,6 +238,34 @@ describe('dates-le.extractDates', () => {
 		expect(_clipboardText()).toMatch(/^1:\d+\t2024-01-15T10:30:00Z$/);
 	});
 
+	it('leaves a Unix time out unless the formats setting asks for it', async () => {
+		const { deps } = makeDeps();
+		registerExtractCommand(makeContext(), deps);
+		const { _clipboardText } = await import('../__mocks__/vscode');
+		_setConfig('dates-le.copyToClipboardEnabled', true);
+		const open = () =>
+			_setActiveEditor(
+				_createDocument({
+					content: 'at 1705314645 on 2024-01-15T10:30:00Z\n',
+					languageId: 'plaintext',
+				}),
+			);
+
+		open();
+		await runCommand('dates-le.extractDates');
+		expect(_clipboardText()).toBe('2024-01-15T10:30:00Z');
+
+		_setConfig('dates-le.formats', ['iso', 'unix']);
+		open();
+		await runCommand('dates-le.extractDates');
+		expect(_clipboardText()).toBe('1705314645\n2024-01-15T10:30:00Z');
+
+		_setConfig('dates-le.formats', ['unix']);
+		open();
+		await runCommand('dates-le.extractDates');
+		expect(_clipboardText()).toBe('1705314645');
+	});
+
 	it('reports empty documents as info, not error', async () => {
 		const { events, deps } = makeDeps();
 		registerExtractCommand(makeContext(), deps);
