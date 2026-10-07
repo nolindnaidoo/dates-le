@@ -19,6 +19,8 @@ export function registerHelpCommand(
 
 ## Commands
 - **Extract Dates**: Extract dates from the current document
+- **Extract Dates from Workspace**: Every date in every file in the workspace, in time order: each date once, with its spellings and where it is
+- **Extract Dates from Folder**: The same for one folder. Also on a folder in the Explorer
 - **Analyze Dates**: Statistics, patterns, clusters, and anomalies for extracted dates
 - **Convert Dates**: Convert dates in the document to another format
 - **Filter Dates**: Extract dates matching a range or condition

@@ -1,4 +1,7 @@
 import * as assert from 'node:assert';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import * as vscode from 'vscode';
 
 const EXTENSION_ID = 'nolindnaidoo.dates-le';
@@ -30,6 +33,8 @@ describe('Dates-LE integration', function () {
 		const commands = await vscode.commands.getCommands(true);
 		for (const id of [
 			'dates-le.extractDates',
+			'dates-le.extractWorkspace',
+			'dates-le.extractFolder',
 			'dates-le.postProcess.dedupe',
 			'dates-le.postProcess.sort',
 			'dates-le.analyze',
@@ -107,5 +112,28 @@ describe('Dates-LE integration', function () {
 			editor.document.getText(),
 			'2024-01-15\n2024-01-16\n2024-01-17',
 		);
+	});
+	it('extracts the dates of a folder from disk, in time order, one row per moment', async () => {
+		const root = mkdtempSync(join(tmpdir(), 'dates-le-extract-'));
+		for (const dir of ['docs', 'node_modules', 'generated']) mkdirSync(join(root, dir));
+		writeFileSync(join(root, '.gitignore'), 'generated/\n');
+		writeFileSync(join(root, 'docs', 'release.md'), 'Shipped 2024-01-15. Announced January 15, 2024.\nSupport ends 2025-12-31.\n');
+		writeFileSync(join(root, 'config.ts'), "const launch = '2024-01-15T00:00:00Z';\n");
+		writeFileSync(join(root, 'node_modules', 'x.js'), "const skipped = '1999-09-09';\n");
+		writeFileSync(join(root, 'generated', 'g.ts'), "const g = '1998-08-08';\n");
+
+		await vscode.commands.executeCommand('dates-le.extractFolder', vscode.Uri.file(root));
+
+		const report = vscode.workspace.textDocuments.find(
+			(doc) => doc.languageId === 'markdown' && doc.getText().includes('dates-le-extract-'),
+		);
+		assert.ok(report, 'no workspace report was opened');
+		const text = report.getText();
+		assert.match(text, /2 distinct date\(s\), 4 occurrence\(s\) in 2 file\(s\)/);
+		assert.ok(text.includes('| `2024-01-15` | `2024-01-15`, `2024-01-15T00:00:00Z`, `January 15, 2024` | 3 | 2 | |'));
+		assert.ok(text.includes('| `2025-12-31` | `2025-12-31` | 1 | 1 | `docs/release.md` |'));
+		assert.ok(text.indexOf('| `2024-01-15`') < text.indexOf('| `2025-12-31`'));
+		assert.ok(!text.includes('1999') && !text.includes('1998'));
+		assert.match(text, /1 file\(s\) ignored by \.gitignore/);
 	});
 });

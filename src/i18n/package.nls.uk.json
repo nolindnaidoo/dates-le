@@ -5,6 +5,8 @@
 	"manifest.command.convert.title": "Перетворення дат",
 	"manifest.command.dedupe.title": "Видалити дублікати дат",
 	"manifest.command.extract.title": "Вилучити дати",
+	"manifest.command.extract-workspace.title": "Видобути дати з робочої області",
+	"manifest.command.extract-folder.title": "Видобути дати з папки",
 	"manifest.command.filter.title": "Фільтрувати дати",
 	"manifest.command.help.title": "Довідка та усунення несправностей",
 	"manifest.command.settings.title": "Відкрити налаштування",
@@ -26,5 +28,13 @@
 	"manifest.settings.statusbar.enabled.desc": "Показувати запис статусної панелі Dates-LE для швидкого доступу",
 	"manifest.settings.telemetry.desc": "Увімкнути локальні журнали телеметрії на панелі виводу",
 	"manifest.settings.title": "Налаштування Dates-LE",
-	"manifest.mcp.label": "Dates-LE: інструменти для вилучення дат у режимі агента"
+	"manifest.mcp.label": "Dates-LE: інструменти для вилучення дат у режимі агента",
+	"manifest.settings.workspace.excludes.desc": "Glob-шаблони додаткових файлів, які пропускає сканування папки або робочої області, окрім вбудованого списку. Приклад: **/fixtures/**",
+	"manifest.settings.workspace.max-files.desc": "Найбільша кількість файлів, яку читає одне сканування папки або робочої області",
+	"manifest.settings.workspace.max-results.desc": "Найбільша кількість результатів, яку повідомляє одне сканування папки або робочої області, перш ніж припинити читання",
+	"manifest.settings.workspace.patterns.desc": "Glob-шаблони файлів, які читає сканування папки або робочої області",
+	"manifest.settings.workspace.gitignore.desc": "Пропускати файли, які пропускають файли .gitignore проєкту",
+	"manifest.settings.workspace.always-include.desc": "Glob-шаблони файлів, які сканування папки або робочої області читає, навіть якщо вбудований список або .gitignore їх пропустили б. Приклад: **/vendor/**",
+	"manifest.settings.workspace.binary.desc": "Пропускати зображення, шрифти, архіви та інші нетекстові файли",
+	"manifest.settings.workspace.default-excludes.desc": "Пропускати папки залежностей, результати збирання, кеші та lock-файли, наприклад node_modules, dist, .next і package-lock.json"
 }

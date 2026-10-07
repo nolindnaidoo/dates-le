@@ -5,6 +5,8 @@
 	"manifest.command.convert.title": "Преобразование дат",
 	"manifest.command.dedupe.title": "Дедупликация дат",
 	"manifest.command.extract.title": "Извлечение дат",
+	"manifest.command.extract-workspace.title": "Извлечь даты из рабочей области",
+	"manifest.command.extract-folder.title": "Извлечь даты из папки",
 	"manifest.command.filter.title": "Фильтр по датам",
 	"manifest.command.help.title": "Справка и устранение неполадок",
 	"manifest.command.settings.title": "Открыть настройки",
@@ -26,5 +28,13 @@
 	"manifest.settings.statusbar.enabled.desc": "Показывать строку состояния Dates-LE для быстрого доступа",
 	"manifest.settings.telemetry.desc": "Включить локальные журналы телеметрии в панели вывода",
 	"manifest.settings.title": "Настройки Dates-LE",
-	"manifest.mcp.label": "Dates-LE — инструменты для извлечения дат в режиме агента"
+	"manifest.mcp.label": "Dates-LE — инструменты для извлечения дат в режиме агента",
+	"manifest.settings.workspace.excludes.desc": "Glob-шаблоны дополнительных файлов, которые пропускает сканирование папки или рабочей области, помимо встроенного списка. Пример: **/fixtures/**",
+	"manifest.settings.workspace.max-files.desc": "Наибольшее число файлов, которое читает одно сканирование папки или рабочей области",
+	"manifest.settings.workspace.max-results.desc": "Наибольшее число результатов, которое сообщает одно сканирование папки или рабочей области, прежде чем прекратить чтение",
+	"manifest.settings.workspace.patterns.desc": "Glob-шаблоны файлов, которые читает сканирование папки или рабочей области",
+	"manifest.settings.workspace.gitignore.desc": "Пропускать файлы, которые пропускают файлы .gitignore проекта",
+	"manifest.settings.workspace.always-include.desc": "Glob-шаблоны файлов, которые сканирование папки или рабочей области читает, даже если встроенный список или .gitignore их пропустили бы. Пример: **/vendor/**",
+	"manifest.settings.workspace.binary.desc": "Пропускать изображения, шрифты, архивы и другие нетекстовые файлы",
+	"manifest.settings.workspace.default-excludes.desc": "Пропускать папки зависимостей, результаты сборки, кэши и lock-файлы, например node_modules, dist, .next и package-lock.json"
 }

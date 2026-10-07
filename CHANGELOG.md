@@ -9,10 +9,34 @@ This file covers the **VS Code extension**. The Rust CLI in `crate/` is a
 separate product on its own cadence and keeps its own
 [CHANGELOG](crate/CHANGELOG.md).
 
-## [2.5.0] - 2026-10-05
+## [2.5.0] - 2026-10-06
 
 ### Added
 
+- Extract across a folder or the whole workspace.
+  `Dates-LE: Extract Dates from Workspace` reads every file in the workspace
+  from disk, and `Dates-LE: Extract Dates from Folder` does the same for one
+  folder, from the command palette or from a folder in the Explorer. The
+  report is the project's dates in time order: each date once however it
+  is spelled, so `2024-01-15`, `2024-01-15T00:00:00Z` and `January 15, 2024`
+  are one row, with the spellings, how often it is written, in how many
+  files, and where. A date written once is placed in its table row, and a
+  repeated one gets a section that lists each place. An ambiguous date is
+  read the way `dates-le.dateOrder` says. It ends with a line for
+  each thing the scan left unread.
+- A scan skips three things by default, each with its own switch:
+  dependency folders, build output, caches and lockfiles
+  (`dates-le.workspace.scanUseDefaultExcludes`), whatever the project's
+  `.gitignore` files skip (`dates-le.workspace.scanRespectGitignore`), and
+  images, fonts, archives and other files that are not text
+  (`dates-le.workspace.scanSkipBinaryFiles`). `dates-le.workspace.scanExcludes`
+  skips more, and `dates-le.workspace.scanAlwaysInclude` reads a path whatever
+  the switches say. `dates-le.workspace.scanPatterns` chooses the files to
+  read in the first place.
+- `dates-le.workspace.scanMaxFiles` caps how many files are read and
+  `dates-le.workspace.scanMaxResults` caps how many occurrences are listed.
+- The positions settings apply to a scan as they do to Extract: off by
+  default, and then each line is a file and how many times the date is in it.
 - Positions are now a setting. `dates-le.showPositions` decides whether the
   output gives the line and column of each date, and
   `dates-le.clipboardIncludesPositions` decides the same for the copy on the
