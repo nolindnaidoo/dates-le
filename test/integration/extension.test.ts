@@ -70,11 +70,33 @@ describe('Dates-LE integration', function () {
 		);
 		assert.ok(resultDoc, 'no results document found');
 		const lines = resultDoc.getText().split('\n');
-		assert.deepStrictEqual(lines, [
-			'2024-01-15T10:30:00Z',
-			'1705312200',
-			'2024-03-01',
-		]);
+		// The bare number is a Unix time, and that kind is off by default.
+		assert.deepStrictEqual(lines, ['2024-01-15T10:30:00Z', '2024-03-01']);
+	});
+
+	it('extracts a Unix time once the formats setting asks for it', async () => {
+		const settings = vscode.workspace.getConfiguration('dates-le');
+		await settings.update(
+			'formats',
+			['iso', 'simple', 'unix'],
+			vscode.ConfigurationTarget.Global,
+		);
+		try {
+			await openEditor('created 2024-01-15T10:30:00Z epoch 1705312200\n', 'plaintext');
+			await vscode.commands.executeCommand('dates-le.extractDates');
+			const resultDoc = vscode.workspace.textDocuments.find(
+				(doc) =>
+					doc.languageId === 'plaintext' &&
+					doc.getText().split('\n').includes('1705312200'),
+			);
+			assert.ok(resultDoc, 'no results document held the Unix time');
+			assert.deepStrictEqual(resultDoc.getText().split('\n'), [
+				'2024-01-15T10:30:00Z',
+				'1705312200',
+			]);
+		} finally {
+			await settings.update('formats', undefined, vscode.ConfigurationTarget.Global);
+		}
 	});
 
 	it('offers its MCP server to agent mode', async () => {

@@ -86,7 +86,7 @@ exports.run = async function run() {
 	assert.ok(result, 'no results document produced');
 	assert.deepStrictEqual(result.getText().split('\\n'), [
 		'2024-01-15T10:30:00Z',
-		'1705312200',
+		// The bare number is a Unix time, and that kind is off by default.
 		'2024-03-01',
 	]);
 	console.log('VSIX E2E OK:', JSON.stringify(result.getText().split('\\n')));

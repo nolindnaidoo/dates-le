@@ -1,12 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { _resetMockState, _setConfig } from '../__mocks__/vscode';
 import {
 	DEFAULT_EXCLUDED_FILES,
 	DEFAULT_EXCLUDED_FOLDERS,
 	DEFAULT_EXCLUDED_PATHS,
 } from '../workspace/defaults';
-import { CONFIG_DEFAULTS } from './config';
+import { CONFIG_DEFAULTS, DATE_KINDS, getConfiguration } from './config';
 
 /**
  * CONFIG_DEFAULTS must stay identical to the defaults declared in
@@ -27,6 +28,7 @@ describe('config defaults parity with package.json', () => {
 		'dates-le.clipboardIncludesPositions': 'clipboardIncludesPositions',
 		'dates-le.copyToClipboardEnabled': 'copyToClipboardEnabled',
 		'dates-le.dateOrder': 'dateOrder',
+		'dates-le.formats': 'formats',
 		'dates-le.notificationsLevel': 'notificationsLevel',
 		'dates-le.openResultsSideBySide': 'openResultsSideBySide',
 		'dates-le.safety.enabled': 'safetyEnabled',
@@ -103,5 +105,47 @@ describe('the README lists the folders a scan skips', () => {
 			...DEFAULT_EXCLUDED_FILES,
 			...DEFAULT_EXCLUDED_PATHS,
 		]);
+	});
+});
+
+describe('dates-le.formats', () => {
+	afterEach(() => {
+		_resetMockState();
+	});
+
+	it('leaves the Unix time out by default, and offers every kind the engine emits', () => {
+		expect(CONFIG_DEFAULTS.formats).not.toContain('unix');
+		expect([...CONFIG_DEFAULTS.formats, 'unix'].sort()).toEqual(
+			[...DATE_KINDS].sort(),
+		);
+		const manifest = JSON.parse(
+			readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf8'),
+		);
+		const items =
+			manifest.contributes.configuration.properties['dates-le.formats'].items;
+		expect(items.enum).toEqual([...DATE_KINDS]);
+		expect(items.enumDescriptions).toHaveLength(DATE_KINDS.length);
+	});
+
+	it('keeps the kinds it knows and drops what is not one', () => {
+		_setConfig('dates-le.formats', ['unix', 'nonsense', 'iso', 7]);
+		expect(getConfiguration().formats).toEqual(['iso', 'unix']);
+	});
+
+	it('reads an empty list as nothing, and a value that is not a list as the default', () => {
+		_setConfig('dates-le.formats', []);
+		expect(getConfiguration().formats).toEqual([]);
+		_setConfig('dates-le.formats', 'iso');
+		expect(getConfiguration().formats).toEqual(CONFIG_DEFAULTS.formats);
+	});
+
+	it('is in the README settings table with its default', () => {
+		const readme = readFileSync(
+			join(__dirname, '..', '..', 'README.md'),
+			'utf8',
+		);
+		expect(readme).toContain(
+			`| \`dates-le.formats\` | ${CONFIG_DEFAULTS.formats.map((kind) => `\`${kind}\``).join(', ')} |`,
+		);
 	});
 });

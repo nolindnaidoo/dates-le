@@ -9,10 +9,15 @@ This file covers the **VS Code extension**. The Rust CLI in `crate/` is a
 separate product on its own cadence and keeps its own
 [CHANGELOG](crate/CHANGELOG.md).
 
-## [2.5.0] - 2026-10-06
+## [2.5.0] - 2026-10-07
 
 ### Added
 
+- Choose which kinds of date are extracted. `dates-le.formats` is a
+  checklist of the kinds every command picks up: `iso`, `simple`, `local`,
+  `rfc2822`, `utc`, `week`, `ordinal`, `basic`, `custom` and `unix`. A kind
+  left out is not reported, in Extract, in a folder or workspace scan, and
+  in Analyze, Convert, Filter and Validate.
 - Extract across a folder or the whole workspace.
   `Dates-LE: Extract Dates from Workspace` reads every file in the workspace
   from disk, and `Dates-LE: Extract Dates from Folder` does the same for one
@@ -47,6 +52,11 @@ separate product on its own cadence and keeps its own
 
 ### Changed
 
+- **A Unix time is no longer extracted unless you ask for it.** A bare
+  number such as `1705314645` is the one kind that does not look like a
+  date, and an id or a phone number of the same length was read as one.
+  `unix` is left out of `dates-le.formats` by default. Add it to read them
+  as before.
 - No command is bound to a key by default any more. The one default this
   extension shipped sat on a key the editor, the system or another LE
   extension already used. Every command can still be given a key under
@@ -54,6 +64,10 @@ separate product on its own cadence and keeps its own
 
 ### Fixed
 
+- A ten-digit number past the year 2100 is no longer read as a Unix time.
+  The wider forms were already held to 2001–2100. Ten digits were left to
+  run to 2286, so a phone number such as `5551234567` came out as a date in
+  2145.
 - Ten digits inside a longer word are no longer read as a Unix time. A
   pinned GitHub Action such as `lychee-action@e7477775783ea55…` carries a
   commit hash, and the ten digits in a row inside it came out as a date in

@@ -1,4 +1,5 @@
 import type {
+	DateFormat,
 	DateValue,
 	ExtractionResult,
 	FileType,
@@ -14,10 +15,15 @@ import { extractFromYaml } from './formats/yaml';
 import { scanDates } from './heuristics';
 import type { DateOrder } from './regional';
 
+/**
+ * @param formats The kinds of date to keep. Every kind when it is left out,
+ *   which is what the MCP tool and the CLI's shared contract ask for.
+ */
 export async function extractDates(
 	content: string,
 	languageId: string,
 	order?: DateOrder,
+	formats?: readonly DateFormat[],
 ): Promise<ExtractionResult> {
 	try {
 		const dates = extractByFileType(
@@ -25,10 +31,19 @@ export async function extractDates(
 			determineFileType(languageId),
 			order,
 		);
-		return createSuccessResult(dates);
+		return createSuccessResult(ofKinds(dates, formats));
 	} catch (error) {
 		return createErrorResult(error);
 	}
+}
+
+function ofKinds(
+	dates: readonly DateValue[],
+	formats: readonly DateFormat[] | undefined,
+): readonly DateValue[] {
+	return formats === undefined
+		? dates
+		: dates.filter((date) => formats.includes(date.format));
 }
 
 /**
@@ -40,9 +55,13 @@ export function extractDatesFromText(
 	content: string,
 	languageId: string,
 	order?: DateOrder,
+	formats?: readonly DateFormat[],
 ): readonly DateValue[] {
 	try {
-		return extractByFileType(content, determineFileType(languageId), order);
+		return ofKinds(
+			extractByFileType(content, determineFileType(languageId), order),
+			formats,
+		);
 	} catch {
 		return [];
 	}

@@ -130,11 +130,11 @@ That prints the tool list and exits — if you see `extract_dates`, the server w
 
 **Every document is read.** A format only ever *adds* patterns to the shared ones, so a language ID this does not name — Python, Go, Rust, shell, SQL — is scanned with the shared patterns rather than refused. What it does not get is the format-specific extras: `Jan 15 10:30:47` is a date in a log file and three words in a Python one.
 
-Recognized date patterns: ISO 8601 in extended (`2024-01-15T10:30:00Z`, with optional milliseconds and offset), **basic** (`20240115`, `20240115T103045Z`), **week** (`2024-W03`, `2024-W03-1`) and **ordinal** (`2024-015`) form; RFC 2822 (`Mon, 15 Jan 2024 10:30:00 GMT`); Unix epochs in seconds, milliseconds, microseconds and nanoseconds (exactly 10, 13, 16 or 19 digits; everything wider than 10 must also land between 2001-09-09 and 2100, so a request id or a card number is not a date in the 2200s, and digits embedded in longer numbers or in the fraction of a float are never matched at all); UTC strings; bare `YYYY-MM-DD`; numeric dates with the day or the month first, separated by `/`, `.` or `-` (`15/01/2024`, `1/15/2024`, `15.01.2024 14:00`, `15-01-2024 3:30 PM`), with an optional time; and dates with the month written out (`15 January 2024`, `3rd Feb. 2024`, `Jan 15, 2024`, `15-JAN-2024`). A numeric date is read the one way it can be when a number is over 12; only when both could be a month does `dates-le.dateOrder` decide, and dotted dates are always day first. Every numeric or written date is checked against the calendar, so `31/02/2024` is not a date, and a numeric year must fall within 1900–2099. Every occurrence is reported with its real line and column. Values that cannot be resolved to a timestamp are not extracted.
+Recognized date patterns: ISO 8601 in extended (`2024-01-15T10:30:00Z`, with optional milliseconds and offset), **basic** (`20240115`, `20240115T103045Z`), **week** (`2024-W03`, `2024-W03-1`) and **ordinal** (`2024-015`) form; RFC 2822 (`Mon, 15 Jan 2024 10:30:00 GMT`); Unix epochs in seconds, milliseconds, microseconds and nanoseconds, **when `dates-le.formats` includes `unix`** (exactly 10, 13, 16 or 19 digits that land between 2001-09-09 and 2100, so a phone number, a request id or a card number is not a date in the 2100s or 2200s; digits embedded in a longer number, in a longer word such as a commit hash, or in the fraction of a float are never matched at all); UTC strings; bare `YYYY-MM-DD`; numeric dates with the day or the month first, separated by `/`, `.` or `-` (`15/01/2024`, `1/15/2024`, `15.01.2024 14:00`, `15-01-2024 3:30 PM`), with an optional time; and dates with the month written out (`15 January 2024`, `3rd Feb. 2024`, `Jan 15, 2024`, `15-JAN-2024`). A numeric date is read the one way it can be when a number is over 12; only when both could be a month does `dates-le.dateOrder` decide, and dotted dates are always day first. Every numeric or written date is checked against the calendar, so `31/02/2024` is not a date, and a numeric year must fall within 1900–2099. Every occurrence is reported with its real line and column. Values that cannot be resolved to a timestamp are not extracted.
 
 Timezone names are the fixed offsets `GMT`/`UT`/`UTC`/`Z`, the eight US abbreviations, and `CEST`, `CET`, `BST`, `JST`, `AEST`, `IST`. They are fixed, not zone-aware.
 
-Known limitations: an ambiguous numeric date follows `dates-le.dateOrder`, which is month first unless you change it; written-out months are English only; syslog lines carry no year, so the current year is assumed; `IST` names three different zones and is read as India's `+05:30`; a bare 8-digit run is only a date inside 1900–2099, and a 10-digit number in the plausible epoch range cannot be told from a phone number.
+Known limitations: an ambiguous numeric date follows `dates-le.dateOrder`, which is month first unless you change it; written-out months are English only; syslog lines carry no year, so the current year is assumed; `IST` names three different zones and is read as India's `+05:30`; a bare 8-digit run is only a date inside 1900–2099, and a 10-digit number inside the epoch window cannot be told from a Unix time, which is why that kind is off unless you turn it on.
 
 ## Across a folder or a workspace
 
@@ -235,6 +235,33 @@ parser included — against 178 cases taken from V8 itself.
 A date with no timezone resolves against the machine's, because that is
 the true answer and it genuinely differs by machine. `TZ` is honoured.
 
+## Choosing which kinds of date are extracted
+
+`dates-le.formats` is a checklist of the kinds of date every command picks up. A kind left out is not reported, in Extract, in a folder or workspace scan, and in Analyze, Convert, Filter and Validate.
+
+| Kind | Reads | Default |
+|---|---|---|
+| `iso` | `2024-01-15T10:30:00Z` | On |
+| `simple` | `2024-01-15` | On |
+| `local` | `01/15/2024`, `January 15, 2024` | On |
+| `rfc2822` | `Mon, 15 Jan 2024 10:30:00 GMT` | On |
+| `utc` | `Mon Jan 15 2024 10:30:00 GMT+0000` | On |
+| `week` | `2024-W03` | On |
+| `ordinal` | `2024-015` | On |
+| `basic` | `20240115` | On |
+| `custom` | Dates a file type marks: log lines, HTML `datetime` attributes, `new Date("…")` | On |
+| `unix` | `1705314645` | **Off** |
+
+**Unix time is off by default.** It is the one kind that does not look like a date: any ten-digit number in the right range is one, and so is an id or a phone number of the same length. Turn it on when you are reading logs or data that carry them:
+
+```jsonc
+{
+	"dates-le.formats": ["iso", "simple", "local", "rfc2822", "utc", "week", "ordinal", "basic", "custom", "unix"]
+}
+```
+
+The MCP tool and the CLI are not affected by this setting. They report every kind, and name the kind of each date so a caller can filter.
+
 ## Commands
 
 | Command | Description |
@@ -262,6 +289,7 @@ No command is bound to a key by default. Give any of them one under **Keyboard S
 | `dates-le.copyToClipboardEnabled` | `false` | Also copy results to the clipboard |
 | `dates-le.clipboardIncludesPositions` | `false` | Include the line and column in that copy |
 | `dates-le.dateOrder` | `mdy` | How to read a numeric date that could be either way round: `mdy` reads `05/01/2024` as 1 May, `dmy` as 5 January |
+| `dates-le.formats` | `iso`, `simple`, `local`, `rfc2822`, `utc`, `week`, `ordinal`, `basic`, `custom` | The kinds of date to extract. Add `unix` to read bare numbers such as `1705314645` as dates |
 | `dates-le.notificationsLevel` | `silent` | `all` = every notification, `important` = warnings + errors, `silent` = errors only |
 | `dates-le.workspace.scanPatterns` | `["**/*"]` | The files a folder or workspace scan reads |
 | `dates-le.workspace.scanUseDefaultExcludes` | `true` | Skip dependency folders, build output, caches and lockfiles |
@@ -327,12 +355,12 @@ a build only tells you how busy the runner was.
 <!-- coverage:start -->
 | Metric | Coverage |
 | --- | --- |
-| Statements | 92.48% |
-| Branches | 83.26% |
-| Functions | 97.10% |
-| Lines | 93.85% |
+| Statements | 92.52% |
+| Branches | 83.36% |
+| Functions | 97.14% |
+| Lines | 93.88% |
 
-310 test cases across 25 files, plus an integration suite that runs
+319 test cases across 25 files, plus an integration suite that runs
 in a real VS Code extension host and an end-to-end test that installs the
 built `.vsix` into a clean profile.
 

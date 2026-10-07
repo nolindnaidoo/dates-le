@@ -68,6 +68,7 @@ async function performAnalysis(
 				document.getText(),
 				document.languageId,
 				getConfiguration().dateOrder,
+				getConfiguration().formats,
 			);
 
 			if (token.isCancellationRequested) {

@@ -64,6 +64,7 @@ export function registerFilterCommand(
 							content,
 							languageId,
 							getConfiguration().dateOrder,
+							getConfiguration().formats,
 						);
 
 						if (token.isCancellationRequested) return;
