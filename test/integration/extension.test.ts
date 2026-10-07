@@ -74,10 +74,10 @@ describe('Dates-LE integration', function () {
 		assert.deepStrictEqual(lines, ['2024-01-15T10:30:00Z', '2024-03-01']);
 	});
 
-	it('extracts a Unix time once the formats setting asks for it', async () => {
+	it('extracts a Unix time once the kinds setting asks for it', async () => {
 		const settings = vscode.workspace.getConfiguration('dates-le');
 		await settings.update(
-			'formats',
+			'kinds',
 			['iso', 'simple', 'unix'],
 			vscode.ConfigurationTarget.Global,
 		);
@@ -95,7 +95,7 @@ describe('Dates-LE integration', function () {
 				'1705312200',
 			]);
 		} finally {
-			await settings.update('formats', undefined, vscode.ConfigurationTarget.Global);
+			await settings.update('kinds', undefined, vscode.ConfigurationTarget.Global);
 		}
 	});
 

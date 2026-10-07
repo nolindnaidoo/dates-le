@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { DATE_KINDS, DEFAULT_KINDS } from '../extraction/kinds';
 import {
 	type DateOrder,
 	DEFAULT_DATE_ORDER,
@@ -17,19 +18,7 @@ export const CONFIG_DEFAULTS = Object.freeze({
 	clipboardIncludesPositions: false,
 	copyToClipboardEnabled: false,
 	dateOrder: DEFAULT_DATE_ORDER,
-	// Every kind but the Unix time: it is the one kind that does not look
-	// like a date, and a ten-digit id or phone number can be one.
-	formats: Object.freeze([
-		'iso',
-		'simple',
-		'local',
-		'rfc2822',
-		'utc',
-		'week',
-		'ordinal',
-		'basic',
-		'custom',
-	]) as readonly DateFormat[],
+	kinds: DEFAULT_KINDS,
 	notificationsLevel: 'silent' as const,
 	openResultsSideBySide: true,
 	safetyEnabled: true,
@@ -62,7 +51,7 @@ export function getConfiguration(): Configuration {
 			CONFIG_DEFAULTS.copyToClipboardEnabled,
 		),
 		dateOrder: readDateOrder(config),
-		formats: readFormats(config),
+		kinds: readKinds(config),
 		notificationsLevel: readNotificationLevel(config),
 		openResultsSideBySide: readBoolean(
 			config,
@@ -193,30 +182,16 @@ function readNotificationLevel(
 		: CONFIG_DEFAULTS.notificationsLevel;
 }
 
-/** The kinds a setting may name. `unknown` is never emitted, so it is not one. */
-export const DATE_KINDS: readonly DateFormat[] = Object.freeze([
-	'iso',
-	'simple',
-	'local',
-	'rfc2822',
-	'utc',
-	'week',
-	'ordinal',
-	'basic',
-	'custom',
-	'unix',
-]);
-
 /**
  * The kinds asked for, with anything that is not a kind left out. A setting
  * that is not a list at all is read as the default, not as nothing: an
  * extraction that silently found no dates would look like a clean file.
  */
-function readFormats(
+function readKinds(
 	config: vscode.WorkspaceConfiguration,
 ): readonly DateFormat[] {
-	const raw = config.get<unknown>('formats', CONFIG_DEFAULTS.formats);
-	if (!Array.isArray(raw)) return CONFIG_DEFAULTS.formats;
+	const raw = config.get<unknown>('kinds', CONFIG_DEFAULTS.kinds);
+	if (!Array.isArray(raw)) return CONFIG_DEFAULTS.kinds;
 	return Object.freeze(DATE_KINDS.filter((kind) => raw.includes(kind)));
 }
 

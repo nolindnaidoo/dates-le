@@ -209,7 +209,7 @@
 					],
 					"description": "%manifest.settings.dateOrder.desc%"
 				},
-				"dates-le.formats": {
+				"dates-le.kinds": {
 					"type": "array",
 					"uniqueItems": true,
 					"default": [
@@ -238,19 +238,19 @@
 							"unix"
 						],
 						"enumDescriptions": [
-							"%manifest.settings.formats.option.iso%",
-							"%manifest.settings.formats.option.simple%",
-							"%manifest.settings.formats.option.local%",
-							"%manifest.settings.formats.option.rfc2822%",
-							"%manifest.settings.formats.option.utc%",
-							"%manifest.settings.formats.option.week%",
-							"%manifest.settings.formats.option.ordinal%",
-							"%manifest.settings.formats.option.basic%",
-							"%manifest.settings.formats.option.custom%",
-							"%manifest.settings.formats.option.unix%"
+							"%manifest.settings.kinds.option.iso%",
+							"%manifest.settings.kinds.option.simple%",
+							"%manifest.settings.kinds.option.local%",
+							"%manifest.settings.kinds.option.rfc2822%",
+							"%manifest.settings.kinds.option.utc%",
+							"%manifest.settings.kinds.option.week%",
+							"%manifest.settings.kinds.option.ordinal%",
+							"%manifest.settings.kinds.option.basic%",
+							"%manifest.settings.kinds.option.custom%",
+							"%manifest.settings.kinds.option.unix%"
 						]
 					},
-					"description": "%manifest.settings.formats.desc%"
+					"description": "%manifest.settings.kinds.desc%"
 				},
 				"dates-le.notificationsLevel": {
 					"type": "string",

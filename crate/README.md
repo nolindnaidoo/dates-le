@@ -82,7 +82,7 @@ still yields its dates.
 |---|---|
 | `iso` | `2024-01-15T10:30:45.123Z` |
 | `rfc2822` | `Mon, 15 Jan 2024 10:30:45 GMT` |
-| `unix` | `1705314645`, `1705314645123`, and microseconds and nanoseconds |
+| `unix` | `1705314645`, `1705314645123`, and microseconds and nanoseconds. Only with `--kinds` naming `unix` |
 | `utc` | `Mon Jan 15 2024 10:30:45 GMT+0000` |
 | `local` | `1/15/2024 10:30:45` |
 | `simple` | `2024-01-15` |
@@ -140,6 +140,11 @@ the hour that does not exist and the hour that happens twice.
 --date-order <order> how to read a numeric date whose day and month
                      could be either way round: mdy (the default)
                      reads 05/01/2024 as 1 May, dmy as 5 January
+--kinds <kinds>      the kinds of date to report, separated by commas:
+                     iso, simple, local, rfc2822, utc, week, ordinal,
+                     basic, custom, unix. Defaults to every kind but
+                     unix: a bare number such as 1705314645 is only
+                     read as a date when unix is listed
 --year <year>        the year a syslog line is assumed to be in, since
                      the line does not carry one. Defaults to this one,
                      which makes that answer move

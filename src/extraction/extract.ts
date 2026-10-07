@@ -16,14 +16,13 @@ import { scanDates } from './heuristics';
 import type { DateOrder } from './regional';
 
 /**
- * @param formats The kinds of date to keep. Every kind when it is left out,
- *   which is what the MCP tool and the CLI's shared contract ask for.
+ * @param kinds The kinds of date to keep. Every kind when it is left out.
  */
 export async function extractDates(
 	content: string,
 	languageId: string,
 	order?: DateOrder,
-	formats?: readonly DateFormat[],
+	kinds?: readonly DateFormat[],
 ): Promise<ExtractionResult> {
 	try {
 		const dates = extractByFileType(
@@ -31,7 +30,7 @@ export async function extractDates(
 			determineFileType(languageId),
 			order,
 		);
-		return createSuccessResult(ofKinds(dates, formats));
+		return createSuccessResult(ofKinds(dates, kinds));
 	} catch (error) {
 		return createErrorResult(error);
 	}
@@ -39,11 +38,11 @@ export async function extractDates(
 
 function ofKinds(
 	dates: readonly DateValue[],
-	formats: readonly DateFormat[] | undefined,
+	kinds: readonly DateFormat[] | undefined,
 ): readonly DateValue[] {
-	return formats === undefined
+	return kinds === undefined
 		? dates
-		: dates.filter((date) => formats.includes(date.format));
+		: dates.filter((date) => kinds.includes(date.format));
 }
 
 /**
@@ -55,12 +54,12 @@ export function extractDatesFromText(
 	content: string,
 	languageId: string,
 	order?: DateOrder,
-	formats?: readonly DateFormat[],
+	kinds?: readonly DateFormat[],
 ): readonly DateValue[] {
 	try {
 		return ofKinds(
 			extractByFileType(content, determineFileType(languageId), order),
-			formats,
+			kinds,
 		);
 	} catch {
 		return [];

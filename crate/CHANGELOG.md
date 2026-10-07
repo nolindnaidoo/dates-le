@@ -7,7 +7,24 @@ this repository release on their own cadence.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.1] - 2026-10-07
+## [0.4.0] - 2026-10-07
+
+### Added
+
+- **Choose which kinds of date are reported.** `--kinds iso,simple,unix` on
+  the command line, and a `kinds` list on both MCP tools, take the names a
+  date carries as `format`: `iso`, `simple`, `local`, `rfc2822`, `utc`,
+  `week`, `ordinal`, `basic`, `custom`, `unix`. A name that is not one is
+  refused, and the refusal lists them.
+
+### Changed
+
+- **A Unix time is no longer reported unless it is asked for.** A bare
+  number such as `1705314645` is the one kind that does not look like a
+  date, and an id or a phone number of the same length was read as one.
+  `unix` is left out of the default kinds, on the command line and in both
+  MCP tools, as it is in the extension's `dates-le.kinds`. Add
+  `--kinds` with `unix` in it to read them as before.
 
 ### Fixed
 

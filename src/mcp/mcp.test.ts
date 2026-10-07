@@ -1,5 +1,7 @@
 import { EventEmitter } from 'node:events';
 import { describe, expect, it } from 'vitest';
+import { CONFIG_DEFAULTS } from '../config/config';
+import { DATE_KINDS, DEFAULT_KINDS } from '../extraction/kinds';
 import type { ExtractionResult } from '../types';
 import { capped, isOk, readMaxResults, toDiagnostics } from './envelope';
 import { resolveFormat, SUPPORTED_FORMATS } from './fileType';
@@ -160,6 +162,37 @@ describe('extract_dates', () => {
 		expect(result.data.dates[0]?.value).toBe('2024-03-15T08:30:00Z');
 		expect(result.data.dates[0]?.line).toBe(1);
 		expect(result.ok).toBe(true);
+	});
+
+	it('leaves a Unix time out unless kinds names it, as the extension setting does', async () => {
+		const content = 'at 1705314645 on 2024-01-15';
+		const values = async (args: Record<string, unknown>) =>
+			(await call({ content, ...args })).data.dates.map((date) => date.value);
+
+		expect(await values({})).toEqual(['2024-01-15']);
+		expect(await values({ kinds: ['unix'] })).toEqual(['1705314645']);
+		expect(await values({ kinds: [...DATE_KINDS] })).toEqual([
+			'1705314645',
+			'2024-01-15',
+		]);
+		expect(await values({ kinds: [] })).toEqual([]);
+	});
+
+	it('refuses a kind that is not one, and names the ones that are', async () => {
+		for (const kinds of [['iso', 'epoch'], 'unix', [7]]) {
+			await expect(call({ content: 'x', kinds })).rejects.toThrow(
+				'kinds must be a list of: iso, simple, local, rfc2822, utc, week, ordinal, basic, custom, unix',
+			);
+		}
+	});
+
+	it('advertises the kinds and the default the extension setting has', () => {
+		const schema = TOOLS[0]?.inputSchema as {
+			properties: { kinds: { items: { enum: string[] }; default: string[] } };
+		};
+		expect(schema.properties.kinds.items.enum).toEqual([...DATE_KINDS]);
+		expect(schema.properties.kinds.default).toEqual([...DEFAULT_KINDS]);
+		expect(CONFIG_DEFAULTS.kinds).toEqual(DEFAULT_KINDS);
 	});
 
 	it('collapses repeats only when asked', async () => {

@@ -86,13 +86,20 @@ lines is still found.
 |---|---|
 | `iso` | `2024-01-15T10:30:45`, optional `.mmm`, optional `Z` or `±HH:MM` |
 | `rfc2822` | `Mon, 15 Jan 2024 10:30:45 GMT` |
-| `unix` | exactly 10, 13, 16 or 19 digits, no digit either side |
+| `unix` | exactly 10, 13, 16 or 19 digits, no digit or letter either side. Reported only when `--kinds` names it |
 | `utc` | `Mon Jan 15 2024 10:30:45 GMT+0000` |
 | `local` | `15/01/2024`, `1/15/2024 3:30 PM`, `15.01.2024 14:00`, `15-01-2024`, `15 January 2024`, `Jan 15, 2024` |
 | `simple` | `2024-01-15` |
 | `week` | `2024-W03`, `2024-W03-1` |
 | `ordinal` | `2024-015` |
 | `basic` | `20240115`, `20240115T103045Z` |
+
+**Which kinds are reported is a choice, and `unix` is not one by
+default.** `--kinds` (the MCP tools' `kinds`, the extension's
+`dates-le.kinds`) takes the names in this table. Left out, it is every
+kind but `unix`: a bare number is the one kind that does not look like a
+date, and an id or a phone number of the same length reads as one. The
+engine finds every kind either way. The option decides what is reported.
 
 A `local` numeric date is read the one way it can be when a number is
 over 12. When both numbers could be a month, `--date-order` (the MCP
@@ -103,9 +110,12 @@ one is checked against the calendar, so `31/02/2024` is refused rather
 than rolled into March, a numeric year must fall within 1900–2099, and
 the instant is local time.
 
-A Unix timestamp must also land above 1e9 seconds / 1e12 milliseconds,
-so a 10-digit account number is not read as a date in 1970. Ten digits
-is the pattern's own floor; the range check is what makes it a date.
+A Unix timestamp must also land between 2001-09-09 and 2100, at every
+width. The floor keeps a 10-digit account number out of 1970. The
+ceiling keeps a 10-digit phone number out of 2145: ten digits used to
+run to their own ceiling, the year 2286. A ten-digit number inside the
+window still cannot be told from a moment, which is why the kind is not
+reported unless `--kinds` names it.
 
 **Sixteen and nineteen digits are microseconds and nanoseconds**, and
 they are converted by taking the leading thirteen **characters** rather

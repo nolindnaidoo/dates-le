@@ -31,27 +31,6 @@
 						"column": 19
 					},
 					{
-						"value": "1705314645",
-						"format": "unix",
-						"timestamp": 1705314645000,
-						"line": 5,
-						"column": 19
-					},
-					{
-						"value": "1705314645123",
-						"format": "unix",
-						"timestamp": 1705314645123,
-						"line": 6,
-						"column": 18
-					},
-					{
-						"value": "1705314645",
-						"format": "unix",
-						"timestamp": 1705314645000,
-						"line": 10,
-						"column": 19
-					},
-					{
 						"value": "2024-01-15",
 						"format": "simple",
 						"timestamp": 1705276800000,
@@ -71,7 +50,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 8,
+				"count": 5,
 				"truncated": false
 			}
 		}
@@ -108,27 +87,6 @@
 						"column": 19
 					},
 					{
-						"value": "1705314645",
-						"format": "unix",
-						"timestamp": 1705314645000,
-						"line": 5,
-						"column": 19
-					},
-					{
-						"value": "1705314645123",
-						"format": "unix",
-						"timestamp": 1705314645123,
-						"line": 6,
-						"column": 18
-					},
-					{
-						"value": "1705314645",
-						"format": "unix",
-						"timestamp": 1705314645000,
-						"line": 10,
-						"column": 19
-					},
-					{
 						"value": "2024-01-15",
 						"format": "simple",
 						"timestamp": 1705276800000,
@@ -148,7 +106,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 8,
+				"count": 5,
 				"truncated": false
 			}
 		}
@@ -211,13 +169,6 @@
 						"timestamp": 1735689599000,
 						"line": 18,
 						"column": 15
-					},
-					{
-						"value": "1705314645",
-						"format": "unix",
-						"timestamp": 1705314645000,
-						"line": 19,
-						"column": 17
 					}
 				],
 				"fileType": "typescript"
@@ -225,7 +176,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 8,
+				"count": 7,
 				"truncated": false
 			}
 		}
@@ -402,13 +353,6 @@
 						"column": 14
 					},
 					{
-						"value": "1705314645",
-						"format": "unix",
-						"timestamp": 1705314645000,
-						"line": 7,
-						"column": 11
-					},
-					{
 						"value": "20240115",
 						"format": "basic",
 						"timestamp": 1705276800000,
@@ -435,7 +379,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 9,
+				"count": 8,
 				"truncated": false
 			}
 		}
@@ -491,13 +435,6 @@
 						"timestamp": 1705276800000,
 						"line": 1,
 						"column": 9
-					},
-					{
-						"value": "1705314645",
-						"format": "unix",
-						"timestamp": 1705314645000,
-						"line": 1,
-						"column": 27
 					}
 				],
 				"fileType": "plaintext"
@@ -505,7 +442,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 2,
+				"count": 1,
 				"truncated": false
 			}
 		}
@@ -618,13 +555,6 @@
 						"timestamp": 1705314645000,
 						"line": 6,
 						"column": 16
-					},
-					{
-						"value": "1705314645",
-						"format": "unix",
-						"timestamp": 1705314645000,
-						"line": 7,
-						"column": 17
 					}
 				],
 				"fileType": "unknown"
@@ -632,7 +562,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 3,
+				"count": 2,
 				"truncated": false
 			}
 		}
@@ -674,13 +604,6 @@
 						"timestamp": 1717200000000,
 						"line": 6,
 						"column": 16
-					},
-					{
-						"value": "1705314645123456789",
-						"format": "unix",
-						"timestamp": 1705314645123,
-						"line": 10,
-						"column": 20
 					}
 				],
 				"fileType": "unknown"
@@ -688,7 +611,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 5,
+				"count": 4,
 				"truncated": false
 			}
 		}
@@ -732,25 +655,11 @@
 						"column": 13
 					},
 					{
-						"value": "1705314645",
-						"format": "unix",
-						"timestamp": 1705314645000,
-						"line": 9,
-						"column": 26
-					},
-					{
 						"value": "2023-11-02",
 						"format": "simple",
 						"timestamp": 1698883200000,
 						"line": 10,
 						"column": 13
-					},
-					{
-						"value": "1698883200",
-						"format": "unix",
-						"timestamp": 1698883200000,
-						"line": 10,
-						"column": 26
 					}
 				],
 				"fileType": "markdown"
@@ -758,7 +667,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 7,
+				"count": 5,
 				"truncated": false
 			}
 		}
@@ -858,20 +767,6 @@
 						"column": 21
 					},
 					{
-						"value": "1705314645123456",
-						"format": "unix",
-						"timestamp": 1705314645123,
-						"line": 9,
-						"column": 21
-					},
-					{
-						"value": "1705314645123456789",
-						"format": "unix",
-						"timestamp": 1705314645123,
-						"line": 10,
-						"column": 21
-					},
-					{
 						"value": "Mon, 15 Jan 2024 10:30:45 CET",
 						"format": "rfc2822",
 						"timestamp": 1705311045000,
@@ -919,7 +814,7 @@
 			"diagnostics": [],
 			"meta": {
 				"tool": "extract_dates",
-				"count": 13,
+				"count": 11,
 				"truncated": false
 			}
 		}
@@ -1156,5 +1051,189 @@
 			"dateOrder": "ymd"
 		},
 		"expectedError": "dateOrder must be \"mdy\" or \"dmy\""
+	},
+	{
+		"name": "a Unix time is left out unless it is asked for",
+		"content": "at 1705314645 on 2024-01-15",
+		"arguments": {},
+		"expected": {
+			"ok": true,
+			"data": {
+				"dates": [
+					{
+						"value": "2024-01-15",
+						"format": "simple",
+						"timestamp": 1705276800000,
+						"line": 1,
+						"column": 18
+					}
+				],
+				"fileType": "unknown"
+			},
+			"diagnostics": [],
+			"meta": {
+				"tool": "extract_dates",
+				"count": 1,
+				"truncated": false
+			}
+		}
+	},
+	{
+		"name": "every kind, once unix is listed",
+		"file": "events.json",
+		"arguments": {
+			"format": "json",
+			"kinds": [
+				"iso",
+				"simple",
+				"local",
+				"rfc2822",
+				"utc",
+				"week",
+				"ordinal",
+				"basic",
+				"custom",
+				"unix"
+			]
+		},
+		"expected": {
+			"ok": true,
+			"data": {
+				"dates": [
+					{
+						"value": "2024-01-15T10:30:45Z",
+						"format": "iso",
+						"timestamp": 1705314645000,
+						"line": 2,
+						"column": 17
+					},
+					{
+						"value": "2024-01-15T10:30:45.123-08:00",
+						"format": "iso",
+						"timestamp": 1705343445123,
+						"line": 3,
+						"column": 17
+					},
+					{
+						"value": "2024-01-15",
+						"format": "simple",
+						"timestamp": 1705276800000,
+						"line": 4,
+						"column": 19
+					},
+					{
+						"value": "1705314645",
+						"format": "unix",
+						"timestamp": 1705314645000,
+						"line": 5,
+						"column": 19
+					},
+					{
+						"value": "1705314645123",
+						"format": "unix",
+						"timestamp": 1705314645123,
+						"line": 6,
+						"column": 18
+					},
+					{
+						"value": "1705314645",
+						"format": "unix",
+						"timestamp": 1705314645000,
+						"line": 10,
+						"column": 19
+					},
+					{
+						"value": "2024-01-15",
+						"format": "simple",
+						"timestamp": 1705276800000,
+						"line": 11,
+						"column": 20
+					},
+					{
+						"value": "2024-01-15",
+						"format": "simple",
+						"timestamp": 1705276800000,
+						"line": 11,
+						"column": 41
+					}
+				],
+				"fileType": "json"
+			},
+			"diagnostics": [],
+			"meta": {
+				"tool": "extract_dates",
+				"count": 8,
+				"truncated": false
+			}
+		}
+	},
+	{
+		"name": "only the kinds that are named",
+		"content": "at 1705314645 on 2024-01-15",
+		"arguments": {
+			"kinds": [
+				"unix"
+			]
+		},
+		"expected": {
+			"ok": true,
+			"data": {
+				"dates": [
+					{
+						"value": "1705314645",
+						"format": "unix",
+						"timestamp": 1705314645000,
+						"line": 1,
+						"column": 4
+					}
+				],
+				"fileType": "unknown"
+			},
+			"diagnostics": [],
+			"meta": {
+				"tool": "extract_dates",
+				"count": 1,
+				"truncated": false
+			}
+		}
+	},
+	{
+		"name": "an empty list of kinds is an answer with nothing in it",
+		"content": "at 1705314645 on 2024-01-15",
+		"arguments": {
+			"kinds": []
+		},
+		"expected": {
+			"ok": true,
+			"data": {
+				"dates": [],
+				"fileType": "unknown"
+			},
+			"diagnostics": [],
+			"meta": {
+				"tool": "extract_dates",
+				"count": 0,
+				"truncated": false
+			}
+		}
+	},
+	{
+		"name": "a kind that is not one is refused",
+		"content": "2024-01-15",
+		"arguments": {
+			"kinds": [
+				"iso",
+				"epoch"
+			]
+		},
+		"expectedError": "kinds must be a list of: iso, simple, local, rfc2822, utc, week, ordinal, basic, custom, unix"
+	},
+	{
+		"name": "kinds that is not a list is refused",
+		"content": "2024-01-15",
+		"arguments": {
+			"kinds": "unix"
+		},
+		"expectedError": "kinds must be a list of: iso, simple, local, rfc2822, utc, week, ordinal, basic, custom, unix"
 	}
 ]

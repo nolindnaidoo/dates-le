@@ -145,7 +145,7 @@ async function extractWorkspace(
 						text,
 						resolveFormat(undefined, file),
 						config.dateOrder,
-						config.formats,
+						config.kinds,
 					)) {
 						if (total >= config.workspaceScanMaxResults) return false;
 						const occurrence = {

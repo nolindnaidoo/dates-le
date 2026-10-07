@@ -93,6 +93,7 @@ If that prints the tool name, the server works.
 | `filename` | string | Used to infer `format` when it is absent — `app.log` resolves to `log`. |
 | `dedupe` | boolean | Collapse repeated dates to their first occurrence. Default `false`. |
 | `dateOrder` | string | `mdy` (the default) or `dmy`: how to read a numeric date whose day and month could be either way round, such as `05/01/2024`. A date that can only be read one way, such as `15/01/2024`, is read that way regardless, and dotted dates such as `05.01.2024` are always day first. |
+| `kinds` | string[] | The kinds of date to return, by the name each carries as `format` in the answer: `iso`, `simple`, `local`, `rfc2822`, `utc`, `week`, `ordinal`, `basic`, `custom`, `unix`. Defaults to every kind except `unix`: a bare number such as `1705314645` is only read as a date when `unix` is listed. |
 | `maxResults` | number | Default `500`, ceiling `5000`. |
 
 Returns each date as written, with its notation, the epoch milliseconds

@@ -64,7 +64,7 @@ export function registerHelpCommand(
 Access settings via Command Palette: "Dates-LE: Open Settings"
 
 Key settings:
-- Formats: Which kinds of date are extracted. Unix time (a bare number such as 1705314645) is off until you add \`unix\` to \`dates-le.formats\`
+- Kinds: Which kinds of date are extracted. Unix time (a bare number such as 1705314645) is off until you add \`unix\` to \`dates-le.kinds\`
 - Copy to clipboard: Automatically copy extraction results
 - Deduplication: Remove duplicate dates from results
 - Side-by-side view: Open results in split editor

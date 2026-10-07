@@ -48,6 +48,40 @@ pub(crate) enum Notation {
 }
 
 impl Notation {
+    /// Every kind, in the order the extension's setting lists them.
+    pub(crate) const ALL: [Self; 10] = [
+        Self::Iso,
+        Self::Simple,
+        Self::Local,
+        Self::Rfc2822,
+        Self::Utc,
+        Self::Week,
+        Self::Ordinal,
+        Self::Basic,
+        Self::Custom,
+        Self::Unix,
+    ];
+
+    pub(crate) fn parse(name: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|kind| kind.as_str() == name)
+    }
+
+    /// Every kind but the Unix time. A bare number is the one kind that
+    /// does not look like a date, and an id or a phone number of the same
+    /// length reads as one, so it is reported only when asked for. The
+    /// extension's `dates-le.kinds` setting leaves the same one out.
+    pub(crate) fn defaults() -> Vec<Self> {
+        Self::ALL
+            .into_iter()
+            .filter(|kind| *kind != Self::Unix)
+            .collect()
+    }
+
+    /// The names, for a refusal that has to say what it would accept.
+    pub(crate) fn names() -> String {
+        Self::ALL.map(Self::as_str).join(", ")
+    }
+
     pub(crate) fn as_str(self) -> &'static str {
         match self {
             Self::Iso => "iso",

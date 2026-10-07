@@ -24,6 +24,8 @@ pub(crate) struct ScanOptions {
     pub(crate) year: i64,
     /// How an ambiguous numeric date such as `05/01/2024` is read.
     pub(crate) order: extract::DateOrder,
+    /// The kinds of date reported. One left out is found and dropped.
+    pub(crate) kinds: Vec<extract::Notation>,
 }
 
 impl Default for ScanOptions {
@@ -37,6 +39,7 @@ impl Default for ScanOptions {
             before: None,
             year: time::current_year(),
             order: extract::DateOrder::default(),
+            kinds: extract::Notation::defaults(),
         }
     }
 }
@@ -186,6 +189,7 @@ pub(crate) fn without_bom(content: &str) -> &str {
 fn shape(found: Vec<Found>, options: &ScanOptions) -> Vec<Date> {
     let mut dates: Vec<Date> = found
         .into_iter()
+        .filter(|date| options.kinds.contains(&date.notation))
         .filter(|date| options.after.is_none_or(|after| date.timestamp >= after))
         .filter(|date| options.before.is_none_or(|before| date.timestamp < before))
         .map(|date| Date {
@@ -254,6 +258,29 @@ mod tests {
             values(&options()),
             ["2024-03-01", "2024-01-15", "2024-01-15"]
         );
+    }
+
+    #[test]
+    fn a_kind_left_out_is_found_and_not_reported() {
+        let document = "at 1705314645 on 2024-01-15";
+        let read = |options: &ScanOptions| -> Vec<String> {
+            scan_text("x", document, "plaintext", options)
+                .dates
+                .into_iter()
+                .map(|date| date.value)
+                .collect()
+        };
+        assert_eq!(read(&options()), ["2024-01-15"]);
+        let with_unix = ScanOptions {
+            kinds: extract::Notation::ALL.to_vec(),
+            ..options()
+        };
+        assert_eq!(read(&with_unix), ["1705314645", "2024-01-15"]);
+        let none = ScanOptions {
+            kinds: Vec::new(),
+            ..options()
+        };
+        assert!(read(&none).is_empty());
     }
 
     #[test]
