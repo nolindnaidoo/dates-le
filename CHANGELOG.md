@@ -28,6 +28,15 @@ separate product on its own cadence and keeps its own
   extension already used. Every command can still be given a key under
   Keyboard Shortcuts.
 
+### Fixed
+
+- Ten digits inside a longer word are no longer read as a Unix time. A
+  pinned GitHub Action such as `lychee-action@e7477775783ea55…` carries a
+  commit hash, and the ten digits in a row inside it came out as a date in
+  2206. A digit run now needs no letter on either side, as it already
+  needed no digit. Punctuation and an underscore still bound one, so
+  `at=1705314645` and `backup_1705314645.sql` are read as before.
+
 ## [2.4.3] - 2026-10-04
 
 ### Added
