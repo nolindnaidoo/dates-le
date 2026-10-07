@@ -82,6 +82,16 @@
 				"category": "%manifest.command.category%"
 			},
 			{
+				"command": "dates-le.extractWorkspace",
+				"title": "%manifest.command.extract-workspace.title%",
+				"category": "%manifest.command.category%"
+			},
+			{
+				"command": "dates-le.extractFolder",
+				"title": "%manifest.command.extract-folder.title%",
+				"category": "%manifest.command.category%"
+			},
+			{
 				"command": "dates-le.postProcess.dedupe",
 				"title": "%manifest.command.dedupe.title%",
 				"category": "%manifest.command.category%"
@@ -135,6 +145,12 @@
 					"command": "dates-le.extractDates"
 				},
 				{
+					"command": "dates-le.extractWorkspace"
+				},
+				{
+					"command": "dates-le.extractFolder"
+				},
+				{
 					"command": "dates-le.postProcess.dedupe"
 				},
 				{
@@ -157,6 +173,13 @@
 				},
 				{
 					"command": "dates-le.help"
+				}
+			],
+			"explorer/context": [
+				{
+					"command": "dates-le.extractFolder",
+					"when": "explorerResourceIsFolder",
+					"group": "7_modification@1"
 				}
 			]
 		},
@@ -231,6 +254,67 @@
 					"type": "boolean",
 					"default": false,
 					"description": "%manifest.settings.telemetry.desc%"
+				},
+				"dates-le.workspace.scanExcludes": {
+					"type": "array",
+					"default": [],
+					"items": {
+						"type": "string"
+					},
+					"description": "%manifest.settings.workspace.excludes.desc%",
+					"order": 104
+				},
+				"dates-le.workspace.scanMaxFiles": {
+					"type": "number",
+					"default": 5000,
+					"minimum": 1,
+					"description": "%manifest.settings.workspace.max-files.desc%",
+					"order": 106
+				},
+				"dates-le.workspace.scanMaxResults": {
+					"type": "number",
+					"default": 10000,
+					"minimum": 1,
+					"description": "%manifest.settings.workspace.max-results.desc%",
+					"order": 107
+				},
+				"dates-le.workspace.scanPatterns": {
+					"type": "array",
+					"default": [
+						"**/*"
+					],
+					"items": {
+						"type": "string"
+					},
+					"description": "%manifest.settings.workspace.patterns.desc%",
+					"order": 100
+				},
+				"dates-le.workspace.scanRespectGitignore": {
+					"type": "boolean",
+					"default": true,
+					"description": "%manifest.settings.workspace.gitignore.desc%",
+					"order": 102
+				},
+				"dates-le.workspace.scanAlwaysInclude": {
+					"type": "array",
+					"default": [],
+					"items": {
+						"type": "string"
+					},
+					"description": "%manifest.settings.workspace.always-include.desc%",
+					"order": 105
+				},
+				"dates-le.workspace.scanSkipBinaryFiles": {
+					"type": "boolean",
+					"default": true,
+					"description": "%manifest.settings.workspace.binary.desc%",
+					"order": 103
+				},
+				"dates-le.workspace.scanUseDefaultExcludes": {
+					"type": "boolean",
+					"default": true,
+					"description": "%manifest.settings.workspace.default-excludes.desc%",
+					"order": 101
 				}
 			}
 		},

@@ -5,6 +5,8 @@
 	"manifest.command.convert.title": "Convertir des dates",
 	"manifest.command.dedupe.title": "Dédupliquer les dates",
 	"manifest.command.extract.title": "Extraire les dates",
+	"manifest.command.extract-workspace.title": "Extraire les dates de l'espace de travail",
+	"manifest.command.extract-folder.title": "Extraire les dates du dossier",
 	"manifest.command.filter.title": "Filtrer les dates",
 	"manifest.command.help.title": "Aide et dépannage",
 	"manifest.command.settings.title": "Ouvrir les paramètres",
@@ -26,5 +28,13 @@
 	"manifest.settings.statusbar.enabled.desc": "Afficher l'entrée de la barre d'état Dates-LE pour un accès rapide",
 	"manifest.settings.telemetry.desc": "Activer les journaux de télémétrie locaux uniquement dans le panneau de sortie",
 	"manifest.settings.title": "Paramètres Dates-LE",
-	"manifest.mcp.label": "Dates-LE : outils d'extraction de dates pour le mode agent"
+	"manifest.mcp.label": "Dates-LE : outils d'extraction de dates pour le mode agent",
+	"manifest.settings.workspace.excludes.desc": "Motifs glob d'autres fichiers ignorés par une analyse de dossier ou d'espace de travail, en plus de la liste intégrée. Exemple : **/fixtures/**",
+	"manifest.settings.workspace.max-files.desc": "Le nombre maximal de fichiers lus par une analyse de dossier ou d'espace de travail",
+	"manifest.settings.workspace.max-results.desc": "Le nombre maximal de résultats signalés par une analyse de dossier ou d'espace de travail avant l'arrêt de la lecture",
+	"manifest.settings.workspace.patterns.desc": "Motifs glob des fichiers lus par une analyse de dossier ou d'espace de travail",
+	"manifest.settings.workspace.gitignore.desc": "Ignorer les fichiers que les fichiers .gitignore du projet ignorent",
+	"manifest.settings.workspace.always-include.desc": "Motifs glob des fichiers qu'une analyse de dossier ou d'espace de travail lit même si la liste intégrée ou .gitignore les ignorerait. Exemple : **/vendor/**",
+	"manifest.settings.workspace.binary.desc": "Ignorer les images, polices, archives et autres fichiers qui ne sont pas du texte",
+	"manifest.settings.workspace.default-excludes.desc": "Ignorer les dossiers de dépendances, les sorties de build, les caches et les fichiers de verrouillage, comme node_modules, dist, .next et package-lock.json"
 }

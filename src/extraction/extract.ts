@@ -32,6 +32,23 @@ export async function extractDates(
 }
 
 /**
+ * The same extraction with nothing to await, for a caller that reads many
+ * files in a row. A document a reader throws on yields nothing here, as it
+ * yields an error and no dates there.
+ */
+export function extractDatesFromText(
+	content: string,
+	languageId: string,
+	order?: DateOrder,
+): readonly DateValue[] {
+	try {
+		return extractByFileType(content, determineFileType(languageId), order);
+	} catch {
+		return [];
+	}
+}
+
+/**
  * A format only ever ADDS patterns to the shared ones — log adds syslog
  * and Apache, JavaScript adds constructor arguments, HTML adds
  * attributes — so the shared scan is the right answer for a document

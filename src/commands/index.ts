@@ -6,6 +6,7 @@ import { registerAnalyzeCommand } from './analyze';
 import { registerConvertCommand } from './convert';
 import { registerDedupeCommand } from './dedupe';
 import { registerExtractCommand } from './extract';
+import { registerExtractWorkspaceCommands } from './extractWorkspace';
 import { registerFilterCommand } from './filter';
 import { registerHelpCommand } from './help';
 import { registerSortCommand } from './sort';
@@ -24,6 +25,7 @@ export function registerCommands(
 		notifier: deps.notifier,
 		statusBar: deps.statusBar,
 	});
+	registerExtractWorkspaceCommands(context, deps);
 	registerDedupeCommand(context, deps.notifier);
 	registerSortCommand(context, deps.notifier);
 	registerAnalyzeCommand(context, deps);

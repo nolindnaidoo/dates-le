@@ -136,6 +136,82 @@ Timezone names are the fixed offsets `GMT`/`UT`/`UTC`/`Z`, the eight US abbrevia
 
 Known limitations: an ambiguous numeric date follows `dates-le.dateOrder`, which is month first unless you change it; written-out months are English only; syslog lines carry no year, so the current year is assumed; `IST` names three different zones and is read as India's `+05:30`; a bare 8-digit run is only a date inside 1900–2099, and a 10-digit number in the plausible epoch range cannot be told from a phone number.
 
+## Across a folder or a workspace
+
+Extract reads the document you have open. A scan reads many files from disk and gives one report: the project's dates, in time order.
+
+- **The whole workspace**: run `Dates-LE: Extract Dates from Workspace` from the command palette.
+- **One folder**: right-click it in the Explorer and choose `Extract Dates from Folder`, or run `Dates-LE: Extract Dates from Folder` and pick one.
+
+Each date is listed once however it is spelled, the earliest first, with the spellings, how often it is written and where:
+
+```markdown
+# Dates-LE workspace report
+
+`my-project` · 3 file(s) read · 3 distinct date(s), 5 occurrence(s) in 3 file(s)
+
+| Date | Written as | Occurrences | Files | Where |
+|---|---|---|---|---|
+| `2024-01-15` | `2024-01-15`, `2024-01-15T00:00:00Z`, `January 15, 2024` | 3 | 2 | |
+| `2024-03-01T08:30:00Z` | `2024-03-01T10:30:00+02:00` | 1 | 1 | `data/events.json` · **2:13** |
+| `2025-12-31` | `2025-12-31` | 1 | 1 | `docs/release.md` · **2:14** |
+
+## `2024-01-15` (3)
+
+- `docs/release.md` · **1:9**, **1:31**
+- `src/config.ts` · **1:17**
+```
+
+**The same date is one row.** `2024-01-15`, `2024-01-15T00:00:00Z` and `January 15, 2024` are one date written three ways, and the table says so. A date written with a time zone is a moment and is named in UTC, with the offset it was written with left in the "Written as" column. One written without a zone is named by what was written, so it is the same date on every machine. An ambiguous date such as `03/04/2024` is read the way `dates-le.dateOrder` says.
+
+Every date is in the table. One written once is placed in its row. A repeated one gets a section below that lists each place.
+
+That is with `dates-le.showPositions` on. It is off by default, and then each place is the file and how many times the date is in it: `docs/release.md (2)`. The copy on the clipboard follows `dates-le.clipboardIncludesPositions`, as it does for Extract.
+
+**What a scan reads.** Files come from disk, so an unsaved edit is not seen. A file over the safety size, or one that is not UTF-8 text, is left unread. It stops at 5,000 files or 10,000 listed occurrences. The report ends with a line for each thing it left out, so a short report is never mistaken for a clean project.
+
+**What it skips, and how to change that.** Three switches are on by default, and each can be turned off on its own in Settings:
+
+| Switch | Skips |
+|---|---|
+| `scanUseDefaultExcludes` | Dependency folders, build output, tool caches and lockfiles. The full list is below |
+| `scanRespectGitignore` | Whatever the project's `.gitignore` files skip |
+| `scanSkipBinaryFiles` | Images, fonts, archives and other files that are not text |
+
+Two lists adjust the result without turning a switch off. To skip more, add a pattern to `scanExcludes`. To read something a switch would skip, add it to `scanAlwaysInclude`:
+
+```jsonc
+{
+	// Also skip the test fixtures.
+	"dates-le.workspace.scanExcludes": ["**/fixtures/**"],
+	// Read the vendored code, though the built-in list skips it.
+	"dates-le.workspace.scanAlwaysInclude": ["**/vendor/**"]
+}
+```
+
+`Dates-LE: Open Settings` opens all of these in the Settings editor.
+
+<details>
+<summary>The built-in list</summary>
+
+Folders, wherever they appear:
+
+<!-- built-in-folders -->
+`.git`, `.hg`, `.svn`, `node_modules`, `bower_components`, `jspm_packages`, `.pnpm-store`, `.yarn`, `vendor`, `site-packages`, `Pods`, `Carthage`, `dist`, `build`, `out`, `target`, `_build`, `_site`, `dist-newstyle`, `zig-out`, `storybook-static`, `cdk.out`, `DerivedData`, `CMakeFiles`, `.next`, `.nuxt`, `.output`, `.svelte-kit`, `.angular`, `.astro`, `.docusaurus`, `.vuepress`, `.expo`, `.turbo`, `.parcel-cache`, `.cache`, `.sass-cache`, `.jekyll-cache`, `.dart_tool`, `.pub-cache`, `.gradle`, `.kotlin`, `.cxx`, `.externalNativeBuild`, `captures`, `ephemeral`, `.symlinks`, `.swiftpm`, `.build`, `.bundle`, `.stack-work`, `.zig-cache`, `.godot`, `elm-stuff`, `.vercel`, `.netlify`, `.serverless`, `.aws-sam`, `.terraform`, `.venv`, `venv`, `__pycache__`, `.tox`, `.nox`, `.mypy_cache`, `.pytest_cache`, `.ruff_cache`, `.ipynb_checkpoints`, `.eggs`, `coverage`, `htmlcov`, `.nyc_output`, `.vscode-test`, `.idea`, `.vs`, `xcuserdata`, `*.egg-info`
+<!-- /built-in-folders -->
+
+Files, wherever they appear:
+
+<!-- built-in-files -->
+`*.min.js`, `*.min.css`, `*.map`, `*.snap`, `*.lock`, `package-lock.json`, `pnpm-lock.yaml`, `npm-shrinkwrap.json`, `go.sum`, `*.pbxproj`, `*.iml`, `local.properties`, `output-metadata.json`, `.flutter-plugins`, `.flutter-plugins-dependencies`, `.packages`, `Generated.xcconfig`, `flutter_export_environment.sh`, `GeneratedPluginRegistrant.*`, `fastlane/report.xml`, `fastlane/test_output/**`, `doc/api/**`
+<!-- /built-in-files -->
+
+Not on the list, because they are ordinary folders in many projects: `bin`, `obj`, `tmp`, `logs`, `public`, `generated`. A project that generates those ignores them in git, and the scan reads `.gitignore`.
+
+</details>
+
+The settings that shape a scan are under [Settings](#settings).
+
 ## The CLI
 
 The same extraction runs from a terminal or a CI step: a Rust CLI in
@@ -164,6 +240,8 @@ the true answer and it genuinely differs by machine. `TZ` is honoured.
 | Command | Description |
 |---|---|
 | `Dates-LE: Extract Dates` | Extract all dates from the active document |
+| `Dates-LE: Extract Dates from Workspace` | Every date in every file in the workspace, in time order: each date once, with its spellings and where it is |
+| `Dates-LE: Extract Dates from Folder` | The same for one folder. Also on a folder in the Explorer |
 | `Dates-LE: Analyze Dates` | Statistics, patterns, clusters, gaps, and anomalies |
 | `Dates-LE: Convert Dates` | Convert extracted dates to ISO, RFC 2822, Unix, UTC, local, simple, or a custom format |
 | `Dates-LE: Filter Dates` | Filter by range, format, duplicates, future/past |
@@ -185,6 +263,14 @@ No command is bound to a key by default. Give any of them one under **Keyboard S
 | `dates-le.clipboardIncludesPositions` | `false` | Include the line and column in that copy |
 | `dates-le.dateOrder` | `mdy` | How to read a numeric date that could be either way round: `mdy` reads `05/01/2024` as 1 May, `dmy` as 5 January |
 | `dates-le.notificationsLevel` | `silent` | `all` = every notification, `important` = warnings + errors, `silent` = errors only |
+| `dates-le.workspace.scanPatterns` | `["**/*"]` | The files a folder or workspace scan reads |
+| `dates-le.workspace.scanUseDefaultExcludes` | `true` | Skip dependency folders, build output, caches and lockfiles |
+| `dates-le.workspace.scanRespectGitignore` | `true` | Skip what the project's `.gitignore` files skip |
+| `dates-le.workspace.scanSkipBinaryFiles` | `true` | Skip images, fonts, archives and other files that are not text |
+| `dates-le.workspace.scanExcludes` | `[]` | More files to skip, as glob patterns |
+| `dates-le.workspace.scanAlwaysInclude` | `[]` | Files to read even when one of the three above would skip them |
+| `dates-le.workspace.scanMaxFiles` | `5000` | The most files one scan reads |
+| `dates-le.workspace.scanMaxResults` | `10000` | The most occurrences one scan lists before it stops reading |
 | `dates-le.safety.enabled` | `true` | Guardrails for very large files |
 | `dates-le.safety.fileSizeWarnBytes` | `1000000` | Refuse extraction above this file size |
 | `dates-le.statusBar.enabled` | `true` | Show the status bar item |
@@ -241,12 +327,12 @@ a build only tells you how busy the runner was.
 <!-- coverage:start -->
 | Metric | Coverage |
 | --- | --- |
-| Statements | 91.81% |
-| Branches | 82.24% |
-| Functions | 96.56% |
-| Lines | 93.12% |
+| Statements | 92.48% |
+| Branches | 83.26% |
+| Functions | 97.10% |
+| Lines | 93.85% |
 
-258 test cases across 22 files, plus an integration suite that runs
+310 test cases across 25 files, plus an integration suite that runs
 in a real VS Code extension host and an end-to-end test that installs the
 built `.vsix` into a clean profile.
 
