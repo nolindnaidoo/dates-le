@@ -38,6 +38,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   A digit run now needs no letter on either side, as it already needed no
   digit. Punctuation and an underscore still bound one, so `at=1705314645`
   and `backup_1705314645.sql` are read as before.
+- The family list's String-LE line no longer promises a position for every
+  string.
 
 ## [0.3.0] - 2026-09-30
 
@@ -350,6 +352,7 @@ proved nothing.
   vanish from the report entirely, which reads to whoever ran it as
   "that file was clean".
 
+[0.4.0]: https://crates.io/crates/dates-le/0.4.0
 [0.3.0]: https://crates.io/crates/dates-le/0.3.0
 [0.2.2]: https://crates.io/crates/dates-le/0.2.2
 [0.2.1]: https://crates.io/crates/dates-le/0.2.1
