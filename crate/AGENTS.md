@@ -109,9 +109,10 @@ failing `--strict`.
 
 ### stdout is protocol, and silent at a terminal
 
-stdout is JSON for machines. When it is a terminal it carries nothing,
-`--values` included, because stderr lists every date and a second copy
-as JSON on the same screen is noise. Anything that can parse gets every
+stdout is JSON for machines. When it is a terminal it carries no JSON,
+because stderr lists every date and a second copy as JSON on the same
+screen is noise. `--values` is the exception: it is plain text a person
+asked to see, so it prints to stdout wherever stdout goes. Anything that can parse gets every
 report unchanged. stderr must stand alone for that reason, so it lists
 the dates and does not only count them.
 

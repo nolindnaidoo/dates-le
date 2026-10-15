@@ -259,8 +259,9 @@ One rule, both edges, checked against V8 at both.
 stdout is protocol: one JSON object per line, one line per file, or with
 `--values` one date per line. When stdout is a terminal it carries
 nothing, because the stderr listing already shows a person every date
-and the same answer repeated as JSON on the same screen is noise. At a
-terminal `--values` lists its dates on stderr instead. No script can
+and the same answer repeated as JSON on the same screen is noise.
+`--values` prints its dates to stdout either way, because it is plain
+text a person asked to see, and stderr stays quiet under it. No script can
 tell the difference, since a script is never a terminal. stderr is for
 the person: every date, then the tally, as a projection of the same
 reports rather than parallel prose.

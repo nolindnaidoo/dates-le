@@ -2,7 +2,8 @@
 //!
 //! stdout is protocol — one JSON report per line, one line per file —
 //! whenever something is reading it, and silent when it is a terminal.
-//! stderr is always for the human, and is a projection of the same
+//! `--values` is the exception: asking for the values is asking to see
+//! them, wherever stdout goes. stderr is always for the human, and is a projection of the same
 //! reports rather than parallel prose.
 
 use std::io::{IsTerminal, Read, Write};
@@ -60,8 +61,7 @@ Options:
   --year <year>        the year a syslog line is assumed to be in,
                        since the line does not carry one. Defaults to
                        this one, which makes that answer move
-  --values             print only the dates, one per line, for piping;
-                       at a terminal they are listed on stderr instead
+  --values             print only the dates, one per line, for piping
   --strict             exit 2 if any file could not be read, rather than
                        reporting it and carrying on
   --stdin              read one document from stdin
@@ -313,38 +313,43 @@ fn report(scanned: &Scanned, values_only: bool) {
     let terminal = stdout.is_terminal();
     let _ = write_stdout(&mut stdout.lock(), &scanned.reports, values_only, terminal);
 
-    // Piped, `--values` is the whole answer and stderr stays quiet, as it
-    // always has. At a terminal nothing reached stdout, so stderr lists.
-    if values_only && !terminal {
+    // `--values` is the whole answer wherever stdout goes, so stderr
+    // stays quiet rather than listing the same dates a second time.
+    if values_only {
         return;
     }
     summarise(&mut std::io::stderr().lock(), scanned);
 }
 
-/// A terminal gets nothing here. The stderr listing already shows every
-/// date a person reads, and the JSON beside it on the same screen is the
-/// same answer a second time in a form nobody reads by eye. Anything
-/// that can parse — a pipe, a file, a subprocess — still gets every
-/// report, so no script sees a difference.
+/// A terminal gets no JSON. The stderr listing already shows every date
+/// a person reads, and the JSON beside it on the same screen is the same
+/// answer a second time in a form nobody reads by eye. Anything that can
+/// parse — a pipe, a file, a subprocess — still gets every report, so no
+/// script sees a difference. `--values` is plain text a person asked
+/// for, so it prints either way.
 fn write_stdout(
     out: &mut impl Write,
     reports: &[FileReport],
     values_only: bool,
     terminal: bool,
 ) -> std::io::Result<()> {
+    if values_only {
+        return write_values(out, reports);
+    }
     if terminal {
         return Ok(());
     }
     for report in reports {
-        if values_only {
-            for date in &report.dates {
-                writeln!(out, "{}", date.value)?;
-            }
-            continue;
-        }
         if let Ok(line) = serde_json::to_string(report) {
             writeln!(out, "{line}")?;
         }
+    }
+    Ok(())
+}
+
+fn write_values(out: &mut impl Write, reports: &[FileReport]) -> std::io::Result<()> {
+    for date in reports.iter().flat_map(|report| &report.dates) {
+        writeln!(out, "{}", date.value)?;
     }
     Ok(())
 }
@@ -461,13 +466,23 @@ mod tests {
     }
 
     #[test]
-    fn a_terminal_gets_nothing_on_stdout() {
+    fn a_terminal_gets_no_json() {
         let scanned = sample(false);
-        for values_only in [false, true] {
-            let mut out = Vec::new();
-            write_stdout(&mut out, &scanned.reports, values_only, true).expect("a write");
-            assert!(out.is_empty(), "values_only={values_only}");
-        }
+        let mut out = Vec::new();
+        write_stdout(&mut out, &scanned.reports, false, true).expect("a write");
+        assert!(out.is_empty());
+    }
+
+    /// `--values` is a request to see the dates, so a terminal gets them.
+    #[test]
+    fn a_terminal_gets_the_values_with_values_only() {
+        let scanned = sample(false);
+        let mut out = Vec::new();
+        write_stdout(&mut out, &scanned.reports, true, true).expect("a write");
+        assert_eq!(
+            String::from_utf8(out).expect("utf-8"),
+            "2024-01-15T10:30:45Z\n"
+        );
     }
 
     /// With stdout silent at a terminal, a bare count would leave a
