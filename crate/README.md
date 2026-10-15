@@ -54,7 +54,7 @@ time.
 No runtime, no network, nothing written.
 
 ```bash
-dates-le src/                       # every date, as JSON, one line per file
+dates-le src/                       # every date; JSON, one line per file, when piped
 dates-le --before 2026-01-01 .      # everything already in the past
 dates-le --sort --iso config/       # ordered by instant, in readable form
 dates-le --values . | sort -u       # just the strings, for piping
@@ -62,6 +62,9 @@ dates-le --values . | sort -u       # just the strings, for piping
 
 Exit codes follow grep: `0` dates found, `1` none found, `2` a malformed
 question. Finding none is an answer, not an error.
+
+stdout carries the JSON reports only when it is piped or redirected, and
+is left out at a terminal, where stderr lists every date instead.
 
 A file that is not text is not read and not reported — it was never a
 candidate — and is counted in the stderr summary instead. A file that
@@ -148,7 +151,8 @@ the hour that does not exist and the hour that happens twice.
 --year <year>        the year a syslog line is assumed to be in, since
                      the line does not carry one. Defaults to this one,
                      which makes that answer move
---values             print only the dates, one per line, for piping
+--values             print only the dates, one per line, for piping;
+                     at a terminal they are listed on stderr instead
 --strict             exit 2 if any file could not be read, rather than
                      reporting it and carrying on
 --stdin              read one document from stdin
