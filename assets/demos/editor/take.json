@@ -1,0 +1,16 @@
+{
+  "files": [
+    "release.md"
+  ],
+  "steps": [
+    {
+      "wait": 1500
+    },
+    {
+      "command": "Dates-LE: Extract Dates"
+    },
+    {
+      "wait": 5000
+    }
+  ]
+}
