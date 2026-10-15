@@ -15,6 +15,8 @@
   </a>
 </p>
 
+![An agent in Claude Code calling the dates-le MCP server](https://raw.githubusercontent.com/nolindnaidoo/dates-le/main/assets/demos/mcp.gif)
+
 An [MCP](https://modelcontextprotocol.io) server that extracts dates and timestamps from
 logs, data files and code — the extraction engine behind the
 [Dates-LE](https://letools.dev/tools/dates-le)

@@ -28,7 +28,7 @@
 ---
 
 <p align="center">
-  <img src="src/assets/images/demo.gif" alt="Dates-LE Demo" style="max-width: 100%; height: auto;" />
+  <img src="assets/demos/editor.gif" alt="Dates-LE in VS Code" style="max-width: 100%; height: auto;" />
 </p>
 
 > **Useful?** A star or rating is how other developers find it —
@@ -62,6 +62,10 @@ The same engine runs as an [MCP](https://modelcontextprotocol.io) server, so an 
 | **VS Code** 1.101+ | Nothing to install — the extension registers `extract_dates` with agent mode |
 | **Claude Code** | `claude mcp add dates-le -- npx -y dates-le-mcp` |
 | **Cursor, Windsurf, anything else** | point it at `npx dates-le-mcp` |
+
+<p align="center">
+  <img src="assets/demos/mcp.gif" alt="An agent in Claude Code calling the dates-le MCP server" style="max-width: 100%; height: auto;" />
+</p>
 
 ```
 extract_dates(content, format?, filename?, dedupe?, dateOrder?, kinds?, maxResults?)
@@ -225,6 +229,10 @@ dates-le --before 2026-01-01 .      # everything already in the past
 dates-le --sort --iso config/       # ordered by instant, in readable form
 dates-le mcp                        # the same extraction over MCP on stdio
 ```
+
+<p align="center">
+  <img src="assets/demos/cli.gif" alt="dates-le in a terminal" style="max-width: 100%; height: auto;" />
+</p>
 
 **The instant is the point.** `2024-01-15`, `1705276800` and
 `Mon, 15 Jan 2024` are one moment written three ways, and resolving each
