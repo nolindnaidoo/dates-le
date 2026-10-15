@@ -7,6 +7,16 @@ this repository release on their own cadence.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-10-15
+
+### Fixed
+
+- **`--values` prints to stdout at a terminal again.** 0.4.1 moved it to
+  stderr there along with the JSON, but it is plain text a person asked
+  to see, not a report. stderr stays quiet under `--values`, as it
+  always did when piped. This matches string-le, colors-le and
+  numbers-le.
+
 ## [0.4.1] - 2026-10-15
 
 ### Changed
@@ -366,6 +376,7 @@ proved nothing.
   vanish from the report entirely, which reads to whoever ran it as
   "that file was clean".
 
+[0.4.2]: https://crates.io/crates/dates-le/0.4.2
 [0.4.1]: https://crates.io/crates/dates-le/0.4.1
 [0.4.0]: https://crates.io/crates/dates-le/0.4.0
 [0.3.0]: https://crates.io/crates/dates-le/0.3.0
