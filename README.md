@@ -224,7 +224,7 @@ The same extraction runs from a terminal or a CI step: a Rust CLI in
 document differently.
 
 ```bash
-dates-le .                          # every date in the tree, as JSON
+dates-le .                          # every date in the tree; JSON on stdout when piped
 dates-le --before 2026-01-01 .      # everything already in the past
 dates-le --sort --iso config/       # ordered by instant, in readable form
 dates-le mcp                        # the same extraction over MCP on stdio

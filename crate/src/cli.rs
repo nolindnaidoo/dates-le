@@ -1,10 +1,11 @@
 //! The terminal surface.
 //!
-//! stdout is always protocol — one JSON report per line, one line per
-//! file. stderr is always for the human, and is a projection of the same
+//! stdout is protocol — one JSON report per line, one line per file —
+//! whenever something is reading it, and silent when it is a terminal.
+//! stderr is always for the human, and is a projection of the same
 //! reports rather than parallel prose.
 
-use std::io::{Read, Write};
+use std::io::{IsTerminal, Read, Write};
 use std::path::PathBuf;
 use std::process::ExitCode;
 
@@ -31,6 +32,9 @@ its dates rather than being skipped.
 Each one carries the instant it actually resolves to, so `2024-01-15`,
 `1705276800` and `Mon, 15 Jan 2024` can be compared rather than read.
 
+One JSON report per line on stdout when it is piped or redirected, every
+date listed on stderr.
+
 Options:
   --after <date>       keep dates at or after this instant
   --before <date>      keep dates strictly before this instant
@@ -56,7 +60,8 @@ Options:
   --year <year>        the year a syslog line is assumed to be in,
                        since the line does not carry one. Defaults to
                        this one, which makes that answer move
-  --values             print only the dates, one per line, for piping
+  --values             print only the dates, one per line, for piping;
+                       at a terminal they are listed on stderr instead
   --strict             exit 2 if any file could not be read, rather than
                        reporting it and carrying on
   --stdin              read one document from stdin
@@ -304,22 +309,54 @@ fn gather(invocation: &Invocation) -> Result<Scanned, String> {
 }
 
 fn report(scanned: &Scanned, values_only: bool) {
-    let reports = &scanned.reports;
     let stdout = std::io::stdout();
-    let mut out = stdout.lock();
+    let terminal = stdout.is_terminal();
+    let _ = write_stdout(&mut stdout.lock(), &scanned.reports, values_only, terminal);
 
-    if values_only {
-        for report in reports {
-            for date in &report.dates {
-                let _ = writeln!(out, "{}", date.value);
-            }
-        }
+    // Piped, `--values` is the whole answer and stderr stays quiet, as it
+    // always has. At a terminal nothing reached stdout, so stderr lists.
+    if values_only && !terminal {
         return;
     }
+    summarise(&mut std::io::stderr().lock(), scanned);
+}
 
+/// A terminal gets nothing here. The stderr listing already shows every
+/// date a person reads, and the JSON beside it on the same screen is the
+/// same answer a second time in a form nobody reads by eye. Anything
+/// that can parse — a pipe, a file, a subprocess — still gets every
+/// report, so no script sees a difference.
+fn write_stdout(
+    out: &mut impl Write,
+    reports: &[FileReport],
+    values_only: bool,
+    terminal: bool,
+) -> std::io::Result<()> {
+    if terminal {
+        return Ok(());
+    }
     for report in reports {
+        if values_only {
+            for date in &report.dates {
+                writeln!(out, "{}", date.value)?;
+            }
+            continue;
+        }
         if let Ok(line) = serde_json::to_string(report) {
-            let _ = writeln!(out, "{line}");
+            writeln!(out, "{line}")?;
+        }
+    }
+    Ok(())
+}
+
+/// The human half: every date, then the tally. With stdout silent at a
+/// terminal this is the only place a person sees the dates, so it lists
+/// them rather than counting them.
+fn summarise(stderr: &mut impl Write, scanned: &Scanned) {
+    let reports = &scanned.reports;
+    for report in reports {
+        for date in &report.dates {
+            let _ = writeln!(stderr, "{}", describe(report, date));
         }
     }
 
@@ -329,7 +366,8 @@ fn report(scanned: &Scanned, values_only: bool) {
         .filter(|report| report.skipped.is_some())
         .count();
     let files = reports.len() - skipped;
-    eprintln!(
+    let _ = writeln!(
+        stderr,
         "{total} date{} in {files} file{}{}{}",
         plural(total),
         plural(files),
@@ -353,12 +391,26 @@ fn report(scanned: &Scanned, values_only: bool) {
     // Named, every one of them. A tool that quietly reads fewer files
     // than it was pointed at is worse than one that fails.
     for report in reports.iter().filter(|report| report.skipped.is_some()) {
-        eprintln!(
+        let _ = writeln!(
+            stderr,
             "  skipped {}: {}",
             report.file,
             report.skipped.as_deref().unwrap_or_default()
         );
     }
+}
+
+/// The one-line projection of a date. It says what the JSON says, no more.
+fn describe(report: &FileReport, date: &scan::Date) -> String {
+    let iso = date
+        .iso
+        .as_deref()
+        .map(|iso| format!("  {iso}"))
+        .unwrap_or_default();
+    format!(
+        "{}:{}:{}  {}  [{}]{iso}",
+        report.file, date.line, date.column, date.value, date.format
+    )
 }
 
 fn plural(count: usize) -> &'static str {
@@ -370,6 +422,67 @@ mod tests {
     use super::*;
     use crate::extract::SUPPORTED_FORMATS;
     use crate::extract::format::FALLBACK_FORMAT;
+
+    fn sample(iso: bool) -> Scanned {
+        let options = ScanOptions {
+            iso,
+            ..ScanOptions::default()
+        };
+        Scanned {
+            reports: vec![scan::scan_text(
+                "a.md",
+                "Cut on 2024-01-15T10:30:45Z.\n",
+                "markdown",
+                &options,
+            )],
+            binary: 0,
+        }
+    }
+
+    #[test]
+    fn a_pipe_gets_one_report_per_line() {
+        let scanned = sample(false);
+        let mut out = Vec::new();
+        write_stdout(&mut out, &scanned.reports, false, false).expect("a write");
+        let text = String::from_utf8(out).expect("utf-8");
+        assert_eq!(text.lines().count(), scanned.reports.len());
+        assert!(text.starts_with('{'), "{text}");
+    }
+
+    #[test]
+    fn a_pipe_gets_the_values_with_values_only() {
+        let scanned = sample(false);
+        let mut out = Vec::new();
+        write_stdout(&mut out, &scanned.reports, true, false).expect("a write");
+        assert_eq!(
+            String::from_utf8(out).expect("utf-8"),
+            "2024-01-15T10:30:45Z\n"
+        );
+    }
+
+    #[test]
+    fn a_terminal_gets_nothing_on_stdout() {
+        let scanned = sample(false);
+        for values_only in [false, true] {
+            let mut out = Vec::new();
+            write_stdout(&mut out, &scanned.reports, values_only, true).expect("a write");
+            assert!(out.is_empty(), "values_only={values_only}");
+        }
+    }
+
+    /// With stdout silent at a terminal, a bare count would leave a
+    /// person unable to see a single date.
+    #[test]
+    fn stderr_lists_every_date_before_the_tally() {
+        let mut err = Vec::new();
+        summarise(&mut err, &sample(true));
+        let text = String::from_utf8(err).expect("utf-8");
+        assert!(
+            text.starts_with("a.md:1:8  2024-01-15T10:30:45Z  [iso]  2024-01-15T10:30:45"),
+            "{text}"
+        );
+        assert!(text.ends_with("1 date in 1 file\n"), "{text}");
+    }
 
     fn parse(arguments: &[&str]) -> Result<Invocation, String> {
         parse_arguments(

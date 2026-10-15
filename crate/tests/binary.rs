@@ -134,7 +134,7 @@ fn every_text_file_in_the_tree_is_read() {
     let run = run(&tree, &[]);
     assert_eq!(run.stdout.lines().count(), 5, "{}", run.stdout);
     assert!(
-        run.stderr.starts_with("5 dates in 5 files"),
+        run.stderr.ends_with("5 dates in 5 files\n"),
         "{}",
         run.stderr
     );

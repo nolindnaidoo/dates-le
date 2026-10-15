@@ -107,6 +107,14 @@ useless. They are counted in the stderr summary instead. A file that *is*
 text and could not be read keeps its named `skipped` diagnostic and keeps
 failing `--strict`.
 
+### stdout is protocol, and silent at a terminal
+
+stdout is JSON for machines. When it is a terminal it carries nothing,
+`--values` included, because stderr lists every date and a second copy
+as JSON on the same screen is noise. Anything that can parse gets every
+report unchanged. stderr must stand alone for that reason, so it lists
+the dates and does not only count them.
+
 ### Local time is a real dependency, and is not hidden
 
 Several of the shapes carry no timezone. Their instant is a property of
