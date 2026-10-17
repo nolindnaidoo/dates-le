@@ -17,6 +17,9 @@
   <a href="https://www.npmjs.com/package/dates-le-mcp">
     <img src="https://img.shields.io/npm/v/dates-le-mcp?style=for-the-badge&label=MCP%20server&color=blue&logo=npm" alt="dates-le-mcp on npm" />
   </a>
+  <a href="https://www.npmjs.com/package/dates-le">
+    <img src="https://img.shields.io/npm/v/dates-le?style=for-the-badge&label=npm%20CLI&color=blue&logo=npm" alt="dates-le on npm" />
+  </a>
   <a href="https://crates.io/crates/dates-le">
     <img src="https://img.shields.io/crates/v/dates-le?style=for-the-badge&label=Rust%20CLI&color=blue&logo=rust" alt="dates-le on crates.io" />
   </a>
@@ -236,6 +239,22 @@ dates-le mcp                        # the same extraction over MCP on stdio
 <p align="center">
   <img src="assets/demos/cli.gif" alt="dates-le in a terminal" style="max-width: 100%; height: auto;" />
 </p>
+
+**Install it from npm** ([`dates-le`](https://www.npmjs.com/package/dates-le)) **or from crates.io** ([`dates-le`](https://crates.io/crates/dates-le)). Both install the same `dates-le` command.
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/dates-le">
+    <img src="https://img.shields.io/npm/v/dates-le?style=for-the-badge&label=npm%20CLI&color=blue&logo=npm" alt="dates-le on npm" />
+  </a>
+  <a href="https://crates.io/crates/dates-le">
+    <img src="https://img.shields.io/crates/v/dates-le?style=for-the-badge&label=Rust%20CLI&color=blue&logo=rust" alt="dates-le on crates.io" />
+  </a>
+</p>
+
+```bash
+npm install -g dates-le   # or run it once: npx dates-le
+cargo install dates-le
+```
 
 **The instant is the point.** `2024-01-15`, `1705276800` and
 `Mon, 15 Jan 2024` are one moment written three ways, and resolving each
