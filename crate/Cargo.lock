@@ -127,7 +127,7 @@ checksum = "a31eee39dddec8330830986fcd7625edb5a24ec90ea038215273bbc3adb08ac6"
 
 [[package]]
 name = "dates-le"
-version = "2.6.0"
+version = "2.6.1"
 dependencies = [
  "chrono",
  "chrono-tz",

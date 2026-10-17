@@ -59,7 +59,7 @@ Options:
                        reporting it and carrying on
   --stdin              read one document from stdin
   --hidden             walk hidden files and directories too
-  --no-ignore          walk files that .gitignore excludes
+  --no-ignore          walk files that .gitignore or .ignore excludes
 
 --after and --before accept anything this tool can read, so
 \`--after 2024-01-15\` and \`--after 'March 5, 2024'\` both work.

@@ -15,8 +15,8 @@ import {
 	describe,
 	exitCode,
 	type FileReport,
-	scanFile,
 	scanText,
+	scanWalked,
 } from './scan';
 import { USAGE } from './usage';
 import { collect } from './walk';
@@ -85,13 +85,7 @@ async function gather(options: Cli, io: RunIo): Promise<Scanned> {
 	for (const root of options.roots) {
 		if (!existsSync(root)) throw new Error(`${root} does not exist`);
 	}
-	const files = collect(options.roots, options.walk);
-	const reports: FileReport[] = [];
-	for (const file of files) {
-		const scanned = await scanFile(file, options.scan);
-		if (scanned) reports.push(scanned);
-	}
-	return { reports, binary: files.length - reports.length };
+	return scanWalked(collect(options.roots, options.walk), options.scan);
 }
 
 function report(scanned: Scanned, values: boolean, io: RunIo): void {

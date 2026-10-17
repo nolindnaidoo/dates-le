@@ -232,17 +232,24 @@ describe('collect', () => {
 		rmdirSync(root);
 	});
 
-	it('sorts by component, skips hidden files, and keeps .ignore under --no-ignore', () => {
-		const shown = (hidden: boolean) =>
-			collect([root], { hidden, respectIgnore: false }).map((path) =>
+	it('sorts by component, skips hidden files, and drops .ignore under --no-ignore', () => {
+		const shown = (hidden: boolean, respectIgnore: boolean) =>
+			collect([root], { hidden, respectIgnore }).files.map((path) =>
 				path.slice(root.length + 1).replaceAll('\\', '/'),
 			);
-		expect(shown(false)).toEqual(['a b.md', 'a.md', 'sub/c.md']);
-		expect(shown(true)).toEqual([
+		expect(shown(false, true)).toEqual(['a b.md', 'a.md', 'sub/c.md']);
+		expect(shown(false, false)).toEqual([
+			'a b.md',
+			'a.md',
+			'skip.md',
+			'sub/c.md',
+		]);
+		expect(shown(true, false)).toEqual([
 			'.hidden.md',
 			'.ignore',
 			'a b.md',
 			'a.md',
+			'skip.md',
 			'sub/c.md',
 		]);
 	});
@@ -250,7 +257,7 @@ describe('collect', () => {
 	it('reads a named file whatever it is called, once however often it is named', () => {
 		const named = join(root, 'skip.md');
 		expect(
-			collect([named, named], { hidden: false, respectIgnore: true }),
+			collect([named, named], { hidden: false, respectIgnore: true }).files,
 		).toEqual([named]);
 	});
 });
@@ -331,14 +338,16 @@ describe('mcp', () => {
 		expect(code).toBe(2);
 	});
 
-	it('scans a missing path to an empty answer, as the crate walk does', async () => {
+	it('reports a missing path with its reason, as the crate walk does', async () => {
+		const missing = join(tmpdir(), 'dates-le-no-such-path');
 		const { written } = await session(
-			`${JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'dates_le_scan', arguments: { path: join(tmpdir(), 'dates-le-no-such-path') } } })}\n`,
+			`${JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'dates_le_scan', arguments: { path: missing } } })}\n`,
 		);
 		const reply = JSON.parse(written[0] ?? '{}');
-		expect(reply.result.structuredContent.data).toEqual({
-			reports: [],
-			dates: 0,
-		});
+		const [report] = reply.result.structuredContent.data.reports;
+		expect(report.file).toBe(missing.replaceAll('\\', '/'));
+		expect(report.skipped).toMatch(
+			/^IO error for operation on .+: .+ \(os error 2\)$/,
+		);
 	});
 });
