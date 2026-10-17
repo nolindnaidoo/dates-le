@@ -322,6 +322,17 @@ entirely.
 A BOM anywhere other than the start is a zero-width no-break space and
 belongs to the text.
 
+**Held equal: this surface and the npm one.** The npm package `dates-le`
+installs a command named `dates-le`, built from the extension's `src/cli/`
+over the extension's engine, and nobody running `dates-le` can tell which
+one they have. It is held to everything above byte for byte — flags,
+walk, instants, zones, filters, exit codes, stdout, stderr, and every reply
+`dates-le mcp` writes — by `scripts/check-cli-parity.ts`. A change to this
+surface changes `src/cli/` in the same commit. That includes `--version`:
+every surface in the repository carries one version. One gap is known: a
+syslog line in a year past 262142, reachable only through `--year`, is
+dropped here, where chrono ends, and resolved by V8, which ends at 275760.
+
 ## Deliberate divergences
 
 One thing is held equal: the shared `extract_dates` MCP tool, which must

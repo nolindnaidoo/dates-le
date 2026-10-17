@@ -245,4 +245,23 @@ mod tests {
             Some("2024-01-15T10:30:45.123Z")
         );
     }
+
+    /// The npm command line validates `--tz` against this list, because
+    /// ICU accepts `utc` and `+05:00` where chrono-tz refuses both. A
+    /// chrono-tz bump that adds or drops a name fails here until the list
+    /// is regenerated, so the two command lines never disagree about
+    /// which zones exist.
+    #[test]
+    fn the_shared_zone_list_is_the_one_chrono_tz_knows() {
+        let listed: Vec<String> = serde_json::from_str(include_str!("../../fixtures/zones.json"))
+            .expect("fixtures/zones.json is a list of names");
+        let known: Vec<&str> = chrono_tz::TZ_VARIANTS
+            .iter()
+            .map(|zone| zone.name())
+            .collect();
+        assert_eq!(listed, known);
+        for name in &listed {
+            assert!(zone_by_name(name).is_some(), "{name}");
+        }
+    }
 }

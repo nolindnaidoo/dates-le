@@ -1,11 +1,37 @@
 # Changelog
 
-The Rust CLI and MCP server. The VS Code extension has its own
-[CHANGELOG](../CHANGELOG.md) and its own version — the two products in
-this repository release on their own cadence.
+The Rust CLI and MCP server. The VS Code extension, the npm MCP server
+and the npm command line have their own [CHANGELOG](../CHANGELOG.md).
+Up to 0.4.2 the crate was versioned on its own. From 2.6.0 every surface
+in this repository carries one version and releases from one tag.
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.6.0] - 2026-10-17
+
+### Changed
+
+- **The version jumps from 0.4.2 to 2.6.0** to match the extension and
+  the npm command line `dates-le`, which installs the same command and is
+  held to this one byte for byte. Two binaries called `dates-le` printing
+  different versions for the same behaviour would mislead anyone
+  comparing them.
+
+### Fixed
+
+- **A closed stdout is refused rather than ignored.** A reader that
+  closed stdout early, as `| head` does, made the report fail to write,
+  and the error was dropped: the run went on to list every date on
+  stderr and exited 0 behind a truncated answer. It now prints
+  `dates-le: could not write the report: <error>`, or `the values` under
+  `--values`, and exits 2, as every tool in the family does.
+
+### Added
+
+- `fixtures/zones.json`, chrono-tz's list of zone names, which the npm
+  command line checks `--tz` against. A test fails when it and chrono-tz
+  disagree.
 
 ## [0.4.2] - 2026-10-15
 

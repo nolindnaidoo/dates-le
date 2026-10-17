@@ -17,18 +17,21 @@ import type { DateOrder } from './regional';
 
 /**
  * @param kinds The kinds of date to keep. Every kind when it is left out.
+ * @param year The year a syslog line is read in. This one when left out.
  */
 export async function extractDates(
 	content: string,
 	languageId: string,
 	order?: DateOrder,
 	kinds?: readonly DateFormat[],
+	year?: number,
 ): Promise<ExtractionResult> {
 	try {
 		const dates = extractByFileType(
 			content,
 			determineFileType(languageId),
 			order,
+			year,
 		);
 		return createSuccessResult(ofKinds(dates, kinds));
 	} catch (error) {
@@ -79,6 +82,7 @@ function extractByFileType(
 	content: string,
 	fileType: FileType,
 	order: DateOrder | undefined,
+	year?: number,
 ): readonly DateValue[] {
 	switch (fileType) {
 		case 'json':
@@ -90,7 +94,7 @@ function extractByFileType(
 		case 'xml':
 			return extractFromXml(content, order);
 		case 'log':
-			return extractFromLog(content, order);
+			return extractFromLog(content, order, year);
 		case 'javascript':
 			return extractFromJavaScript(content, order);
 		case 'html':

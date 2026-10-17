@@ -139,3 +139,30 @@ fn every_text_file_in_the_tree_is_read() {
         run.stderr
     );
 }
+
+/// A reader that closes stdout early, as `| head` does, gets the
+/// family's one-line refusal and exit 2. The write error was ignored,
+/// so a truncated answer left with an exit code that said it was whole.
+#[test]
+fn a_closed_stdout_is_refused_rather_than_ignored() {
+    let tree = Tree::new("closed-stdout");
+    tree.write("dates.txt", "2024-01-15\n".repeat(20_000).as_bytes());
+    for (flag, what) in [(None, "report"), (Some("--values"), "values")] {
+        let mut command = Command::new(env!("CARGO_BIN_EXE_dates-le"));
+        command.arg("--no-ignore").args(flag).arg(&tree.0);
+        let mut child = command
+            .stdin(std::process::Stdio::null())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .expect("the binary runs");
+        drop(child.stdout.take());
+        let output = child.wait_with_output().expect("the binary exits");
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert_eq!(output.status.code(), Some(2), "{stderr}");
+        assert!(
+            stderr.starts_with(&format!("dates-le: could not write the {what}: ")),
+            "{stderr}"
+        );
+    }
+}
