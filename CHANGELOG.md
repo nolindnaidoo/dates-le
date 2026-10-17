@@ -14,6 +14,12 @@ version and releases from one tag.
 
 ### Fixed
 
+- **`mcp` no longer ends the session on a frame that is not UTF-8**, in
+  the crate or the npm package. Such a frame is dropped like one that is not
+  JSON, and the requests after it are served. The npm server reads frames
+  with `src/cli/frames.ts`, the crate server's framing in one file shared
+  across the family, and `check:cli-pipes` now feeds both servers eighteen
+  malformed frames and requests and compares the answers.
 - **A directory the walk cannot enter is reported, not dropped.** The
   command line and the `dates_le_scan` tool, in the crate and in the npm
   package, skipped a locked directory without a word, so a tree with one
