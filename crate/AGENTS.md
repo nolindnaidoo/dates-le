@@ -108,7 +108,10 @@ line is produced and `--strict` is unaffected; otherwise a repository
 with sixteen images in it exits 2 under `--strict`, which makes the flag
 useless. They are counted in the stderr summary instead. A file that *is*
 text and could not be read keeps its named `skipped` diagnostic and keeps
-failing `--strict`.
+failing `--strict`, and so does a directory the walk could not enter:
+`walk::collect` returns it beside the files, and `scan::scan_walked` turns
+it into a `skipped` report. It used to be dropped, and a tree with a
+locked directory in it read as clean.
 
 ### stdout is protocol, and silent at a terminal
 

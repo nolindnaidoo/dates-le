@@ -7,9 +7,9 @@
  * sorted the way Rust sorts a `PathBuf`, by component, so a report's lines are
  * in the same order from either binary.
  *
- * The crate's walk drops an entry it cannot read, a locked directory
- * included, without a word, and so does this one. `.ignore` files stay in
- * force under `--no-ignore`, because the crate never turns them off.
+ * An entry the walk cannot enter, a locked directory, is reported with its
+ * reason rather than dropped, and `--no-ignore` turns every ignore file off,
+ * `.ignore` included, as the crate's walk does.
  */
 import { type Dirent, readdirSync, statSync } from 'node:fs';
 import { dirname, resolve, sep } from 'node:path';
@@ -22,27 +22,46 @@ import {
 	repositoryRules,
 	rulesFor,
 } from './ignoreRules';
+import { rustIoMessage } from './ioError';
+
+export interface Unreadable {
+	readonly path: string;
+	readonly reason: string;
+}
+
+/** The files to read, and the entries the walk could not enter. */
+export interface Walked {
+	readonly files: readonly string[];
+	readonly unreadable: readonly Unreadable[];
+}
 
 interface Walk {
 	readonly options: WalkOptions;
 	readonly repository: RepositoryRules | null;
 	readonly files: string[];
+	readonly unreadable: Unreadable[];
 }
 
-/** Every file under `roots`, in a stable order. */
+/** Every file under `roots`, and every entry it could not enter, in a stable order. */
 export function collect(
 	roots: readonly string[],
 	options: WalkOptions,
-): readonly string[] {
+): Walked {
 	const files: string[] = [];
+	const unreadable: Unreadable[] = [];
 	for (const root of roots) {
 		if (isFile(root)) {
 			files.push(root);
 			continue;
 		}
-		files.push(...walkDirectory(root, options));
+		const walk = walkDirectory(root, options);
+		files.push(...walk.files);
+		unreadable.push(...walk.unreadable);
 	}
-	return Object.freeze(sortAndDedupe(files));
+	return Object.freeze({
+		files: sortAndDedupe(files),
+		unreadable: sortAndDedupeUnreadable(unreadable),
+	});
 }
 
 function isFile(path: string): boolean {
@@ -53,16 +72,17 @@ function isFile(path: string): boolean {
 	}
 }
 
-function walkDirectory(root: string, options: WalkOptions): readonly string[] {
+function walkDirectory(root: string, options: WalkOptions): Walk {
 	const absolute = resolve(root);
 	const repoRoot = options.respectIgnore ? repositoryRoot(absolute) : null;
 	const walk: Walk = {
 		options,
 		repository: repoRoot ? repositoryRules(repoRoot) : null,
 		files: [],
+		unreadable: [],
 	};
 	visit(walk, root, absolute, parentRules(absolute, options));
-	return walk.files;
+	return walk;
 }
 
 /** The crate's `parents(true)`: ignore files above the walk root count too. */
@@ -90,12 +110,17 @@ function visit(
 	let entries: readonly Dirent[];
 	try {
 		entries = readdirSync(absolute, { withFileTypes: true });
-	} catch {
+	} catch (error) {
+		// The path the `ignore` error carries, and the walkdir error inside it.
+		walk.unreadable.push({
+			path: shown,
+			reason: `IO error for operation on ${shown}: ${rustIoMessage(error)}`,
+		});
 		return;
 	}
-	const inRepository =
-		walk.options.respectIgnore && repositoryRoot(absolute) !== null;
-	const chain = [...inherited, rulesFor(absolute, inRepository)];
+	const chain = walk.options.respectIgnore
+		? [...inherited, rulesFor(absolute, repositoryRoot(absolute) !== null)]
+		: inherited;
 	for (const entry of entries) {
 		visitEntry(
 			walk,
@@ -117,7 +142,11 @@ function visitEntry(
 	if (!walk.options.hidden && entry.name.startsWith('.')) return;
 	const isDir = entry.isDirectory();
 	if (!isDir && !entry.isFile()) return;
-	if (isIgnored(absolute, isDir, chain, walk.repository)) return;
+	if (
+		walk.options.respectIgnore &&
+		isIgnored(absolute, isDir, chain, walk.repository)
+	)
+		return;
 	if (!isDir) {
 		walk.files.push(shown);
 		return;
@@ -179,4 +208,28 @@ function sortAndDedupe(files: readonly string[]): string[] {
 			return !previous || compareComponents(previous.key, item.key) !== 0;
 		})
 		.map((item) => item.path);
+}
+
+/** `Vec<(PathBuf, String)>::sort` then `dedup`: by path, then by reason. */
+function sortAndDedupeUnreadable(entries: readonly Unreadable[]): Unreadable[] {
+	const keyed = entries.map((entry) => ({
+		entry,
+		key: components(entry.path),
+	}));
+	const order = (
+		left: (typeof keyed)[number],
+		right: (typeof keyed)[number],
+	): number =>
+		compareComponents(left.key, right.key) ||
+		Buffer.compare(
+			Buffer.from(left.entry.reason),
+			Buffer.from(right.entry.reason),
+		);
+	keyed.sort(order);
+	return keyed
+		.filter((item, index) => {
+			const previous = keyed[index - 1];
+			return !previous || order(previous, item) !== 0;
+		})
+		.map((item) => item.entry);
 }

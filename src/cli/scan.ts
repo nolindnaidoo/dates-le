@@ -10,6 +10,7 @@ import { extractDates } from '../extraction/extract';
 import { resolveFormat } from '../mcp/fileType';
 import type { ScanOptions } from './args';
 import { decodeUtf8OrThrow, rustIoMessage, withoutBom } from './ioError';
+import type { Walked } from './walk';
 
 export interface FoundDate {
 	readonly value: string;
@@ -66,6 +67,26 @@ export async function scanText(
  * does not fail `--strict`. A text file that could not be read is reported
  * with the reason.
  */
+/**
+ * The crate's `scan_walked`: a report per text file, then one per entry the
+ * walk could not enter, and how many files were binary.
+ */
+export async function scanWalked(
+	walked: Walked,
+	options: ScanOptions,
+): Promise<{ reports: FileReport[]; binary: number }> {
+	const reports: FileReport[] = [];
+	for (const file of walked.files) {
+		const scanned = await scanFile(file, options);
+		if (scanned) reports.push(scanned);
+	}
+	const binary = walked.files.length - reports.length;
+	for (const entry of walked.unreadable) {
+		reports.push(skipped(reportedPath(entry.path), entry.reason));
+	}
+	return { reports, binary };
+}
+
 export async function scanFile(
 	path: string,
 	options: ScanOptions,

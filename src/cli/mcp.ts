@@ -13,7 +13,7 @@ import { TOOLS } from '../mcp/tools';
 import type { DateFormat } from '../types';
 import type { ScanOptions } from './args';
 import { rustDebug } from './debug';
-import { type FileReport, scanFile } from './scan';
+import { scanWalked } from './scan';
 import { collect } from './walk';
 
 const PROTOCOL_VERSION = '2025-06-18';
@@ -280,16 +280,11 @@ async function scan(args: Record<string, unknown>): Promise<unknown> {
 		order: dateOrder(args),
 		kinds: kinds(args),
 	};
-	const files = collect(inputs, {
+	const walked = collect(inputs, {
 		hidden: flag('hidden'),
 		respectIgnore: !flag('ignored'),
 	});
-	const reports: FileReport[] = [];
-	for (const file of files) {
-		const report = await scanFile(file, options);
-		if (report) reports.push(report);
-	}
-	const binary = files.length - reports.length;
+	const { reports, binary } = await scanWalked(walked, options);
 	const dates = reports.reduce((sum, report) => sum + report.dates.length, 0);
 	const diagnostics: Diagnostic[] = reports
 		.filter((report) => report.skipped !== undefined)

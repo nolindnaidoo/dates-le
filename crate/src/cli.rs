@@ -66,7 +66,7 @@ Options:
                        reporting it and carrying on
   --stdin              read one document from stdin
   --hidden             walk hidden files and directories too
-  --no-ignore          walk files that .gitignore excludes
+  --no-ignore          walk files that .gitignore or .ignore excludes
 
 --after and --before accept anything this tool can read, so
 `--after 2024-01-15` and `--after 'March 5, 2024'` both work.
@@ -300,15 +300,9 @@ fn gather(invocation: &Invocation) -> Result<Scanned, String> {
             return Err(format!("{} does not exist", root.display()));
         }
     }
-    let files = walk::collect(&invocation.roots, invocation.walk);
-    let reports: Vec<FileReport> = files
-        .iter()
-        .filter_map(|path| scan::scan_file(path, &invocation.scan))
-        .collect();
-    Ok(Scanned {
-        binary: files.len() - reports.len(),
-        reports,
-    })
+    let walked = walk::collect(&invocation.roots, invocation.walk);
+    let (reports, binary) = scan::scan_walked(&walked, &invocation.scan);
+    Ok(Scanned { reports, binary })
 }
 
 /// A reader that closed stdout early fails the run with exit 2, as every

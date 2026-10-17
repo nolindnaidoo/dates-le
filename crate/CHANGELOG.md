@@ -8,6 +8,21 @@ in this repository carries one version and releases from one tag.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.1] - 2026-10-17
+
+### Fixed
+
+- **A directory the walk cannot enter is reported, not dropped.** The
+  command line and the `dates_le_scan` tool, in the crate and in the npm
+  package, skipped a locked directory without a word, so a tree with one
+  read as clean. It now comes back as a `skipped` report naming the
+  directory and the operating system's reason, and fails `--strict`. A
+  path named to `dates_le_scan` that does not exist is reported the same
+  way, where it used to answer as an empty tree.
+- **`--no-ignore` turns `.ignore` files off too.** It stopped at
+  `.gitignore`, so a file an `.ignore` named stayed unread under the flag
+  that asks for everything. `--help` now names both.
+
 ## [2.6.0] - 2026-10-17
 
 ### Changed

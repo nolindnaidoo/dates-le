@@ -1,6 +1,6 @@
 {
 	"name": "dates-le",
-	"version": "2.6.0",
+	"version": "2.6.1",
 	"description": "Get every date and timestamp out of a codebase, with the instant each resolves to and the file, line and column it came from.",
 	"keywords": [
 		"dates",

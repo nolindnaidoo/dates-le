@@ -240,15 +240,11 @@ fn scan_tool(arguments: &Value) -> Result<Value, String> {
         respect_ignore: !flag("ignored"),
     };
 
-    let targets = walk::collect(&inputs, walk_options);
     // A file that is not text at all yields no report; it was never a
     // candidate, and a PNG named in the answer is noise an agent has to
     // reason past. The count is carried so the coverage is still stated.
-    let reports: Vec<scan::FileReport> = targets
-        .iter()
-        .filter_map(|target| scan::scan_file(target, &options))
-        .collect();
-    let binary = targets.len() - reports.len();
+    let walked = walk::collect(&inputs, walk_options);
+    let (reports, binary) = scan::scan_walked(&walked, &options);
 
     let dates: usize = reports.iter().map(|report| report.dates.len()).sum();
     let mut diagnostics: Vec<Value> = reports

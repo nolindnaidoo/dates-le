@@ -111,6 +111,27 @@ pub(crate) fn scan_text(
 /// and keeps failing `--strict`, because that answer really is
 /// incomplete. Binaries are counted in the summary instead, so the
 /// reader still knows the walk covered less than the tree.
+/// Every report a walk yields, and how many files were binary: a report
+/// per text file, then one per entry the walk could not enter, saying why.
+pub(crate) fn scan_walked(
+    walked: &crate::walk::Walked,
+    options: &ScanOptions,
+) -> (Vec<FileReport>, usize) {
+    let mut reports: Vec<FileReport> = walked
+        .files
+        .iter()
+        .filter_map(|path| scan_file(path, options))
+        .collect();
+    let binary = walked.files.len() - reports.len();
+    reports.extend(
+        walked
+            .unreadable
+            .iter()
+            .map(|(path, reason)| FileReport::skipped(&reported_path(path), reason.clone())),
+    );
+    (reports, binary)
+}
+
 pub(crate) fn scan_file(path: &Path, options: &ScanOptions) -> Option<FileReport> {
     let label = reported_path(path);
     let name = path.file_name().and_then(|name| name.to_str());
