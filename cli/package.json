@@ -1,0 +1,46 @@
+{
+	"name": "dates-le",
+	"version": "2.6.0",
+	"description": "Get every date and timestamp out of a codebase, with the instant each resolves to and the file, line and column it came from.",
+	"keywords": [
+		"dates",
+		"timestamps",
+		"iso8601",
+		"logs",
+		"audit",
+		"cli",
+		"dates-le",
+		"nolindnaidoo",
+		"letools"
+	],
+	"license": "MIT",
+	"author": {
+		"name": "Nolin Naidoo",
+		"url": "https://nolindnaidoo.com"
+	},
+	"homepage": "https://letools.dev/tools/dates-le",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/nolindnaidoo/dates-le.git",
+		"directory": "cli"
+	},
+	"bugs": {
+		"url": "https://github.com/nolindnaidoo/dates-le/issues"
+	},
+	"type": "commonjs",
+	"bin": {
+		"dates-le": "cli.js"
+	},
+	"files": [
+		"cli.js",
+		"README.md",
+		"LICENSE"
+	],
+	"engines": {
+		"node": ">=20"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true
+	}
+}

@@ -14,28 +14,36 @@ import type { DateOrder } from '../regional';
  * Containment dedupe replaces the v1.x behavior of emitting both the
  * shared-core match and the log match for the same characters.
  */
-const LOG_SPECS: readonly DatePatternSpec[] = [
-	{
-		pattern: /(?<!\d)\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?!\d)/dg,
-		format: 'iso',
-	},
-	{
-		pattern: /(?<![A-Za-z])[A-Za-z]{3}\s+\d{1,2}\s\d{2}:\d{2}:\d{2}(?!\d)/dg,
-		format: 'custom',
-		toTimestamp: (value) => resolveInstant(`${value} ${currentYear()}`),
-	},
-	{
-		pattern: /\[(\d{2}\/[A-Za-z]{3}\/\d{4}:\d{2}:\d{2}:\d{2}\s[+-]\d{4})\]/dg,
-		format: 'custom',
-		toTimestamp: apacheToTimestamp,
-	},
-];
+function logSpecs(year: number): readonly DatePatternSpec[] {
+	return [
+		{
+			pattern:
+				/(?<!\d)\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?!\d)/dg,
+			format: 'iso',
+		},
+		{
+			pattern: /(?<![A-Za-z])[A-Za-z]{3}\s+\d{1,2}\s\d{2}:\d{2}:\d{2}(?!\d)/dg,
+			format: 'custom',
+			toTimestamp: (value) => resolveInstant(`${value} ${year}`),
+		},
+		{
+			pattern: /\[(\d{2}\/[A-Za-z]{3}\/\d{4}:\d{2}:\d{2}:\d{2}\s[+-]\d{4})\]/dg,
+			format: 'custom',
+			toTimestamp: apacheToTimestamp,
+		},
+	];
+}
 
+/**
+ * @param year The year a syslog line is read in, since the line carries
+ * none. This one when it is left out; the command line's `--year` names it.
+ */
 export function extractFromLog(
 	content: string,
 	order?: DateOrder,
+	year: number = currentYear(),
 ): readonly DateValue[] {
-	return scanDates(content, LOG_SPECS, order);
+	return scanDates(content, logSpecs(year), order);
 }
 
 function currentYear(): number {

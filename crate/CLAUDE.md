@@ -71,6 +71,14 @@ with its own `CLAUDE.md`.
   the walk, `--after`/`--before`, `--tz`, `--strict`, the exit codes and JSON Lines have no
   editor equivalent and are not drift. SPEC.md's "Deliberate
   divergences" is the bar for a new one.
+- **The command line has a twin.** The npm package `dates-le`, built
+  from the extension's `src/cli/`, mirrors `cli.rs`, `scan.rs`,
+  `walk.rs` and `mcp/` byte for byte, and
+  `bun ../scripts/check-cli-parity.ts` fails on any difference. A change
+  to a flag, a message, the walk, a zone, a filter, an exit code or an
+  MCP reply changes `src/cli/` in the same commit. So does a chrono-tz
+  bump: `fixtures/zones.json` is the list the npm side validates `--tz`
+  against, and a test here fails until it is regenerated.
 - Write regression tests for every bug you fix; keep unit tests free of
   clocks, randomness, and the filesystem outside `walk`/`scan`.
 - **Run the binary, not only the tests.** Every defect worth having

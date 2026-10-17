@@ -49,9 +49,11 @@ time.
 | Route | Command | Worth knowing |
 |---|---|---|
 | **cargo** | `cargo install dates-le` | Any platform, needs **Rust 1.88+**. |
+| **npm** | `npm install -g dates-le` or `npx dates-le` | Needs **Node 20+**. The same `dates-le` command, held to this one byte for byte. |
 | **From source** | `git clone https://github.com/nolindnaidoo/dates-le`<br>`cd dates-le/crate && cargo build --release` | The same build CI runs. |
 
-No runtime, no network, nothing written.
+The cargo build needs no runtime. Neither one touches the network or
+writes a file.
 
 ```bash
 dates-le src/                       # every date; JSON, one line per file, when piped

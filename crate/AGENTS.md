@@ -23,7 +23,10 @@ to a number is what turns a list of strings into something that can be
 sorted, filtered and compared. Every decision below follows from that.
 
 **Status: released.** Both surfaces and the test layers below
-are green. Releases go out through `release-crate.yml`, which is
+are green. Since 2.6.0 the crate carries the repository's one version
+and releases from its one tag, `v<version>` (earlier releases were
+tagged `crate-v*`); the root `AGENTS.md` has the release steps.
+Releases go out through `release-crate.yml`, which is
 dispatch-only and refuses a version that crates.io already carries, has
 no changelog entry, would ship a tarball missing its own corpus, or
 whose corpus the extension no longer reproduces.

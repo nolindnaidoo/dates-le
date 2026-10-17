@@ -51,6 +51,7 @@ Open a file, run `Dates-LE: Extract Dates`, and every date in the document lands
 | **VS Code** | The extraction, in your editor, on a keystroke | [Marketplace](https://marketplace.visualstudio.com/items?itemName=nolindnaidoo.dates-le) |
 | **Cursor, VSCodium, Windsurf** | The same extension | [Open VSX](https://open-vsx.org/extension/nolindnaidoo/dates-le) |
 | **A terminal or a CI step** | The same run over a whole tree, with exit codes | `cargo install dates-le` · [crates.io](https://crates.io/crates/dates-le) |
+| **A terminal, via Node** | The same command line, held to the Rust one byte for byte | `npx dates-le` · [npm](https://www.npmjs.com/package/dates-le) |
 | **Any MCP agent, via Node** | `extract_dates` over stdio | `npx dates-le-mcp` · [npm](https://www.npmjs.com/package/dates-le-mcp) |
 
 ## Use it from an AI agent
@@ -221,7 +222,9 @@ The settings that shape a scan are under [Settings](#settings).
 The same extraction runs from a terminal or a CI step: a Rust CLI in
 [`crate/`](crate/README.md), sharing one corpus with the extension —
 [`crate/fixtures/`](crate/fixtures/) — so the two can never read a
-document differently.
+document differently. The same command line also ships on npm as
+`dates-le`, for a machine with Node and no Rust, and CI holds it to the
+crate byte for byte on three operating systems.
 
 ```bash
 dates-le .                          # every date in the tree; JSON on stdout when piped
@@ -364,12 +367,12 @@ a build only tells you how busy the runner was.
 <!-- coverage:start -->
 | Metric | Coverage |
 | --- | --- |
-| Statements | 92.83% |
-| Branches | 83.90% |
-| Functions | 97.28% |
-| Lines | 94.13% |
+| Statements | 87.67% |
+| Branches | 78.55% |
+| Functions | 90.58% |
+| Lines | 89.45% |
 
-358 test cases across 28 files, plus an integration suite that runs
+392 test cases across 30 files, plus an integration suite that runs
 in a real VS Code extension host and an end-to-end test that installs the
 built `.vsix` into a clean profile.
 

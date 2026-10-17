@@ -139,7 +139,10 @@ pub fn run(arguments: &[String]) -> ExitCode {
         Err(message) => return refuse(&message),
     };
 
-    report(&scanned, invocation.values);
+    if let Err(message) = report(&scanned, invocation.values) {
+        eprintln!("dates-le: {message}");
+        return ExitCode::from(2);
+    }
     scan::exit_code(&scanned.reports, invocation.strict)
 }
 
@@ -308,17 +311,24 @@ fn gather(invocation: &Invocation) -> Result<Scanned, String> {
     })
 }
 
-fn report(scanned: &Scanned, values_only: bool) {
+/// A reader that closed stdout early fails the run with exit 2, as every
+/// tool in the family does. This ignored the write error, so `| head`
+/// left a truncated answer behind an exit code that said it was whole.
+fn report(scanned: &Scanned, values_only: bool) -> Result<(), String> {
     let stdout = std::io::stdout();
     let terminal = stdout.is_terminal();
-    let _ = write_stdout(&mut stdout.lock(), &scanned.reports, values_only, terminal);
+    write_stdout(&mut stdout.lock(), &scanned.reports, values_only, terminal).map_err(|error| {
+        let what = if values_only { "values" } else { "report" };
+        format!("could not write the {what}: {error}")
+    })?;
 
     // `--values` is the whole answer wherever stdout goes, so stderr
     // stays quiet rather than listing the same dates a second time.
     if values_only {
-        return;
+        return Ok(());
     }
     summarise(&mut std::io::stderr().lock(), scanned);
+    Ok(())
 }
 
 /// A terminal gets no JSON. The stderr listing already shows every date
