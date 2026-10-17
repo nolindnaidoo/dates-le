@@ -333,9 +333,15 @@ describe('mcp', () => {
 		expect(written).toEqual(['{"jsonrpc":"2.0","id":null,"result":{}}\n']);
 	});
 
-	it('ends with exit 2 on a line that is not UTF-8', async () => {
-		const { code } = await session(Buffer.from([0x7b, 0xff, 0x7d, 0x0a]));
-		expect(code).toBe(2);
+	it('drops a line that is not UTF-8 and serves the next', async () => {
+		const { code, written } = await session(
+			Buffer.concat([
+				Buffer.from([0x7b, 0xff, 0x7d, 0x0a]),
+				Buffer.from('{"jsonrpc":"2.0","id":1,"method":"ping"}\n'),
+			]),
+		);
+		expect(code).toBe(0);
+		expect(written).toEqual(['{"jsonrpc":"2.0","id":1,"result":{}}\n']);
 	});
 
 	it('reports a missing path with its reason, as the crate walk does', async () => {

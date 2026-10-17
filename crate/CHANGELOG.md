@@ -12,6 +12,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **An MCP frame that is not UTF-8 is dropped, and the server reads on.**
+  `mcp` ended the session with exit 2 on one, so a client lost every
+  request after it. It is now treated like a frame that is not JSON: it
+  carries no id to answer, so nothing is sent and the next frame is
+  served.
 - **A directory the walk cannot enter is reported, not dropped.** The
   command line and the `dates_le_scan` tool, in the crate and in the npm
   package, skipped a locked directory without a word, so a tree with one
