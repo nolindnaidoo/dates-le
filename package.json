@@ -3,7 +3,7 @@
 	"publisher": "nolindnaidoo",
 	"displayName": "Dates-LE: Date & Timestamp Extractor",
 	"description": "Date and timestamp extractor: find every date, unix epoch and ISO 8601 timestamp, and the exact instant each one resolves to",
-	"version": "2.6.1",
+	"version": "2.6.2",
 	"license": "MIT",
 	"author": {
 		"name": "nolindnaidoo",
