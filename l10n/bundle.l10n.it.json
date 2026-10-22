@@ -95,5 +95,6 @@
 	"{0} distinct date(s), {1} occurrence(s) in {2} file(s)": "{0} date distinte, {1} occorrenze in {2} file",
 	"No dates found.": "Nessuna data trovata.",
 	"Date": "Data",
-	"{0} file(s) could not be read.": "Impossibile leggere {0} file."
+	"{0} file(s) could not be read.": "Impossibile leggere {0} file.",
+	"Dates-LE could not finish: {0}": "Dates-LE non è riuscito a completare: {0}"
 }

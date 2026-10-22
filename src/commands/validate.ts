@@ -6,6 +6,7 @@ import type { DateValue } from '../types';
 import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
 import { sanitizeErrorMessage } from '../utils/errors';
+import { guarded } from './guard';
 import {
 	generateValidationReport,
 	openValidationResults,
@@ -40,7 +41,7 @@ export function registerValidateCommand(
 ): void {
 	const command = vscode.commands.registerCommand(
 		'dates-le.validate',
-		async () => {
+		guarded(deps.notifier, async () => {
 			deps.telemetry.event('command-validate');
 
 			const editor = vscode.window.activeTextEditor;
@@ -143,7 +144,7 @@ export function registerValidateCommand(
 					`Failed to validate dates: ${sanitizeErrorMessage(message)}`,
 				);
 			}
-		},
+		}),
 	);
 
 	context.subscriptions.push(command);

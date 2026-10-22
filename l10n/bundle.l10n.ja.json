@@ -95,5 +95,6 @@
 	"{0} distinct date(s), {1} occurrence(s) in {2} file(s)": "{2} 個のファイルに {0} 種類の日付、{1} 件の出現",
 	"No dates found.": "日付が見つかりません。",
 	"Date": "日付",
-	"{0} file(s) could not be read.": "{0} 個のファイルを読み取れませんでした。"
+	"{0} file(s) could not be read.": "{0} 個のファイルを読み取れませんでした。",
+	"Dates-LE could not finish: {0}": "Dates-LE を完了できませんでした: {0}"
 }

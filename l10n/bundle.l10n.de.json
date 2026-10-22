@@ -95,5 +95,6 @@
 	"{0} distinct date(s), {1} occurrence(s) in {2} file(s)": "{0} verschiedene Datumsangabe(n), {1} Vorkommen in {2} Datei(en)",
 	"No dates found.": "Keine Datumsangaben gefunden.",
 	"Date": "Datum",
-	"{0} file(s) could not be read.": "{0} Datei(en) konnten nicht gelesen werden."
+	"{0} file(s) could not be read.": "{0} Datei(en) konnten nicht gelesen werden.",
+	"Dates-LE could not finish: {0}": "Dates-LE konnte nicht abschließen: {0}"
 }
