@@ -4,7 +4,7 @@ import { CONFIG_DEFAULTS } from '../config/config';
 import { DATE_KINDS, DEFAULT_KINDS } from '../extraction/kinds';
 import type { ExtractionResult } from '../types';
 import { capped, isOk, readMaxResults, toDiagnostics } from './envelope';
-import { resolveFormat, SUPPORTED_FORMATS } from './fileType';
+import { FALLBACK_FORMAT, resolveFormat, SUPPORTED_FORMATS } from './fileType';
 import { TOOLS } from './tools';
 import { createResponder, MAX_FRAME_BYTES, serve } from './transport';
 
@@ -117,6 +117,17 @@ describe('fileType: tolerant resolution', () => {
 	it('advertises only formats the engine supports', () => {
 		expect(SUPPORTED_FORMATS).toContain('json');
 		expect(SUPPORTED_FORMATS).not.toContain('unknown');
+	});
+
+	it('does not read a prototype key as a format', () => {
+		// The table was a plain object, so `ALIASES['constructor']` was Object's
+		// constructor and `ALIASES['__proto__']` was Object.prototype: both
+		// truthy, both returned as the file type.
+		for (const name of ['constructor', '__proto__', 'toString', 'valueOf']) {
+			expect(resolveFormat(name, undefined)).toBe(FALLBACK_FORMAT);
+			expect(resolveFormat(undefined, name)).toBe(FALLBACK_FORMAT);
+			expect(resolveFormat(undefined, `notes.${name}`)).toBe(FALLBACK_FORMAT);
+		}
 	});
 });
 
