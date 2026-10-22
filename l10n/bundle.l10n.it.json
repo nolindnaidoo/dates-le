@@ -94,5 +94,6 @@
 	"Where": "Dove",
 	"{0} distinct date(s), {1} occurrence(s) in {2} file(s)": "{0} date distinte, {1} occorrenze in {2} file",
 	"No dates found.": "Nessuna data trovata.",
-	"Date": "Data"
+	"Date": "Data",
+	"{0} file(s) could not be read.": "Impossibile leggere {0} file."
 }

@@ -94,5 +94,6 @@
 	"Where": "Vị trí",
 	"{0} distinct date(s), {1} occurrence(s) in {2} file(s)": "{0} ngày khác nhau, {1} lần xuất hiện trong {2} tệp",
 	"No dates found.": "Không tìm thấy ngày nào.",
-	"Date": "Ngày"
+	"Date": "Ngày",
+	"{0} file(s) could not be read.": "Không thể đọc {0} tệp."
 }

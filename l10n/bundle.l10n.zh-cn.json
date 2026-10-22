@@ -94,5 +94,6 @@
 	"Where": "位置",
 	"{0} distinct date(s), {1} occurrence(s) in {2} file(s)": "{2} 个文件中有 {0} 个不同的日期，共出现 {1} 次",
 	"No dates found.": "未找到日期。",
-	"Date": "日期"
+	"Date": "日期",
+	"{0} file(s) could not be read.": "{0} 个文件无法读取。"
 }

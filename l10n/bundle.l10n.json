@@ -94,5 +94,6 @@
   "Where": "Where",
   "{0} distinct date(s), {1} occurrence(s) in {2} file(s)": "{0} distinct date(s), {1} occurrence(s) in {2} file(s)",
   "No dates found.": "No dates found.",
-  "Date": "Date"
+  "Date": "Date",
+  "{0} file(s) could not be read.": "{0} file(s) could not be read."
 }

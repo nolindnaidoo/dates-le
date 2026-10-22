@@ -94,5 +94,6 @@
 	"Where": "Onde",
 	"{0} distinct date(s), {1} occurrence(s) in {2} file(s)": "{0} data(s) distinta(s), {1} ocorrência(s) em {2} arquivo(s)",
 	"No dates found.": "Nenhuma data encontrada.",
-	"Date": "Data"
+	"Date": "Data",
+	"{0} file(s) could not be read.": "{0} arquivo(s) não puderam ser lidos."
 }
