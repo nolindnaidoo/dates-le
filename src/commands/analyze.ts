@@ -11,6 +11,7 @@ import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
 import { formatDateSpan } from '../utils/duration';
 import { sanitizeErrorMessage } from '../utils/errors';
+import { guarded } from './guard';
 
 export function registerAnalyzeCommand(
 	context: vscode.ExtensionContext,
@@ -22,7 +23,7 @@ export function registerAnalyzeCommand(
 ): void {
 	const command = vscode.commands.registerCommand(
 		'dates-le.analyze',
-		async () => {
+		guarded(deps.notifier, async () => {
 			deps.telemetry.event('command-analyze');
 
 			const editor = vscode.window.activeTextEditor;
@@ -39,7 +40,7 @@ export function registerAnalyzeCommand(
 					`Failed to analyze dates: ${sanitizeErrorMessage(message)}`,
 				);
 			}
-		},
+		}),
 	);
 
 	context.subscriptions.push(command);

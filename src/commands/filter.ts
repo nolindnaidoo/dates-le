@@ -7,6 +7,7 @@ import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
 import { sanitizeErrorMessage } from '../utils/errors';
 import { generateFilterReport, openFilterResults } from './filterReport';
+import { guarded } from './guard';
 
 export interface DateFilterOptions {
 	readonly dateRange?: {
@@ -32,7 +33,7 @@ export function registerFilterCommand(
 ): void {
 	const command = vscode.commands.registerCommand(
 		'dates-le.filter',
-		async () => {
+		guarded(deps.notifier, async () => {
 			deps.telemetry.event('command-filter');
 
 			const editor = vscode.window.activeTextEditor;
@@ -135,7 +136,7 @@ export function registerFilterCommand(
 					`Failed to filter dates: ${sanitizeErrorMessage(message)}`,
 				);
 			}
-		},
+		}),
 	);
 
 	context.subscriptions.push(command);

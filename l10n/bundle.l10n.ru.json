@@ -94,5 +94,7 @@
 	"Where": "Где",
 	"{0} distinct date(s), {1} occurrence(s) in {2} file(s)": "Различных дат: {0}, вхождений: {1}, файлов: {2}",
 	"No dates found.": "Даты не найдены.",
-	"Date": "Дата"
+	"Date": "Дата",
+	"{0} file(s) could not be read.": "Не удалось прочитать файлов: {0}.",
+	"Dates-LE could not finish: {0}": "Dates-LE не удалось завершить: {0}"
 }

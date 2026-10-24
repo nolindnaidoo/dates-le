@@ -94,5 +94,7 @@
 	"Where": "Dónde",
 	"{0} distinct date(s), {1} occurrence(s) in {2} file(s)": "{0} fecha(s) distinta(s), {1} aparición(es) en {2} archivo(s)",
 	"No dates found.": "No se encontraron fechas.",
-	"Date": "Fecha"
+	"Date": "Fecha",
+	"{0} file(s) could not be read.": "{0} archivo(s) no se pudieron leer.",
+	"Dates-LE could not finish: {0}": "Dates-LE no pudo terminar: {0}"
 }

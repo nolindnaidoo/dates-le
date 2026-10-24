@@ -94,5 +94,7 @@
 	"Where": "Де",
 	"{0} distinct date(s), {1} occurrence(s) in {2} file(s)": "Різних дат: {0}, входжень: {1}, файлів: {2}",
 	"No dates found.": "Дат не знайдено.",
-	"Date": "Дата"
+	"Date": "Дата",
+	"{0} file(s) could not be read.": "Не вдалося прочитати файлів: {0}.",
+	"Dates-LE could not finish: {0}": "Dates-LE не вдалося завершити: {0}"
 }

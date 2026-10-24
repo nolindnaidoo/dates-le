@@ -9,6 +9,7 @@ import {
 	scanFiles,
 	unreadNotes,
 } from '../workspace/scan';
+import { guarded } from './guard';
 import {
 	askForFolder,
 	code,
@@ -79,17 +80,18 @@ export function registerExtractWorkspaceCommands(
 	deps: WorkspaceDeps,
 ): void {
 	context.subscriptions.push(
-		vscode.commands.registerCommand('dates-le.extractWorkspace', async () =>
-			extractWorkspace(deps),
+		vscode.commands.registerCommand(
+			'dates-le.extractWorkspace',
+			guarded(deps.notifier, async () => extractWorkspace(deps)),
 		),
 		// The Explorer hands over the folder that was clicked. From the
 		// palette there is none, and the command asks.
 		vscode.commands.registerCommand(
 			'dates-le.extractFolder',
-			async (picked?: vscode.Uri) => {
+			guarded(deps.notifier, async (picked?: vscode.Uri) => {
 				const folder = picked ?? (await askForFolder());
 				if (folder !== undefined) await extractWorkspace(deps, folder);
-			},
+			}),
 		),
 	);
 }

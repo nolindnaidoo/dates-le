@@ -10,6 +10,7 @@ import { fullDocumentRange } from '../utils/document';
 import { sanitizeErrorMessage } from '../utils/errors';
 import { bareValue, withPosition } from '../utils/positions';
 import { handleSafetyChecks } from '../utils/safety';
+import { guarded } from './guard';
 
 export function registerExtractCommand(
 	context: vscode.ExtensionContext,
@@ -22,7 +23,7 @@ export function registerExtractCommand(
 ): void {
 	const command = vscode.commands.registerCommand(
 		'dates-le.extractDates',
-		async () => {
+		guarded(deps.notifier, async () => {
 			deps.telemetry.event('command-extract-dates');
 
 			const editor = vscode.window.activeTextEditor;
@@ -106,7 +107,7 @@ export function registerExtractCommand(
 			} finally {
 				deps.statusBar.hideProgress();
 			}
-		},
+		}),
 	);
 
 	context.subscriptions.push(command);

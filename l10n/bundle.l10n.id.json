@@ -94,5 +94,7 @@
 	"Where": "Lokasi",
 	"{0} distinct date(s), {1} occurrence(s) in {2} file(s)": "{0} tanggal berbeda, {1} kemunculan dalam {2} file",
 	"No dates found.": "Tidak ada tanggal yang ditemukan.",
-	"Date": "Tanggal"
+	"Date": "Tanggal",
+	"{0} file(s) could not be read.": "{0} file tidak dapat dibaca.",
+	"Dates-LE could not finish: {0}": "Dates-LE tidak dapat menyelesaikan: {0}"
 }

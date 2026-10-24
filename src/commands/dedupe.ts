@@ -3,6 +3,7 @@ import type { Notifier } from '../ui/notifier';
 import { replaceDocumentContent } from '../utils/document';
 import { sanitizeErrorMessage } from '../utils/errors';
 import { hasPosition, onValues } from '../utils/positions';
+import { guarded } from './guard';
 
 export function registerDedupeCommand(
 	context: vscode.ExtensionContext,
@@ -10,7 +11,7 @@ export function registerDedupeCommand(
 ): void {
 	const command = vscode.commands.registerCommand(
 		'dates-le.postProcess.dedupe',
-		async () => {
+		guarded(notifier, async () => {
 			const editor = vscode.window.activeTextEditor;
 			if (!editor) {
 				notifier.showWarning(vscode.l10n.t('No active editor found'));
@@ -52,7 +53,7 @@ export function registerDedupeCommand(
 					`Deduplication failed: ${sanitizeErrorMessage(message)}`,
 				);
 			}
-		},
+		}),
 	);
 
 	context.subscriptions.push(command);

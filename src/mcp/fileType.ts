@@ -12,45 +12,50 @@
  * `fileType` the answer carries so the caller can see which patterns ran.
  */
 
-/** Every language id the engine understands, keyed by what a caller might send. */
-const ALIASES: Readonly<Record<string, string>> = Object.freeze({
-	json: 'json',
-	jsonc: 'json',
-	yaml: 'yaml',
-	yml: 'yaml',
-	csv: 'csv',
-	tsv: 'csv',
-	xml: 'xml',
-	log: 'log',
-	txt: 'plaintext',
-	text: 'plaintext',
-	plaintext: 'plaintext',
-	javascript: 'javascript',
-	js: 'javascript',
-	jsx: 'javascript',
-	mjs: 'javascript',
-	cjs: 'javascript',
-	javascriptreact: 'javascript',
-	typescript: 'typescript',
-	ts: 'typescript',
-	tsx: 'typescript',
-	mts: 'typescript',
-	cts: 'typescript',
-	typescriptreact: 'typescript',
-	html: 'html',
-	htm: 'html',
-	xhtml: 'html',
+/** Every language id the engine understands, keyed by what a caller might send. *
+ * A `Map`, not a plain object: on an object, `constructor`, `__proto__` and
+ * every other `Object.prototype` name is a hit, and a caller naming one got
+ * a function or the prototype back as its file type. A map has no inherited
+ * keys.
+ */
+const ALIASES: ReadonlyMap<string, string> = new Map([
+	['json', 'json'],
+	['jsonc', 'json'],
+	['yaml', 'yaml'],
+	['yml', 'yaml'],
+	['csv', 'csv'],
+	['tsv', 'csv'],
+	['xml', 'xml'],
+	['log', 'log'],
+	['txt', 'plaintext'],
+	['text', 'plaintext'],
+	['plaintext', 'plaintext'],
+	['javascript', 'javascript'],
+	['js', 'javascript'],
+	['jsx', 'javascript'],
+	['mjs', 'javascript'],
+	['cjs', 'javascript'],
+	['javascriptreact', 'javascript'],
+	['typescript', 'typescript'],
+	['ts', 'typescript'],
+	['tsx', 'typescript'],
+	['mts', 'typescript'],
+	['cts', 'typescript'],
+	['typescriptreact', 'typescript'],
+	['html', 'html'],
+	['htm', 'html'],
+	['xhtml', 'html'],
 	// Read by the shared patterns like everything unnamed, and named all
 	// the same: a caller who says `toml` should not be told `unknown` in
 	// the answer's own `fileType` field.
-	toml: 'toml',
-	ini: 'ini',
-	cfg: 'ini',
-	conf: 'ini',
-	properties: 'properties',
-	markdown: 'markdown',
-	md: 'markdown',
-});
+	['toml', 'toml'],
+	['ini', 'ini'],
+	['cfg', 'ini'],
+	['conf', 'ini'],
+	['properties', 'properties'],
+	['markdown', 'markdown'],
+	['md', 'markdown'],
+]);
 
 /** What a name nothing recognises resolves to. Held equal to the crate's. */
 export const FALLBACK_FORMAT = 'unknown';
@@ -83,7 +88,7 @@ export function resolveFormat(
 	filename: string | undefined,
 ): string {
 	if (format) {
-		const direct = ALIASES[normalise(format)];
+		const direct = ALIASES.get(normalise(format));
 		if (direct) return direct;
 	}
 
@@ -91,7 +96,7 @@ export function resolveFormat(
 		const extension = filename.includes('.')
 			? filename.slice(filename.lastIndexOf('.') + 1)
 			: '';
-		const inferred = ALIASES[normalise(extension)];
+		const inferred = ALIASES.get(normalise(extension));
 		if (inferred) return inferred;
 	}
 

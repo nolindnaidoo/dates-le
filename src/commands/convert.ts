@@ -10,6 +10,7 @@ import type { Telemetry } from '../telemetry/telemetry';
 import type { Notifier } from '../ui/notifier';
 import type { StatusBar } from '../ui/statusBar';
 import { sanitizeErrorMessage } from '../utils/errors';
+import { guarded } from './guard';
 
 export function registerConvertCommand(
 	context: vscode.ExtensionContext,
@@ -21,7 +22,7 @@ export function registerConvertCommand(
 ): void {
 	const command = vscode.commands.registerCommand(
 		'dates-le.convert',
-		async () => {
+		guarded(deps.notifier, async () => {
 			deps.telemetry.event('command-convert');
 
 			const editor = vscode.window.activeTextEditor;
@@ -141,7 +142,7 @@ export function registerConvertCommand(
 					`Failed to convert dates: ${sanitizeErrorMessage(message)}`,
 				);
 			}
-		},
+		}),
 	);
 
 	context.subscriptions.push(command);
