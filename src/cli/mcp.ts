@@ -13,11 +13,12 @@ import { TOOLS } from '../mcp/tools';
 import type { DateFormat } from '../types';
 import type { ScanOptions } from './args';
 import { rustDebug } from './debug';
-import { requests } from './frames';
+import { type Frame, frames, type Request } from './frames';
 import { scanWalked } from './scan';
 import { collect } from './walk';
 
 const PROTOCOL_VERSION = '2025-06-18';
+const PARSE_ERROR = -32700;
 const INVALID_PARAMS = -32602;
 const METHOD_NOT_FOUND = -32601;
 
@@ -107,14 +108,28 @@ function sharedTool(name: string) {
  */
 export async function serve(
 	input: AsyncIterable<Uint8Array>,
-	write: (line: string) => void,
+	write: (line: string) => Promise<void> | undefined,
 	version: string,
 ): Promise<number> {
-	for await (const request of requests(input)) {
-		const response = await handle(request, version);
-		if (response !== undefined) write(`${response}\n`);
+	for await (const frame of frames(input)) {
+		const response = await respond(frame, version);
+		if (response !== undefined) await write(`${response}\n`);
 	}
 	return 0;
+}
+
+/** A malformed frame is answered in the extension server's words, so a client that sent one learns what happened. */
+function respond(frame: Frame, version: string): Promise<string | undefined> {
+	if ('refusal' in frame) {
+		return Promise.resolve(
+			JSON.stringify({
+				jsonrpc: '2.0',
+				id: null,
+				error: { code: PARSE_ERROR, message: frame.refusal },
+			}),
+		);
+	}
+	return handle(frame.request, version);
 }
 
 function field(value: unknown, name: string): unknown {
@@ -127,15 +142,17 @@ function field(value: unknown, name: string): unknown {
 }
 
 async function handle(
-	request: unknown,
+	request: Request,
 	version: string,
 ): Promise<string | undefined> {
-	const method = field(request, 'method');
-	if (typeof method !== 'string') return undefined;
 	const id = field(request, 'id');
-	// A notification carries no id and gets no reply.
-	if (id === undefined) return undefined;
-	const handled = await dispatch(method, field(request, 'params'), version);
+	// A notification carries no id, or a null one, and gets no reply.
+	if (id === undefined || id === null) return undefined;
+	const handled = await dispatch(
+		request.method,
+		field(request, 'params'),
+		version,
+	);
 	return JSON.stringify({ jsonrpc: '2.0', id, ...handled });
 }
 
@@ -166,7 +183,7 @@ async function dispatch(
 	return {
 		error: {
 			code: METHOD_NOT_FOUND,
-			message: `this server does not implement ${method}`,
+			message: `Unknown method: ${method}`,
 		},
 	};
 }
@@ -177,15 +194,13 @@ async function dispatch(
  * concluding the server is broken.
  */
 async function callTool(params: unknown): Promise<Handled> {
-	if (params === undefined) {
-		return {
-			error: { code: INVALID_PARAMS, message: 'no tool call was supplied' },
-		};
-	}
 	const name = field(params, 'name');
 	if (typeof name !== 'string') {
 		return {
-			error: { code: INVALID_PARAMS, message: 'the tool call named no tool' },
+			error: {
+				code: INVALID_PARAMS,
+				message: 'tools/call requires a string `name`',
+			},
 		};
 	}
 	// serde_json answers `get` on anything but an object with nothing, so
@@ -200,7 +215,7 @@ async function callTool(params: unknown): Promise<Handled> {
 	return {
 		error: {
 			code: INVALID_PARAMS,
-			message: `this server offers no tool named ${name}`,
+			message: `Unknown tool: ${name}`,
 		},
 	};
 }
